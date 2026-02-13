@@ -38,8 +38,10 @@ def validate_phone(phone):
 @login_required
 @require_role(UserRole.TEACHER, UserRole.SUPER_USER)
 def get_students():
-    """Get all students with their batch information (excludes archived)"""
+    """Get all students with their batch information (excludes archived, sorted by roll number)"""
     try:
+        from models import MonthlyExam, MonthlyRanking
+        
         batch_id = request.args.get('batch_id', type=int)
         search = request.args.get('search', '').strip()
         
@@ -60,11 +62,37 @@ def get_students():
             )
             query = query.filter(search_filter)
         
-        students = query.order_by(User.first_name, User.last_name).all()
+        students = query.all()
+        
+        # Build roll number map from latest monthly exam
+        roll_map = {}
+        if batch_id:
+            # Find most recent monthly exam for this batch
+            most_recent_exam = MonthlyExam.query.filter_by(
+                batch_id=batch_id
+            ).order_by(
+                MonthlyExam.year.desc(),
+                MonthlyExam.month.desc()
+            ).first()
+            
+            if most_recent_exam:
+                rankings = MonthlyRanking.query.filter_by(
+                    monthly_exam_id=most_recent_exam.id,
+                    is_final=True
+                ).all()
+                
+                for ranking in rankings:
+                    if ranking.roll_number:
+                        roll_map[ranking.user_id] = ranking.roll_number
+        
+        # Sort by roll number (students without roll go to end)
+        students.sort(key=lambda s: (s.id not in roll_map, roll_map.get(s.id, 999999), s.first_name))
         
         students_data = []
         for student in students:
             student_data = serialize_user(student)
+            student_data['roll_number'] = roll_map.get(student.id)  # Add roll number
+            
             # Add batch information - include ALL batches
             if student.batches:
                 # Primary batch (first one for backward compatibility)

@@ -456,13 +456,38 @@ def get_monthly_attendance():
         
         print(f"✅ Found batch: {batch.name} (ID: {batch.id})")
         
-        # Get students in batch
+        # Get students in batch sorted by roll number
+        from models import MonthlyExam, MonthlyRanking
+        
+        # Find most recent monthly exam for this batch
+        most_recent_exam = MonthlyExam.query.filter_by(
+            batch_id=batch_id
+        ).order_by(
+            MonthlyExam.year.desc(),
+            MonthlyExam.month.desc()
+        ).first()
+        
+        # Build roll number map
+        roll_map = {}
+        if most_recent_exam:
+            rankings = MonthlyRanking.query.filter_by(
+                monthly_exam_id=most_recent_exam.id,
+                is_final=True
+            ).all()
+            
+            for ranking in rankings:
+                if ranking.roll_number:
+                    roll_map[ranking.user_id] = ranking.roll_number
+        
         students = User.query.join(User.batches).filter(
             User.role == UserRole.STUDENT,
             User.is_active == True,
             User.is_archived == False,
             Batch.id == batch_id
-        ).order_by(User.first_name, User.last_name).all()
+        ).all()
+        
+        # Sort by roll number (students without roll go to end)
+        students.sort(key=lambda s: (s.id not in roll_map, roll_map.get(s.id, 999999)))
         
         # Get days in month
         days_in_month = calendar.monthrange(year, month)[1]
@@ -625,13 +650,38 @@ def download_monthly_attendance():
         if not batch:
             return error_response('Batch not found', 404)
         
-        # Get students in batch (sorted by roll number if available)
+        # Get students in batch sorted by roll number from latest monthly exam
+        from models import MonthlyExam, MonthlyRanking
+        
+        # Find most recent monthly exam for this batch
+        most_recent_exam = MonthlyExam.query.filter_by(
+            batch_id=batch_id
+        ).order_by(
+            MonthlyExam.year.desc(),
+            MonthlyExam.month.desc()
+        ).first()
+        
+        # Build roll number map
+        roll_map = {}
+        if most_recent_exam:
+            rankings = MonthlyRanking.query.filter_by(
+                monthly_exam_id=most_recent_exam.id,
+                is_final=True
+            ).all()
+            
+            for ranking in rankings:
+                if ranking.roll_number:
+                    roll_map[ranking.user_id] = ranking.roll_number
+        
         students = User.query.join(User.batches).filter(
             User.role == UserRole.STUDENT,
             User.is_active == True,
             User.is_archived == False,
             Batch.id == batch_id
-        ).order_by(User.first_name, User.last_name).all()
+        ).all()
+        
+        # Sort by roll number (students without roll go to end)
+        students.sort(key=lambda s: (s.id not in roll_map, roll_map.get(s.id, 999999)))
         
         # Get days in month
         days_in_month = calendar.monthrange(year, month)[1]

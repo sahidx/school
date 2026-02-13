@@ -67,6 +67,7 @@
                                    class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                                    title="Select All">
                         </th>
+                        <th class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Roll</th>
                         <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Student Name</th>
                         <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Parents Info</th>
                         <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
@@ -86,6 +87,11 @@
                                        :checked="selectedStudents.has(student.id)" 
                                        @change="toggleStudentSelection(student.id, $event.target.checked)"
                                        class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                            </td>
+                            <!-- Roll Number -->
+                            <td class="px-3 py-4 text-center">
+                                <span x-show="student.roll_number" class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-indigo-100 text-indigo-800 font-semibold text-sm" x-text="student.roll_number"></span>
+                                <span x-show="!student.roll_number" class="text-gray-400 text-xs">-</span>
                             </td>
                             <!-- Student Name -->
                             <td class="px-3 py-4 whitespace-nowrap">

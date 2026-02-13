@@ -51,11 +51,37 @@ def load_monthly_fees():
         if not batch:
             return error_response('Batch not found', 404)
         
+        # Get students sorted by roll number from most recent monthly exam
+        from models import MonthlyExam, MonthlyRanking
+        
+        # Find most recent monthly exam for this batch
+        most_recent_exam = MonthlyExam.query.filter_by(
+            batch_id=batch_id
+        ).order_by(
+            MonthlyExam.year.desc(),
+            MonthlyExam.month.desc()
+        ).first()
+        
+        # Build roll number map
+        roll_map = {}
+        if most_recent_exam:
+            rankings = MonthlyRanking.query.filter_by(
+                monthly_exam_id=most_recent_exam.id,
+                is_final=True
+            ).all()
+            
+            for ranking in rankings:
+                if ranking.roll_number:
+                    roll_map[ranking.user_id] = ranking.roll_number
+        
         students = User.query.filter(
             User.role == UserRole.STUDENT,
             User.is_active == True,
             User.is_archived == False
-        ).join(User.batches).filter(Batch.id == batch_id).order_by(User.first_name).all()
+        ).join(User.batches).filter(Batch.id == batch_id).all()
+        
+        # Sort by roll number (students without roll go to end)
+        students.sort(key=lambda s: (s.id not in roll_map, roll_map.get(s.id, 999999)))
         
         if not students:
             return error_response('No students found in this batch', 404)
@@ -88,6 +114,7 @@ def load_monthly_fees():
             student_data = {
                 'student_id': student.id,
                 'student_name': student.full_name,
+                'roll_number': roll_map.get(student.id),  # Add roll number
                 'months': {}
             }
             

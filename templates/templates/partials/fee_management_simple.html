@@ -88,6 +88,9 @@
                     <tbody class="bg-white divide-y divide-gray-200">
                         <template x-for="(student, index) in students" :key="student.student_id">
                             <tr :class="index % 2 === 0 ? 'bg-white' : 'bg-gray-50'">
+                                <td class="px-3 py-2 whitespace-nowrap text-center">
+                                    <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-indigo-100 text-indigo-800 font-semibold text-sm" x-text="student.roll_number || (index + 1)"></span>
+                                </td>
                                 <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">
                                     <div x-text="student.student_name"></div>
                                     <div class="text-xs text-gray-500" x-show="student.paid_date" x-text="'Paid: ' + student.paid_date"></div>

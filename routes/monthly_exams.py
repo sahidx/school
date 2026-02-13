@@ -494,6 +494,10 @@ def get_comprehensive_monthly_ranking(exam_id):
         active_student_ids = [s.id for s in batch_students]
         rankings = [r for r in rankings if r['user_id'] in active_student_ids]
         
+        # Re-sort by roll number for display (students without roll go to end)
+        # This maintains the rank calculation but displays in roll order like attendance
+        rankings.sort(key=lambda x: (x['roll_number'] is None, x['roll_number'] if x['roll_number'] else 999999))
+        
         # If student, only return their data and nearby rankings
         if current_user.role == UserRole.STUDENT:
             student_rank = next(

@@ -157,9 +157,9 @@
                                 </template>
                             </td>
                             
-                            <!-- Roll Number (Current Rank) -->
+                            <!-- Roll Number (from previous month or current rank) -->
                             <td class="px-3 py-2 whitespace-nowrap text-center">
-                                <span class="text-sm font-bold text-blue-600" x-text="rank.position"></span>
+                                <span class="text-sm font-bold text-blue-600" x-text="rank.roll_number || rank.position"></span>
                             </td>
                             
                             <!-- Student Name -->
