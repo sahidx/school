@@ -7,6 +7,46 @@ from utils.response import success_response
 
 debug_bp = Blueprint('debug', __name__)
 
+@debug_bp.route('/rankings/<int:batch_id>', methods=['GET'])
+def debug_rankings(batch_id):
+    """Debug ranking logic for a specific batch"""
+    from utils.rankings import get_batch_latest_rank_map
+    from models import Batch, MonthlyExam, MonthlyRanking, MonthlyMark
+    
+    try:
+        batch = Batch.query.get(batch_id)
+        if not batch:
+            return {'error': 'Batch not found'}, 404
+            
+        # 1. Run the utility
+        rank_map, source_exam = get_batch_latest_rank_map(batch_id)
+        
+        # 2. Get details about what happened
+        exams = MonthlyExam.query.filter_by(batch_id=batch_id).order_by(MonthlyExam.year.desc(), MonthlyExam.month.desc(), MonthlyExam.id.desc()).all()
+        
+        exam_details = []
+        for ex in exams:
+            rank_count = MonthlyRanking.query.filter_by(monthly_exam_id=ex.id).count()
+            mark_count = MonthlyMark.query.filter_by(monthly_exam_id=ex.id).count()
+            exam_details.append({
+                'id': ex.id,
+                'title': ex.title,
+                'date': f"{ex.month}/{ex.year}",
+                'rankings_count': rank_count,
+                'marks_count': mark_count
+            })
+            
+        return {
+            'batch': {'id': batch.id, 'name': batch.name},
+            'source_exam': {'id': source_exam.id, 'title': source_exam.title} if source_exam else None,
+            'rank_map_size': len(rank_map),
+            'rank_map_sample': {k: v for i, (k, v) in enumerate(rank_map.items()) if i < 10},
+            'all_exams_history': exam_details
+        }
+    except Exception as e:
+        import traceback
+        return {'error': str(e), 'trace': traceback.format_exc()}, 500
+
 @debug_bp.route('/check-data', methods=['GET'])
 def check_data():
     """Check if test data exists"""
