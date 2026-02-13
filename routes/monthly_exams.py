@@ -353,41 +353,47 @@ def get_comprehensive_monthly_ranking(exam_id):
                     }
                     total_possible_marks += exam.marks
             
-            # Calculate attendance marks (1 mark per present OR leave day)
-            # Count only attendance inside this exam period (start_date -> end_date)
+            # Calculate attendance marks (1 mark per present day in the month)
+            # Only count attendance from the SAME MONTH as the exam
             attendance_marks = 0
             total_days = 0
             max_attendance_marks = 0
             
             if monthly_exam.start_date and monthly_exam.end_date:
-                period_start = monthly_exam.start_date.date() if hasattr(monthly_exam.start_date, 'date') else monthly_exam.start_date
-                period_end = monthly_exam.end_date.date() if hasattr(monthly_exam.end_date, 'date') else monthly_exam.end_date
+                # Get the first and last day of the exam's month
+                exam_month = monthly_exam.month
+                exam_year = monthly_exam.year
                 
-                # Count ACTUAL attendance-taking days for this batch in exam period
-                # A day is considered "taken" only if at least one student was PRESENT or LEAVE
-                total_days = db.session.query(
-                    db.func.count(db.func.distinct(Attendance.date))
-                ).filter(
+                # First day of the month
+                month_start = datetime(exam_year, exam_month, 1).date()
+                
+                # Last day of the month
+                if exam_month == 12:
+                    month_end = datetime(exam_year + 1, 1, 1).date() - timedelta(days=1)
+                else:
+                    month_end = datetime(exam_year, exam_month + 1, 1).date() - timedelta(days=1)
+                
+                # Count total working days based on ACTUAL attendance records
+                # Instead of assuming weekdays, count unique days attendance was taken for this batch in this month
+                unique_attendance_days = db.session.query(Attendance.date).filter(
                     Attendance.batch_id == monthly_exam.batch_id,
-                    Attendance.date >= period_start,
-                    Attendance.date <= period_end,
-                    or_(Attendance.status == AttendanceStatus.PRESENT,
-                        Attendance.status == AttendanceStatus.LEAVE)
-                ).scalar() or 0
+                    Attendance.date >= month_start,
+                    Attendance.date <= month_end
+                ).distinct().count()
                 
-                max_attendance_marks = total_days  # Maximum possible attendance marks (actual days taken)
+                # Use the count of unique attendance days as the total possible days
+                total_days = unique_attendance_days
+                max_attendance_marks = total_days  # Maximum possible attendance marks for the month
                 
                 # Count present OR leave days (both get 1 mark)
-                # PRESENT and LEAVE both count as attendance
-                attended_count = Attendance.query.filter(
+                present_count = Attendance.query.filter(
                     Attendance.user_id == student.id,
                     Attendance.batch_id == monthly_exam.batch_id,
-                    Attendance.date >= period_start,
-                    Attendance.date <= period_end,
-                    or_(Attendance.status == AttendanceStatus.PRESENT, 
-                        Attendance.status == AttendanceStatus.LEAVE)
+                    Attendance.date >= month_start,
+                    Attendance.date <= month_end,
+                    Attendance.status.in_([AttendanceStatus.PRESENT, AttendanceStatus.LEAVE])
                 ).count()
-                attendance_marks = attended_count
+                attendance_marks = present_count
             
             # Calculate attendance percentage
             attendance_percentage = (attendance_marks / total_days * 100) if total_days > 0 else 0
