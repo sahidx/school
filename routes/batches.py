@@ -319,7 +319,7 @@ def get_batch_students(batch_id):
         if not batch:
             return error_response('Batch not found', 404)
         
-        # Find most recent monthly exam for this batch that has finalized rankings
+        # Find most recent monthly exam for this batch (prefer finalized rankings)
         most_recent_exam = (
             MonthlyExam.query.join(MonthlyRanking, MonthlyRanking.monthly_exam_id == MonthlyExam.id)
             .filter(
@@ -329,6 +329,13 @@ def get_batch_students(batch_id):
             .order_by(MonthlyExam.year.desc(), MonthlyExam.month.desc(), MonthlyExam.id.desc())
             .first()
         )
+        if not most_recent_exam:
+            most_recent_exam = (
+                MonthlyExam.query.join(MonthlyRanking, MonthlyRanking.monthly_exam_id == MonthlyExam.id)
+                .filter(MonthlyExam.batch_id == batch_id)
+                .order_by(MonthlyExam.year.desc(), MonthlyExam.month.desc(), MonthlyExam.id.desc())
+                .first()
+            )
         
         # Build a map of user_id to current rank from most recent exam
         rank_map = {}
@@ -337,6 +344,10 @@ def get_batch_students(batch_id):
                 monthly_exam_id=most_recent_exam.id,
                 is_final=True
             ).all()
+            if not rankings:
+                rankings = MonthlyRanking.query.filter_by(
+                    monthly_exam_id=most_recent_exam.id
+                ).all()
             
             for ranking in rankings:
                 current_rank = ranking.position or ranking.roll_number
