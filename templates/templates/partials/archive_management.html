@@ -55,6 +55,30 @@
                 </button>
             </div>
 
+            <!-- Search Bar for Batches -->
+            <div class="mb-4">
+                <div class="relative">
+                    <input 
+                        type="text" 
+                        x-model="batchSearchQuery"
+                        placeholder="Search batches by name, description, or reason..."
+                        class="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                    <div class="absolute left-3 top-2.5 text-gray-400">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <div x-show="batchSearchQuery" class="absolute right-3 top-2.5">
+                        <button @click="batchSearchQuery = ''" class="text-gray-400 hover:text-gray-600">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+                <div x-show="batchSearchQuery && filteredBatches.length > 0" class="text-sm text-gray-600 mt-2">
+                    <i class="fas fa-filter mr-1"></i>
+                    Showing <span x-text="filteredBatches.length"></span> of <span x-text="archivedBatches.length"></span> batches
+                </div>
+            </div>
+
             <!-- Batches List -->
             <div x-show="archivedBatches.length > 0">
                 <div class="overflow-x-auto">
@@ -70,7 +94,7 @@
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
-                            <template x-for="batch in archivedBatches" :key="batch.id">
+                            <template x-for="batch in filteredBatches" :key="batch.id">
                                 <tr>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="text-sm font-medium text-gray-900" x-text="batch.name"></div>
@@ -105,8 +129,15 @@
                 </div>
             </div>
 
+            <!-- No Results State -->
+            <div x-show="filteredBatches.length === 0 && batchSearchQuery" class="text-center py-12">
+                <i class="fas fa-search text-gray-300 text-5xl mb-4"></i>
+                <p class="text-gray-500 text-lg">No batches match your search</p>
+                <p class="text-gray-400 text-sm mt-2">Try a different search term</p>
+            </div>
+
             <!-- Empty State -->
-            <div x-show="archivedBatches.length === 0" class="text-center py-12">
+            <div x-show="archivedBatches.length === 0 && !batchSearchQuery" class="text-center py-12">
                 <i class="fas fa-archive text-gray-300 text-5xl mb-4"></i>
                 <p class="text-gray-500 text-lg">No archived batches found</p>
                 <p class="text-gray-400 text-sm mt-2">Batches you archive will appear here</p>
@@ -124,6 +155,30 @@
                     <i class="fas fa-sync-alt mr-1"></i>
                     Refresh
                 </button>
+            </div>
+
+            <!-- Search Bar for Students -->
+            <div class="mb-4">
+                <div class="relative">
+                    <input 
+                        type="text" 
+                        x-model="studentSearchQuery"
+                        placeholder="Search students by name, phone, address, batch, or reason..."
+                        class="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                    <div class="absolute left-3 top-2.5 text-gray-400">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <div x-show="studentSearchQuery" class="absolute right-3 top-2.5">
+                        <button @click="studentSearchQuery = ''" class="text-gray-400 hover:text-gray-600">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+                <div x-show="studentSearchQuery && filteredStudents.length > 0" class="text-sm text-gray-600 mt-2">
+                    <i class="fas fa-filter mr-1"></i>
+                    Showing <span x-text="filteredStudents.length"></span> of <span x-text="archivedStudents.length"></span> students
+                </div>
             </div>
 
             <!-- Students List -->
@@ -144,7 +199,7 @@
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
-                            <template x-for="student in archivedStudents" :key="student.id">
+                            <template x-for="student in filteredStudents" :key="student.id">
                                 <tr>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="text-sm font-medium text-gray-900" x-text="student.firstName + ' ' + student.lastName"></div>
@@ -200,8 +255,15 @@
                 </div>
             </div>
 
+            <!-- No Results State -->
+            <div x-show="filteredStudents.length === 0 && studentSearchQuery" class="text-center py-12">
+                <i class="fas fa-search text-gray-300 text-5xl mb-4"></i>
+                <p class="text-gray-500 text-lg">No students match your search</p>
+                <p class="text-gray-400 text-sm mt-2">Try a different search term</p>
+            </div>
+
             <!-- Empty State -->
-            <div x-show="archivedStudents.length === 0" class="text-center py-12">
+            <div x-show="archivedStudents.length === 0 && !studentSearchQuery" class="text-center py-12">
                 <i class="fas fa-archive text-gray-300 text-5xl mb-4"></i>
                 <p class="text-gray-500 text-lg">No archived students found</p>
                 <p class="text-gray-400 text-sm mt-2">Students you archive will appear here</p>
@@ -216,6 +278,47 @@ function archiveManagement() {
         activeTab: 'batches',
         archivedBatches: [],
         archivedStudents: [],
+        batchSearchQuery: '',
+        studentSearchQuery: '',
+
+        get filteredBatches() {
+            if (!this.batchSearchQuery) return this.archivedBatches;
+            
+            const query = this.batchSearchQuery.toLowerCase();
+            return this.archivedBatches.filter(batch => {
+                return (
+                    batch.name?.toLowerCase().includes(query) ||
+                    batch.description?.toLowerCase().includes(query) ||
+                    batch.archive_reason?.toLowerCase().includes(query) ||
+                    batch.archived_by_name?.toLowerCase().includes(query)
+                );
+            });
+        },
+
+        get filteredStudents() {
+            if (!this.studentSearchQuery) return this.archivedStudents;
+            
+            const query = this.studentSearchQuery.toLowerCase();
+            return this.archivedStudents.filter(student => {
+                const fullName = `${student.firstName} ${student.lastName}`.toLowerCase();
+                const batchName = student.batch?.name?.toLowerCase() || '';
+                const guardianName = student.guardianName?.toLowerCase() || '';
+                const motherName = student.motherName?.toLowerCase() || '';
+                const phone = student.phoneNumber?.toLowerCase() || student.guardianPhone?.toLowerCase() || '';
+                const address = student.address?.toLowerCase() || '';
+                const reason = student.archive_reason?.toLowerCase() || '';
+                
+                return (
+                    fullName.includes(query) ||
+                    batchName.includes(query) ||
+                    guardianName.includes(query) ||
+                    motherName.includes(query) ||
+                    phone.includes(query) ||
+                    address.includes(query) ||
+                    reason.includes(query)
+                );
+            });
+        },
 
         async init() {
             await this.loadArchivedBatches();
