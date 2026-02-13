@@ -741,56 +741,26 @@ def generate_monthly_ranking(exam_id):
         rankings = ranking_data['data']['rankings']
         updated_count = 0
         
-        # Find previous month's exam to get roll numbers
-        prev_month = monthly_exam.month - 1 if monthly_exam.month > 1 else 12
-        prev_year = monthly_exam.year if monthly_exam.month > 1 else monthly_exam.year - 1
-        
-        prev_exam = MonthlyExam.query.filter_by(
-            batch_id=monthly_exam.batch_id,
-            month=prev_month,
-            year=prev_year
-        ).first()
-        
-        # Build a map of user_id to previous roll number
-        prev_roll_map = {}
-        if prev_exam:
-            print(f"\n🔍 Found previous exam: {prev_exam.month}/{prev_exam.year} (ID: {prev_exam.id})")
-            prev_rankings = MonthlyRanking.query.filter_by(
-                monthly_exam_id=prev_exam.id,
-                is_final=True
-            ).all()
-            print(f"📋 Previous rankings count: {len(prev_rankings)}")
-            for pr in prev_rankings:
-                if pr.roll_number:
-                    prev_roll_map[pr.user_id] = pr.roll_number
-                    print(f"  User {pr.user_id} had roll number: {pr.roll_number}")
-        else:
-            print(f"\n⚠️  No previous exam found for {prev_month}/{prev_year}")
-        
-        print(f"📊 Previous roll map: {prev_roll_map}")
+        print(f"\n📊 Generating rankings for exam {exam_id} - {monthly_exam.title}")
+        print(f"📋 Total students to rank: {len(rankings)}")
         
         # Clear existing rankings for this exam
         MonthlyRanking.query.filter_by(monthly_exam_id=exam_id).delete()
         
-        # Create new ranking records and assign roll numbers from previous month
+        # Create new ranking records and assign roll numbers based on CURRENT RANK
         for idx, rank_data in enumerate(rankings):
-            # ALWAYS use previous month's roll number map, ignore current roll_number
             user_id = rank_data['user_id']
             
-            # Inherit from previous month or assign new roll number
-            if user_id in prev_roll_map:
-                roll_number = prev_roll_map[user_id]
-                print(f"✅ User {user_id}: Inherited roll {roll_number} from previous month")
-            else:
-                # New student: assign roll number based on current rank
-                roll_number = idx + 1
-                print(f"🆕 User {user_id}: New student, assigned roll {roll_number}")
+            # ALWAYS assign roll number based on current month's rank/position
+            # This makes roll numbers dynamic - they change every month based on performance
+            roll_number = rank_data['position']  # position is already idx + 1
+            print(f"📌 User {user_id}: Assigned roll {roll_number} based on current rank")
             
             ranking = MonthlyRanking(
                 monthly_exam_id=exam_id,
                 user_id=rank_data['user_id'],
                 position=rank_data['position'],
-                roll_number=roll_number,  # Use previous month's roll or auto-assigned
+                roll_number=roll_number,  # Always equals position (current month's rank)
                 total_exam_marks=rank_data['total_exam_marks'],
                 total_possible_marks=rank_data['total_possible_marks'],
                 attendance_marks=rank_data['attendance_marks'],
