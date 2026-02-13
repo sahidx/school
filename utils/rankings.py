@@ -1,6 +1,6 @@
 from sqlalchemy import func
 
-from models import db, MonthlyExam, MonthlyRanking, MonthlyMark, User, Batch, UserRole
+from models import db, MonthlyExam, MonthlyRanking, MonthlyMark
 
 
 def get_batch_latest_rank_map(batch_id):
@@ -52,17 +52,6 @@ def get_batch_latest_rank_map(batch_id):
     if not all_exams:
         return {}, None
 
-    # Keep only active, non-archived students from this batch
-    active_student_ids = {
-        student.id
-        for student in User.query.join(User.batches).filter(
-            User.role == UserRole.STUDENT,
-            User.is_active == True,
-            User.is_archived == False,
-            Batch.id == batch_id
-        ).all()
-    }
-
     for exam in all_exams:
         mark_rows = (
             db.session.query(
@@ -80,8 +69,6 @@ def get_batch_latest_rank_map(batch_id):
 
         scored = []
         for row in mark_rows:
-            if row.user_id not in active_student_ids:
-                continue
             obtained = float(row.total_obtained or 0)
             possible = float(row.total_possible or 0)
             percentage = (obtained / possible * 100) if possible > 0 else 0
