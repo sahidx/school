@@ -3,6 +3,74 @@ from sqlalchemy import func
 from models import db, MonthlyExam, MonthlyRanking, MonthlyMark
 
 
+def get_global_latest_rank_map(candidate_user_ids):
+    """
+    Find the latest exam rank map for a set of users across ALL batches.
+    Useful fallback when a specific batch has no exams.
+    """
+    if not candidate_user_ids:
+        return {}, None
+
+    # 1. Try Rankings first (Finalized or otherwise)
+    latest_ranked_exam = (
+        MonthlyExam.query
+        .join(MonthlyRanking, MonthlyRanking.monthly_exam_id == MonthlyExam.id)
+        .filter(MonthlyRanking.user_id.in_(candidate_user_ids))
+        .order_by(MonthlyExam.year.desc(), MonthlyExam.month.desc(), MonthlyExam.id.desc())
+        .first()
+    )
+
+    if latest_ranked_exam:
+        rankings = MonthlyRanking.query.filter_by(monthly_exam_id=latest_ranked_exam.id).all()
+        rank_map = {}
+        for row in rankings:
+            current_rank = row.position or row.roll_number
+            if current_rank:
+                rank_map[row.user_id] = current_rank
+        if rank_map:
+            return rank_map, latest_ranked_exam
+
+    # 2. Fallback to Marks
+    latest_marked_exam = (
+        MonthlyExam.query
+        .join(MonthlyMark, MonthlyMark.monthly_exam_id == MonthlyExam.id)
+        .filter(MonthlyMark.user_id.in_(candidate_user_ids))
+        .order_by(MonthlyExam.year.desc(), MonthlyExam.month.desc(), MonthlyExam.id.desc())
+        .first()
+    )
+
+    if latest_marked_exam:
+        mark_rows = (
+            db.session.query(
+                MonthlyMark.user_id,
+                func.sum(MonthlyMark.marks_obtained).label('total_obtained'),
+                func.sum(MonthlyMark.total_marks).label('total_possible')
+            )
+            .filter(MonthlyMark.monthly_exam_id == latest_marked_exam.id)
+            .group_by(MonthlyMark.user_id)
+            .all()
+        )
+
+        scored = []
+        max_obtained = 0
+        for row in mark_rows:
+            obtained = float(row.total_obtained or 0)
+            if obtained > max_obtained:
+                max_obtained = obtained
+            possible = float(row.total_possible or 0)
+            percentage = (obtained / possible * 100) if possible > 0 else 0
+            scored.append((row.user_id, percentage, obtained))
+
+        if scored and max_obtained > 0:
+            scored.sort(key=lambda item: (-item[1], -item[2], item[0]))
+            rank_map = {}
+            for index, item in enumerate(scored, start=1):
+                rank_map[item[0]] = index
+            return rank_map, latest_marked_exam
+
+    return {}, None
+
+
 def get_batch_latest_rank_map(batch_id):
     """Return rank map for a batch using latest available monthly exam data.
 

@@ -321,6 +321,12 @@ def get_batch_students(batch_id):
         # Build current rank map from latest usable monthly exam result for this batch
         rank_map, _ = get_batch_latest_rank_map(batch_id)
         
+        # Fallback: If no batch-specific rank found, try global fallback for these students
+        if not rank_map:
+            from utils.rankings import get_global_latest_rank_map
+            student_ids = [s.id for s in batch.students if s.is_active and not s.is_archived]
+            rank_map, _ = get_global_latest_rank_map(student_ids)
+
         students = []
         for student in batch.students:
             if student.is_active and not student.is_archived:
