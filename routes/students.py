@@ -171,19 +171,17 @@ def create_student():
                 print(f"ERROR: {error_msg}")
                 return error_response(error_msg, 400)
             
-            # Check if guardian phone already exists
+            # Check if guardian phone already exists - ALLOW multiple students with same phone (siblings)
             existing_users = User.query.filter_by(phoneNumber=phone, role=UserRole.STUDENT).all()
             if existing_users:
                 # Check if this is the SAME student (by name match) or a SIBLING (different name)
-                same_student_found = False
                 for existing_user in existing_users:
                     same_name = (existing_user.first_name.lower() == data['firstName'].strip().lower() and 
                                existing_user.last_name.lower() == data['lastName'].strip().lower())
                     
                     if same_name:
-                        # SAME student - add them to the new batch if provided
-                        same_student_found = True
-                        print(f"INFO: Student {existing_user.first_name} {existing_user.last_name} already exists. Enrolling in batch if provided.")
+                        # SAME student exists - add them to the new batch if provided
+                        print(f"INFO: Student {existing_user.first_name} {existing_user.last_name} already exists with phone {phone}.")
                         batch_id = data.get('batchId')
                         if batch_id:
                             batch = Batch.query.get(batch_id)
@@ -192,6 +190,7 @@ def create_student():
                                 if batch not in existing_user.batches:
                                     existing_user.batches.append(batch)
                                     db.session.commit()
+                                    print(f"✅ Enrolled existing student in new batch: {batch.name}")
                                     
                                     # Prepare response
                                     student_data = serialize_user(existing_user)
@@ -207,12 +206,11 @@ def create_student():
                                 return error_response('Batch not found', 404)
                         else:
                             return error_response('Student with this name and guardian phone already exists. Please provide a batch to enroll them in.', 409)
-                        break
                 
-                # If no same student found, it's a SIBLING - allow creation to continue
-                if not same_student_found:
-                    print(f"✅ SIBLING DETECTED: Guardian phone {phone} exists for {len(existing_users)} student(s), but creating NEW student with name '{data['firstName']} {data['lastName']}'")
-                    # Don't return - let the code continue to create the new student below
+                # No exact name match found - it's a SIBLING or different child
+                # ALLOW creation to continue - this is the fix!
+                print(f"✅ CREATING SIBLING: Guardian phone {phone} has {len(existing_users)} existing student(s), creating NEW student '{data['firstName']} {data['lastName']}'")
+                # Continue to create the new student below - DO NOT RETURN ERROR
             
             # Check if phone belongs to teacher/admin (not student)
             existing_non_student = User.query.filter_by(phoneNumber=phone).filter(User.role != UserRole.STUDENT).first()
