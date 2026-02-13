@@ -1,48 +1,61 @@
 #!/bin/bash
+#
+# FORCE RESTART - Kill all Python processes and restart fresh
+#
 
-# Force restart script - kills all gunicorn processes and cleans up PID file
+set -e
 
-echo "=========================================="
-echo "FORCE RESTARTING VPS SERVICE"
-echo "=========================================="
+echo "════════════════════════════════════════════════════════════════"
+echo "  FORCE RESTART APPLICATION"
+echo "════════════════════════════════════════════════════════════════"
+echo ""
 
-# Colors
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-RED='\033[0;31m'
-NC='\033[0m'
+cd /var/www/saroyarsir
 
-echo -e "\n${YELLOW}1. Stopping systemd service...${NC}"
-sudo systemctl stop saro.service
+echo "Step 1: Force sync code..."
+git fetch origin main
+git reset --hard origin/main
+echo "  ✅ Code synchronized"
+echo ""
 
-echo -e "\n${YELLOW}2. Killing ALL gunicorn processes...${NC}"
-sudo pkill -9 gunicorn
+echo "Step 2: Kill ALL Python processes..."
+pkill -9 -f "python.*app.py" || echo "  (No processes to kill)"
+pkill -9 -f "gunicorn" || echo "  (No gunicorn to kill)"
 sleep 2
-sudo pkill -9 -f "python.*app.py"
-sleep 1
+echo "  ✅ Old processes killed"
+echo ""
 
-echo -e "\n${YELLOW}3. Removing stale PID file...${NC}"
-sudo rm -f /tmp/smartgarden-hub.pid
-ls -la /tmp/smartgarden-hub.pid 2>/dev/null && echo "PID file still exists!" || echo "✓ PID file removed"
+echo "Step 3: Starting application..."
+export FLASK_ENV=production
+export PORT=8000
 
-echo -e "\n${YELLOW}4. Checking for remaining processes...${NC}"
-ps aux | grep -E "gunicorn|app.py" | grep -v grep || echo "✓ No gunicorn processes running"
-
-echo -e "\n${YELLOW}5. Starting service...${NC}"
-sudo systemctl start saro.service
-sleep 3
-
-echo -e "\n${YELLOW}6. Checking service status...${NC}"
-if sudo systemctl is-active --quiet saro.service; then
-    echo -e "${GREEN}✓ Service started successfully!${NC}"
-    sudo systemctl status saro.service --no-pager -l | head -20
+# Try systemd first
+if systemctl restart saroyarsir 2>/dev/null; then
+    echo "  ✅ Started via systemd"
 else
-    echo -e "${RED}✗ Service failed to start${NC}"
-    echo -e "\nRecent logs:"
-    sudo journalctl -u saro.service -n 20 --no-pager
-    exit 1
+    echo "  ⚠️ systemd failed, starting manually..."
+    cd /var/www/saroyarsir
+    nohup python3 app.py > logs/app.log 2>&1 &
+    echo "  ✅ Started manually"
 fi
 
-echo -e "\n${GREEN}=========================================="
-echo -e "SERVICE RESTARTED SUCCESSFULLY!"
-echo -e "==========================================${NC}"
+sleep 3
+echo ""
+
+echo "Step 4: Verify process is running..."
+if pgrep -f "python.*app.py" > /dev/null; then
+    echo "  ✅ Python process is running!"
+    pgrep -af "python.*app.py"
+else
+    echo "  ❌ WARNING: No Python process found!"
+    echo "  Check logs/app.log for errors"
+fi
+
+echo ""
+echo "════════════════════════════════════════════════════════════════"
+echo "  ✅ RESTART COMPLETE"
+echo "════════════════════════════════════════════════════════════════"
+echo ""
+echo "Now refresh your browser (Ctrl+Shift+R) and check if attendance"
+echo "column shows '/7' or '/8' instead of '/20'"
+echo ""
