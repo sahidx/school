@@ -67,13 +67,16 @@ def get_students():
         # Build roll number map from latest monthly exam
         roll_map = {}
         if batch_id:
-            # Find most recent monthly exam for this batch
-            most_recent_exam = MonthlyExam.query.filter_by(
-                batch_id=batch_id
-            ).order_by(
-                MonthlyExam.year.desc(),
-                MonthlyExam.month.desc()
-            ).first()
+            # Find most recent monthly exam for this batch that has finalized rankings
+            most_recent_exam = (
+                MonthlyExam.query.join(MonthlyRanking, MonthlyRanking.monthly_exam_id == MonthlyExam.id)
+                .filter(
+                    MonthlyExam.batch_id == batch_id,
+                    MonthlyRanking.is_final == True
+                )
+                .order_by(MonthlyExam.year.desc(), MonthlyExam.month.desc(), MonthlyExam.id.desc())
+                .first()
+            )
             
             if most_recent_exam:
                 rankings = MonthlyRanking.query.filter_by(

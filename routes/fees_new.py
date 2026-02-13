@@ -61,7 +61,7 @@ def load_monthly_fees():
                 MonthlyExam.batch_id == batch_id,
                 MonthlyRanking.is_final == True
             )
-            .order_by(MonthlyExam.year.desc(), MonthlyExam.month.desc())
+            .order_by(MonthlyExam.year.desc(), MonthlyExam.month.desc(), MonthlyExam.id.desc())
             .first()
         )
         
