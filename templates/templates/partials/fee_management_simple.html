@@ -69,6 +69,7 @@
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                         <tr>
+                            <th class="px-3 py-2 text-center text-sm font-medium text-gray-700">Roll</th>
                             <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Student</th>
                             <th class="px-3 py-2 text-center text-sm font-medium text-gray-700">Jan</th>
                             <th class="px-3 py-2 text-center text-sm font-medium text-gray-700">Feb</th>
@@ -116,6 +117,7 @@
                     </tbody>
                     <tfoot class="bg-gray-100">
                         <tr>
+                            <td class="px-3 py-2"></td>
                             <td class="px-4 py-3 text-right font-bold text-gray-900">Monthly Totals:</td>
                             <template x-for="month in 12" :key="month">
                                 <td class="px-2 py-3 text-center font-semibold text-gray-700" x-text="getMonthTotal(month).toFixed(2)"></td>

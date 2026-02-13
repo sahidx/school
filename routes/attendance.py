@@ -552,6 +552,7 @@ def get_monthly_attendance():
                 'id': student.id,
                 'name': student.full_name,
                 'student_id': getattr(student, 'student_id', ''),
+                'roll_number': roll_map.get(student.id),
                 'attendance': attendance_dict
             })
         
