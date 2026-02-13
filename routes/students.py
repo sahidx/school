@@ -7,6 +7,7 @@ from flask_bcrypt import generate_password_hash
 from models import db, User, UserRole, Batch, user_batches
 from utils.auth import login_required, require_role, get_current_user
 from utils.response import success_response, error_response, serialize_user
+from utils.rankings import get_batch_latest_rank_map
 from sqlalchemy import or_
 import re
 import secrets
@@ -40,8 +41,6 @@ def validate_phone(phone):
 def get_students():
     """Get all students with their batch information (excludes archived, sorted by roll number)"""
     try:
-        from models import MonthlyExam, MonthlyRanking
-        
         batch_id = request.args.get('batch_id', type=int)
         search = request.args.get('search', '').strip()
         
@@ -64,70 +63,10 @@ def get_students():
         
         students = query.all()
         
-        # Build roll number map from latest monthly exam
+        # Build roll number map from latest usable monthly exam
         roll_map = {}
         if batch_id:
-            # Find most recent monthly exam for this batch (prefer finalized rankings)
-            most_recent_exam = (
-                MonthlyExam.query.join(MonthlyRanking, MonthlyRanking.monthly_exam_id == MonthlyExam.id)
-                .filter(
-                    MonthlyExam.batch_id == batch_id,
-                    MonthlyRanking.is_final == True
-                )
-                .order_by(MonthlyExam.year.desc(), MonthlyExam.month.desc(), MonthlyExam.id.desc())
-                .first()
-            )
-            if not most_recent_exam:
-                most_recent_exam = (
-                    MonthlyExam.query.join(MonthlyRanking, MonthlyRanking.monthly_exam_id == MonthlyExam.id)
-                    .filter(MonthlyExam.batch_id == batch_id)
-                    .order_by(MonthlyExam.year.desc(), MonthlyExam.month.desc(), MonthlyExam.id.desc())
-                    .first()
-                )
-            
-            if most_recent_exam:
-                rankings = MonthlyRanking.query.filter_by(
-                    monthly_exam_id=most_recent_exam.id,
-                    is_final=True
-                ).all()
-                if not rankings:
-                    rankings = MonthlyRanking.query.filter_by(
-                        monthly_exam_id=most_recent_exam.id
-                    ).all()
-                
-                for ranking in rankings:
-                    current_rank = ranking.position or ranking.roll_number
-                    if current_rank:
-                        roll_map[ranking.user_id] = current_rank
-
-            # Fallback: if latest exam has no usable ranks, scan older exams and pick first valid rank map
-            if not roll_map:
-                candidate_exams = (
-                    MonthlyExam.query.join(MonthlyRanking, MonthlyRanking.monthly_exam_id == MonthlyExam.id)
-                    .filter(MonthlyExam.batch_id == batch_id)
-                    .order_by(MonthlyExam.year.desc(), MonthlyExam.month.desc(), MonthlyExam.id.desc())
-                    .all()
-                )
-
-                for candidate_exam in candidate_exams:
-                    candidate_rankings = MonthlyRanking.query.filter_by(
-                        monthly_exam_id=candidate_exam.id,
-                        is_final=True
-                    ).all()
-                    if not candidate_rankings:
-                        candidate_rankings = MonthlyRanking.query.filter_by(
-                            monthly_exam_id=candidate_exam.id
-                        ).all()
-
-                    candidate_map = {}
-                    for ranking in candidate_rankings:
-                        current_rank = ranking.position or ranking.roll_number
-                        if current_rank:
-                            candidate_map[ranking.user_id] = current_rank
-
-                    if candidate_map:
-                        roll_map = candidate_map
-                        break
+            roll_map, _ = get_batch_latest_rank_map(batch_id)
         
         # Sort by roll number (students without roll go to end)
         students.sort(key=lambda s: (s.id not in roll_map, roll_map.get(s.id, 999999), s.first_name))

@@ -7,6 +7,7 @@ from sqlalchemy import extract
 from datetime import datetime, date
 from decimal import Decimal
 import calendar
+from utils.rankings import get_batch_latest_rank_map
 
 fees_bp = Blueprint('fees', __name__)
 
@@ -51,72 +52,8 @@ def load_monthly_fees():
         if not batch:
             return error_response('Batch not found', 404)
         
-        # Get students sorted by roll number from most recent monthly exam
-        from models import MonthlyExam, MonthlyRanking
-        
-        # Find most recent monthly exam for this batch (prefer finalized rankings)
-        most_recent_exam = (
-            MonthlyExam.query.join(MonthlyRanking, MonthlyRanking.monthly_exam_id == MonthlyExam.id)
-            .filter(
-                MonthlyExam.batch_id == batch_id,
-                MonthlyRanking.is_final == True
-            )
-            .order_by(MonthlyExam.year.desc(), MonthlyExam.month.desc(), MonthlyExam.id.desc())
-            .first()
-        )
-        if not most_recent_exam:
-            most_recent_exam = (
-                MonthlyExam.query.join(MonthlyRanking, MonthlyRanking.monthly_exam_id == MonthlyExam.id)
-                .filter(MonthlyExam.batch_id == batch_id)
-                .order_by(MonthlyExam.year.desc(), MonthlyExam.month.desc(), MonthlyExam.id.desc())
-                .first()
-            )
-        
-        # Build roll number map
-        roll_map = {}
-        if most_recent_exam:
-            rankings = MonthlyRanking.query.filter_by(
-                monthly_exam_id=most_recent_exam.id,
-                is_final=True
-            ).all()
-            if not rankings:
-                rankings = MonthlyRanking.query.filter_by(
-                    monthly_exam_id=most_recent_exam.id
-                ).all()
-            
-            for ranking in rankings:
-                current_rank = ranking.position or ranking.roll_number
-                if current_rank:
-                    roll_map[ranking.user_id] = current_rank
-
-        # Fallback: if latest exam has no usable ranks, scan older exams and pick first valid rank map
-        if not roll_map:
-            candidate_exams = (
-                MonthlyExam.query.join(MonthlyRanking, MonthlyRanking.monthly_exam_id == MonthlyExam.id)
-                .filter(MonthlyExam.batch_id == batch_id)
-                .order_by(MonthlyExam.year.desc(), MonthlyExam.month.desc(), MonthlyExam.id.desc())
-                .all()
-            )
-
-            for candidate_exam in candidate_exams:
-                candidate_rankings = MonthlyRanking.query.filter_by(
-                    monthly_exam_id=candidate_exam.id,
-                    is_final=True
-                ).all()
-                if not candidate_rankings:
-                    candidate_rankings = MonthlyRanking.query.filter_by(
-                        monthly_exam_id=candidate_exam.id
-                    ).all()
-
-                candidate_map = {}
-                for ranking in candidate_rankings:
-                    current_rank = ranking.position or ranking.roll_number
-                    if current_rank:
-                        candidate_map[ranking.user_id] = current_rank
-
-                if candidate_map:
-                    roll_map = candidate_map
-                    break
+        # Build current rank map from latest usable monthly exam result for this batch
+        roll_map, _ = get_batch_latest_rank_map(batch_id)
         
         students = User.query.filter(
             User.role == UserRole.STUDENT,
