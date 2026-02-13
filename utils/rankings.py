@@ -167,7 +167,6 @@ def get_batch_latest_rank_map(batch_id):
     # 3: Fallback to exam marks
     for exam in prioritized_exams:
         mark_rows = (
-        mark_rows = (
             db.session.query(
                 MonthlyMark.user_id,
                 func.sum(MonthlyMark.marks_obtained).label('total_obtained'),
