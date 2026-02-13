@@ -49,7 +49,7 @@ def get_global_latest_rank_map(candidate_user_ids):
         rankings = MonthlyRanking.query.filter_by(monthly_exam_id=exam.id).all()
         rank_map = {}
         for row in rankings:
-            current_rank = row.position or row.roll_number
+            current_rank = row.position
             if current_rank:
                 rank_map[row.user_id] = current_rank
         
@@ -157,7 +157,9 @@ def get_batch_latest_rank_map(batch_id):
 
         rank_map = {}
         for row in candidate_rows:
-            current_rank = row.position or row.roll_number
+            # STRICT: Only accept 'position' (Merit Rank). 
+            # Do NOT fallback to 'roll_number' because new exams have rolls but no merit rank.
+            current_rank = row.position
             if current_rank:
                 rank_map[row.user_id] = current_rank
 
