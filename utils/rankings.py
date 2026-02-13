@@ -68,13 +68,20 @@ def get_batch_latest_rank_map(batch_id):
             continue
 
         scored = []
+        max_obtained = 0
         for row in mark_rows:
             obtained = float(row.total_obtained or 0)
+            if obtained > max_obtained:
+                max_obtained = obtained
             possible = float(row.total_possible or 0)
             percentage = (obtained / possible * 100) if possible > 0 else 0
             scored.append((row.user_id, percentage, obtained))
 
         if not scored:
+            continue
+
+        # Skip exam if all students have 0 marks (likely just initialized but not taken)
+        if max_obtained == 0:
             continue
 
         scored.sort(key=lambda item: (-item[1], -item[2], item[0]))

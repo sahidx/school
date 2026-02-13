@@ -40,12 +40,20 @@ echo "${YELLOW}📦 Step 2: Creating database backup${NC}"
 echo "=================================================="
 
 if [ ! -f "instance/app.db" ]; then
-    echo "${RED}❌ Database file not found at instance/app.db${NC}"
-    exit 1
+    echo "${YELLOW}⚠️  Database file not found at instance/app.db - Attempting to find elsewhere or skipping backup${NC}"
+    # Try alternate location
+    if [ -f "/var/www/saroyarsir/smartgardenhub.db" ]; then
+        echo "${GREEN}✅ Found database at /var/www/saroyarsir/smartgardenhub.db${NC}"
+        cp "/var/www/saroyarsir/smartgardenhub.db" "/var/www/saroyarsir/smartgardenhub.db.backup.$(date +%Y%m%d_%H%M%S)"
+    else 
+        echo "${YELLOW}⚠️  Skipping database backup (DB not found)${NC}"
+    fi
+    # Do not exit, continue deployment
+else
+    BACKUP_FILE="instance/app.db.backup.$(date +%Y%m%d_%H%M%S)"
+    cp instance/app.db "$BACKUP_FILE"
+    echo "${GREEN}✅ Database backup created at $BACKUP_FILE${NC}"
 fi
-
-BACKUP_FILE="instance/app.db.backup.$(date +%Y%m%d_%H%M%S)"
-cp instance/app.db "$BACKUP_FILE"
 
 if [ $? -ne 0 ]; then
     echo "${RED}❌ Backup failed${NC}"
