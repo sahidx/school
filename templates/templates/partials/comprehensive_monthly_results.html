@@ -55,29 +55,42 @@
                 </div>
             </div>
             
-            <div class="flex space-x-2">
-                <button @click="downloadExcel()" 
-                        class="px-3 py-2 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 flex items-center"
-                        x-show="rankings.length > 0">
-                    <i class="fas fa-download mr-2"></i>Download Excel
+            <div class="flex flex-wrap gap-2">
+                <!-- Download Excel -->
+                <button @click="downloadExcel()"
+                        x-show="rankings.length > 0"
+                        class="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-semibold rounded-lg bg-blue-600 hover:bg-blue-700 text-white shadow-sm transition-colors">
+                    <i class="fas fa-file-excel"></i>Excel
                 </button>
-                <button @click="regenerateRanking()" 
-                        class="px-3 py-2 bg-purple-600 text-white text-sm rounded hover:bg-purple-700 flex items-center"
-                        x-show="rankings.length > 0 && rankingsGenerated">
-                    <i class="fas fa-sync-alt mr-2"></i>Re-generate Ranking
+                <!-- Re-generate -->
+                <button @click="regenerateRanking()"
+                        x-show="rankings.length > 0 && rankingsGenerated"
+                        class="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-semibold rounded-lg bg-violet-600 hover:bg-violet-700 text-white shadow-sm transition-colors">
+                    <i class="fas fa-sync-alt"></i>Re-rank
                 </button>
-                <button @click="showRollNumberModal = true" 
-                        class="px-3 py-2 bg-yellow-500 text-white text-sm rounded hover:bg-yellow-600"
-                        x-show="isTeacher && rankings.length > 0">
-                    <i class="fas fa-edit mr-2"></i>Assign Roll Numbers
+                <!-- Assign Roll Numbers -->
+                <button @click="showRollNumberModal = true"
+                        x-show="isTeacher && rankings.length > 0"
+                        class="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-semibold rounded-lg bg-amber-500 hover:bg-amber-600 text-white shadow-sm transition-colors">
+                    <i class="fas fa-hashtag"></i>Roll Nos.
                 </button>
-                <!-- ── Print Section Result ── -->
+                <!-- Section Result Print -->
                 <a :href="`/api/monthly-exams/${currentExamId}/section-result`"
                    target="_blank"
-                   class="px-3 py-2 bg-green-600 text-white text-sm rounded hover:bg-green-700 flex items-center"
-                   x-show="isTeacher && rankings.length > 0">
-                    <i class="fas fa-print mr-2"></i>Section Result
+                   x-show="isTeacher && rankings.length > 0"
+                   class="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-semibold rounded-lg bg-teal-600 hover:bg-teal-700 text-white shadow-sm transition-colors">
+                    <i class="fas fa-print"></i>Print
                 </a>
+                <!-- Publish / Unpublish Results -->
+                <button @click="publishResults()"
+                        x-show="isTeacher && rankings.length > 0"
+                        :class="isPublished
+                            ? 'bg-gray-500 hover:bg-gray-600'
+                            : 'bg-emerald-600 hover:bg-emerald-700'"
+                        class="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-semibold rounded-lg text-white shadow-sm transition-colors">
+                    <i :class="isPublished ? 'fas fa-eye-slash' : 'fas fa-globe'"></i>
+                    <span x-text="isPublished ? 'Unpublish' : 'Publish Results'"></span>
+                </button>
             </div>
         </div>
     </div>
@@ -290,6 +303,7 @@ function comprehensiveResults() {
         showRollNumberModal: false,
         rollChanges: {},
         rankingsGenerated: false,
+        isPublished: false,
         isTeacher: window.userRole === 'TEACHER' || window.userRole === 'SUPER_USER',
         currentExamId: null, // Track current exam ID
 
@@ -403,6 +417,8 @@ function comprehensiveResults() {
                     
                     // Check if rankings are already saved in database
                     await this.checkIfRankingsGenerated();
+                    // Set publish status
+                    this.isPublished = !!this.examData?.result_published_at;
                     
                     // Auto-save rankings when generated (only for teachers) if not already saved
                     if (this.isTeacher && this.rankings.length > 0 && !this.rankingsGenerated) {
@@ -452,6 +468,38 @@ function comprehensiveResults() {
             } catch (error) {
                 console.error('Error saving rankings:', error);
                 // Don't show error to user - this is a background operation
+            }
+        },
+
+        async publishResults() {
+            try {
+                const action = this.isPublished ? 'unpublish' : 'publish';
+                const confirmMsg = this.isPublished
+                    ? 'Unpublish results? Students will no longer see them.'
+                    : 'Publish results? All students will be able to see them.';
+                if (!confirm(confirmMsg)) return;
+
+                const response = await fetch(`/api/monthly-exams/${window.currentMonthlyExamId}/publish-results`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include'
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    this.isPublished = !this.isPublished;
+                    if (this.examData) this.examData.result_published_at = this.isPublished ? new Date().toISOString() : null;
+                    this.successMessage = this.isPublished
+                        ? '✅ Results published! Students can now view them.'
+                        : '🔒 Results unpublished.';
+                    setTimeout(() => { this.successMessage = null; }, 4000);
+                } else {
+                    this.error = data.message || 'Failed to publish results';
+                    setTimeout(() => { this.error = null; }, 4000);
+                }
+            } catch (err) {
+                this.error = 'Error: ' + err.message;
+                setTimeout(() => { this.error = null; }, 4000);
             }
         },
 
