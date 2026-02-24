@@ -7,7 +7,7 @@ from pathlib import Path
 class Config:
     """Base configuration"""
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'dev-secret-key-change-in-production'
-    APP_NAME = 'SmartGardenHub'
+    APP_NAME = 'Modern Ideal Non Government Primary School'
     
     # Session configuration
     SESSION_TYPE = 'filesystem'
@@ -26,7 +26,7 @@ class DevelopmentConfig(Config):
     
     # SQLite database for development
     base_dir = Path(__file__).parent
-    SQLALCHEMY_DATABASE_URI = f"sqlite:///{base_dir}/smartgardenhub.db"
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or f"sqlite:///{base_dir}/school.db"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_ECHO = False
 
@@ -36,7 +36,7 @@ class ProductionConfig(Config):
     
     # SQLite database for production
     # Using absolute path for VPS deployment at /var/www/saroyarsir
-    SQLALCHEMY_DATABASE_URI = "sqlite:////var/www/saroyarsir/smartgardenhub.db"
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or "sqlite:////var/www/saroyarsir/school.db"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_ECHO = False
 

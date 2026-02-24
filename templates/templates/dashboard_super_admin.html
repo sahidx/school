@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Super Admin Dashboard - SmartGardenHub{% endblock %}
+{% block title %}Admin Dashboard - Modern Ideal Non Government Primary School{% endblock %}
 
 {% block extra_head %}
 <script src="https://unpkg.com/htmx.org@1.9.6"></script>
@@ -25,39 +25,49 @@
                     <i class="fas fa-crown text-white text-lg"></i>
                 </div>
                 <div class="ml-3">
-                    <h2 class="text-lg font-semibold text-gray-900">Super Admin</h2>
-                    <p class="text-sm text-red-600 font-semibold">System Control</p>
-                    <p class="text-xs text-gray-500">Welcome, {{ user.firstName }} {{ user.lastName }}!</p>
+                    <h2 class="text-lg font-semibold text-gray-900">{{ user.firstName }} {{ user.lastName }}</h2>
+                    <p class="text-sm text-red-600 font-semibold">School Administrator</p>
+                    <p class="text-xs text-gray-500">Admin Dashboard</p>
                 </div>
             </div>
         </div>
 
-        <!-- Navigation Menu -->
-        <nav class="mt-6">
-            <div class="px-3 space-y-1">
-                <template x-for="item in menuItems" :key="item.id">
-                    <button 
-                        @click="activeSection = item.id"
-                        :class="{
-                            'bg-red-50 border-r-2 border-red-500 text-red-700': activeSection === item.id,
-                            'text-gray-600 hover:bg-gray-50 hover:text-gray-900': activeSection !== item.id
-                        }"
-                        class="w-full flex items-center px-3 py-2 text-sm font-medium rounded-l-md transition-colors duration-200">
-                        <i :class="item.icon" class="mr-3 text-lg"></i>
-                        <span x-text="item.title"></span>
-                    </button>
-                </template>
+        <!-- Navigation Menu — scrollable -->
+        <nav class="mt-4 overflow-y-auto" style="height: calc(100vh - 180px);">
+            <div class="px-3 pb-4">
+
+                <!-- OVERVIEW -->
+                <p class="px-3 pt-3 pb-1 text-xs font-bold uppercase tracking-widest text-gray-400">Overview</p>
+                <button @click="activeSection='dashboard'" :class="activeSection==='dashboard'?'bg-red-50 border-r-2 border-red-500 text-red-700':'text-gray-600 hover:bg-gray-50 hover:text-gray-900'" class="w-full flex items-center px-3 py-2 text-sm font-medium rounded-l-md transition-colors duration-200"><i class="fas fa-tachometer-alt mr-3 text-base"></i>Dashboard</button>
+
+                <!-- STUDENTS -->
+                <p class="px-3 pt-4 pb-1 text-xs font-bold uppercase tracking-widest text-gray-400">Students</p>
+                <button @click="activeSection='students'" :class="activeSection==='students'?'bg-red-50 border-r-2 border-red-500 text-red-700':'text-gray-600 hover:bg-gray-50 hover:text-gray-900'" class="w-full flex items-center px-3 py-2 text-sm font-medium rounded-l-md transition-colors duration-200"><i class="fas fa-user-graduate mr-3 text-base"></i>Students</button>
+                <button @click="activeSection='attendance'" :class="activeSection==='attendance'?'bg-red-50 border-r-2 border-red-500 text-red-700':'text-gray-600 hover:bg-gray-50 hover:text-gray-900'" class="w-full flex items-center px-3 py-2 text-sm font-medium rounded-l-md transition-colors duration-200"><i class="fas fa-clipboard-check mr-3 text-base"></i>Attendance</button>
+                <button @click="activeSection='fee-management'" :class="activeSection==='fee-management'?'bg-red-50 border-r-2 border-red-500 text-red-700':'text-gray-600 hover:bg-gray-50 hover:text-gray-900'" class="w-full flex items-center px-3 py-2 text-sm font-medium rounded-l-md transition-colors duration-200"><i class="fas fa-money-bill-wave mr-3 text-base"></i>Fee Management</button>
+                <button @click="activeSection='documents'" :class="activeSection==='documents'?'bg-red-50 border-r-2 border-red-500 text-red-700':'text-gray-600 hover:bg-gray-50 hover:text-gray-900'" class="w-full flex items-center px-3 py-2 text-sm font-medium rounded-l-md transition-colors duration-200"><i class="fas fa-folder-open mr-3 text-base"></i>Documents</button>
+                <button @click="activeSection='archive'" :class="activeSection==='archive'?'bg-red-50 border-r-2 border-red-500 text-red-700':'text-gray-600 hover:bg-gray-50 hover:text-gray-900'" class="w-full flex items-center px-3 py-2 text-sm font-medium rounded-l-md transition-colors duration-200"><i class="fas fa-archive mr-3 text-base"></i>Archive</button>
+
+                <!-- ACADEMICS -->
+                <p class="px-3 pt-4 pb-1 text-xs font-bold uppercase tracking-widest text-gray-400">Academics</p>
+                <button @click="activeSection='classes'" :class="activeSection==='classes'?'bg-red-50 border-r-2 border-red-500 text-red-700':'text-gray-600 hover:bg-gray-50 hover:text-gray-900'" class="w-full flex items-center px-3 py-2 text-sm font-medium rounded-l-md transition-colors duration-200"><i class="fas fa-door-open mr-3 text-base"></i>Classes &amp; Subjects</button>
+                <button @click="activeSection='term-exams'" :class="activeSection==='term-exams'?'bg-red-50 border-r-2 border-red-500 text-red-700':'text-gray-600 hover:bg-gray-50 hover:text-gray-900'" class="w-full flex items-center px-3 py-2 text-sm font-medium rounded-l-md transition-colors duration-200"><i class="fas fa-book-open mr-3 text-base"></i>1st &amp; 2nd Term Exams</button>
+                <button @click="activeSection='term-results'" :class="activeSection==='term-results'?'bg-red-50 border-r-2 border-red-500 text-red-700':'text-gray-600 hover:bg-gray-50 hover:text-gray-900'" class="w-full flex items-center px-3 py-2 text-sm font-medium rounded-l-md transition-colors duration-200"><i class="fas fa-chart-bar mr-3 text-base"></i>Term Results</button>
+                <button @click="activeSection='online-exams'" :class="activeSection==='online-exams'?'bg-red-50 border-r-2 border-red-500 text-red-700':'text-gray-600 hover:bg-gray-50 hover:text-gray-900'" class="w-full flex items-center px-3 py-2 text-sm font-medium rounded-l-md transition-colors duration-200"><i class="fas fa-laptop mr-3 text-base"></i>Online Exams</button>
+
+                <!-- SCHOOL -->
+                <p class="px-3 pt-4 pb-1 text-xs font-bold uppercase tracking-widest text-gray-400">School</p>
+                <button @click="activeSection='school-cms'" :class="activeSection==='school-cms'?'bg-red-50 border-r-2 border-red-500 text-red-700':'text-gray-600 hover:bg-gray-50 hover:text-gray-900'" class="w-full flex items-center px-3 py-2 text-sm font-medium rounded-l-md transition-colors duration-200"><i class="fas fa-school mr-3 text-base"></i>School Info CMS</button>
+                <button @click="activeSection='announcements'" :class="activeSection==='announcements'?'bg-red-50 border-r-2 border-red-500 text-red-700':'text-gray-600 hover:bg-gray-50 hover:text-gray-900'" class="w-full flex items-center px-3 py-2 text-sm font-medium rounded-l-md transition-colors duration-200"><i class="fas fa-bullhorn mr-3 text-base"></i>Announcements</button>
+                <button @click="activeSection='teachers'" :class="activeSection==='teachers'?'bg-red-50 border-r-2 border-red-500 text-red-700':'text-gray-600 hover:bg-gray-50 hover:text-gray-900'" class="w-full flex items-center px-3 py-2 text-sm font-medium rounded-l-md transition-colors duration-200"><i class="fas fa-chalkboard-teacher mr-3 text-base"></i>Teachers</button>
+
+                <!-- SYSTEM -->
+                <p class="px-3 pt-4 pb-1 text-xs font-bold uppercase tracking-widest text-gray-400">System</p>
+                <button @click="activeSection='sms-management'" :class="activeSection==='sms-management'?'bg-red-50 border-r-2 border-red-500 text-red-700':'text-gray-600 hover:bg-gray-50 hover:text-gray-900'" class="w-full flex items-center px-3 py-2 text-sm font-medium rounded-l-md transition-colors duration-200"><i class="fas fa-sms mr-3 text-base"></i>SMS Management</button>
+                <button @click="logout()" class="w-full flex items-center px-3 py-2 text-sm font-medium text-gray-500 hover:bg-gray-50 rounded-l-md transition-colors duration-200 mt-2"><i class="fas fa-sign-out-alt mr-3 text-base"></i>Logout</button>
+
             </div>
         </nav>
-
-        <!-- Logout Button -->
-        <div class="absolute bottom-4 left-4 right-4">
-            <button @click="logout()" 
-                    class="w-full flex items-center px-3 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 rounded-md transition-colors duration-200">
-                <i class="fas fa-sign-out-alt mr-3"></i>
-                <span>Logout</span>
-            </button>
-        </div>
     </div>
 
     <!-- Main Content -->
@@ -76,8 +86,11 @@
                         <span class="font-medium">SMS Balance:</span>
                         <span class="text-green-600 font-bold" x-text="user.smsCount || 0"></span>
                     </div>
-                    <div class="w-8 h-8 bg-red-600 rounded-full flex items-center justify-center">
-                        <i class="fas fa-crown text-white text-sm"></i>
+                    <div class="flex items-center space-x-2">
+                        <span class="text-sm text-gray-700 font-medium">{{ user.firstName }} Sir</span>
+                        <div class="w-9 h-9 bg-gradient-to-r from-red-600 to-pink-600 rounded-full flex items-center justify-center text-white text-sm font-bold">
+                            {{ user.firstName[0] | upper if user.firstName else 'A' }}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -144,29 +157,86 @@
                 <!-- Quick Actions -->
                 <div class="bg-white rounded-lg shadow p-6">
                     <h3 class="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <button @click="activeSection = 'sms-management'" 
-                                class="flex items-center p-4 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">
-                            <i class="fas fa-sms text-blue-600 text-xl mr-3"></i>
-                            <span class="font-medium text-blue-700">Manage SMS Credits</span>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        <button @click="activeSection='students'" class="flex items-center p-4 bg-green-50 rounded-lg hover:bg-green-100 transition-colors">
+                            <i class="fas fa-user-graduate text-green-600 text-xl mr-3"></i>
+                            <span class="font-medium text-green-700">Students</span>
                         </button>
-                        <button @click="viewAllTeachers()" 
-                                class="flex items-center p-4 bg-green-50 rounded-lg hover:bg-green-100 transition-colors">
-                            <i class="fas fa-users text-green-600 text-xl mr-3"></i>
-                            <span class="font-medium text-green-700">View All Teachers</span>
+                        <button @click="activeSection='attendance'" class="flex items-center p-4 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">
+                            <i class="fas fa-clipboard-check text-blue-600 text-xl mr-3"></i>
+                            <span class="font-medium text-blue-700">Attendance</span>
                         </button>
-                        <button @click="viewSystemStats()" 
-                                class="flex items-center p-4 bg-purple-50 rounded-lg hover:bg-purple-100 transition-colors">
+                        <button @click="activeSection='fee-management'" class="flex items-center p-4 bg-yellow-50 rounded-lg hover:bg-yellow-100 transition-colors">
+                            <i class="fas fa-money-bill-wave text-yellow-600 text-xl mr-3"></i>
+                            <span class="font-medium text-yellow-700">Fee Management</span>
+                        </button>
+                        <button @click="activeSection='term-exams'" class="flex items-center p-4 bg-orange-50 rounded-lg hover:bg-orange-100 transition-colors">
+                            <i class="fas fa-book-open text-orange-600 text-xl mr-3"></i>
+                            <span class="font-medium text-orange-700">Term Exams</span>
+                        </button>
+                        <button @click="activeSection='online-exams'" class="flex items-center p-4 bg-indigo-50 rounded-lg hover:bg-indigo-100 transition-colors">
+                            <i class="fas fa-laptop text-indigo-600 text-xl mr-3"></i>
+                            <span class="font-medium text-indigo-700">Online Exams</span>
+                        </button>
+                        <button @click="activeSection='term-results'" class="flex items-center p-4 bg-purple-50 rounded-lg hover:bg-purple-100 transition-colors">
                             <i class="fas fa-chart-bar text-purple-600 text-xl mr-3"></i>
-                            <span class="font-medium text-purple-700">System Statistics</span>
+                            <span class="font-medium text-purple-700">Term Results</span>
+                        </button>
+                        <button @click="activeSection='announcements'" class="flex items-center p-4 bg-pink-50 rounded-lg hover:bg-pink-100 transition-colors">
+                            <i class="fas fa-bullhorn text-pink-600 text-xl mr-3"></i>
+                            <span class="font-medium text-pink-700">Announcements</span>
+                        </button>
+                        <button @click="activeSection='sms-management'" class="flex items-center p-4 bg-red-50 rounded-lg hover:bg-red-100 transition-colors">
+                            <i class="fas fa-sms text-red-600 text-xl mr-3"></i>
+                            <span class="font-medium text-red-700">SMS Credits</span>
                         </button>
                     </div>
                 </div>
             </div>
 
+            <!-- Student Management -->
+            <div x-show="activeSection === 'students'" x-cloak>
+                {% include 'partials/student_management.html' %}
+            </div>
+
+            <!-- Attendance Management -->
+            <div x-show="activeSection === 'attendance'" x-cloak>
+                {% include 'partials/attendance_management.html' %}
+            </div>
+
+            <!-- Fee Management -->
+            <div x-show="activeSection === 'fee-management'" x-cloak>
+                {% include 'partials/fee_management.html' %}
+            </div>
+
+            <!-- Batch / Group Management -->
+            <div x-show="activeSection === 'batches'" x-cloak>
+                {% include 'partials/batch_management.html' %}
+            </div>
+
+            <!-- Online Exams -->
+            <div x-show="activeSection === 'online-exams'" x-cloak>
+                {% include 'partials/online_exam_management.html' %}
+            </div>
+
+            <!-- Documents -->
+            <div x-show="activeSection === 'documents'" x-cloak>
+                {% include 'partials/document_management.html' %}
+            </div>
+
+            <!-- Archive -->
+            <div x-show="activeSection === 'archive'" x-cloak>
+                {% include 'partials/archive_management.html' %}
+            </div>
+
             <!-- SMS Management -->
             <div x-show="activeSection === 'sms-management'" x-cloak>
                 {% include 'partials/super_admin_sms.html' %}
+            </div>
+            <!-- School Management CMS — handles: info, announcements, classes, term-exams, term-results, teachers -->
+            <div x-show="['school-cms','announcements','classes','term-exams','term-results','teachers'].includes(activeSection)" x-cloak
+                 x-init="$watch('activeSection', v => window.dispatchEvent(new CustomEvent('school-tab',{detail:v})))">
+                {% include 'partials/school_management.html' %}
             </div>
         </main>
     </div>
@@ -199,13 +269,25 @@ function superAdminDashboard() {
         },
         
         menuItems: [
-            { id: 'dashboard', title: 'Dashboard', icon: 'fas fa-tachometer-alt' },
-            { id: 'sms-management', title: 'SMS Management', icon: 'fas fa-sms' }
+            { id: 'dashboard',     title: 'Dashboard' },
+            { id: 'students',      title: 'Students' },
+            { id: 'attendance',    title: 'Attendance' },
+            { id: 'fee-management',title: 'Fee Management' },
+            { id: 'documents',     title: 'Documents' },
+            { id: 'archive',       title: 'Archive' },
+            { id: 'classes',       title: 'Classes & Subjects' },
+            { id: 'term-exams',    title: '1st & 2nd Term Exams' },
+            { id: 'term-results',  title: 'Term Results' },
+            { id: 'online-exams',  title: 'Online Exams' },
+            { id: 'school-cms',    title: 'School Info CMS' },
+            { id: 'announcements', title: 'Announcements' },
+            { id: 'teachers',      title: 'Teachers' },
+            { id: 'sms-management',title: 'SMS Management' }
         ],
 
         get currentTitle() {
             const item = this.menuItems.find(item => item.id === this.activeSection);
-            return item ? item.title : 'Super Admin Dashboard';
+            return item ? item.title : 'Dashboard';
         },
 
         init() {

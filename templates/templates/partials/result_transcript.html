@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Result Transcript – {{ student.full_name }}</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: Arial, sans-serif; font-size: 11.5px; color: #000; background: #fff; }
+.page {
+  width: 210mm; min-height: 297mm; margin: 0 auto; padding: 8mm 10mm;
+  background: #fff; border: 3px solid #b8962e; position: relative; overflow: hidden;
+}
+.page::after {
+  content: ''; position: absolute; inset: 5px; border: 1px solid #d4b96e;
+  pointer-events: none; z-index: 0;
+}
+.school-header { text-align: center; border-bottom: 2px solid #b8962e; padding-bottom: 6px; margin-bottom: 0; position: relative; z-index: 1; }
+.school-name { font-size: 21px; font-weight: bold; color: #b8962e; letter-spacing: 1px; }
+.school-sub  { font-size: 11px; color: #555; margin-top: 1px; }
+.title-strip {
+  background: #b8962e; color: #fff; text-align: center;
+  font-size: 12.5px; font-weight: bold; padding: 3px 0;
+  letter-spacing: 2.5px; margin: 5px 0 6px; position: relative; z-index: 1;
+}
+.meta-row { display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 6px; position: relative; z-index: 1; }
+.meta-left, .meta-right { width: 48%; }
+.meta-item { display: flex; gap: 4px; margin-bottom: 3px; }
+.meta-label { color: #555; min-width: 96px; font-size: 10.5px; }
+.meta-val   { font-weight: bold; border-bottom: 1px dotted #bbb; flex: 1; padding-bottom: 1px; }
+.body-row { display: flex; gap: 8px; align-items: flex-start; position: relative; z-index: 1; }
+.marks-col { flex: 1; }
+.right-col  { width: 134px; flex-shrink: 0; }
+table.marks { width: 100%; border-collapse: collapse; font-size: 11px; }
+table.marks th, table.marks td { border: 1px solid #999; padding: 4px 5px; text-align: center; }
+table.marks th { background: #b8962e; color: #fff; font-size: 10px; font-weight: bold; }
+table.marks td.subj { text-align: left; font-weight: 500; padding-left: 6px; }
+table.marks tfoot td { background: #f5f0e0; font-weight: bold; }
+.fc { color: #c00; font-weight: bold; }
+.pc { color: #006600; font-weight: bold; }
+table.gs { width: 100%; border-collapse: collapse; font-size: 10px; }
+table.gs th { background: #34558b; color: #fff; font-size: 9.5px; padding: 3px 4px; border: 1px solid #aaa; }
+table.gs td { border: 1px solid #aaa; padding: 3px 4px; text-align: center; }
+table.gs caption { font-size: 9.5px; font-weight: bold; background: #eee; padding: 3px; border: 1px solid #aaa; border-bottom: none; }
+.extra-block { margin-top: 8px; position: relative; z-index: 1; }
+table.extra { width: 100%; border-collapse: collapse; font-size: 11px; }
+table.extra th { background: #555; color: #fff; padding: 4px 6px; border: 1px solid #aaa; font-size: 10px; }
+table.extra td { border: 1px solid #aaa; padding: 4px 6px; text-align: center; }
+.result-bar {
+  margin-top: 8px; border: 2px solid #b8962e; border-radius: 4px;
+  padding: 5px 10px; display: flex; justify-content: space-between;
+  align-items: center; position: relative; z-index: 1;
+}
+.res-word { font-size: 18px; font-weight: bold; }
+.res-word.pass { color: #006600; }
+.res-word.fail { color: #c00; }
+.res-stats { font-size: 11px; color: #333; display: flex; gap: 14px; }
+.res-stats span strong { color: #000; }
+.sig-row { display: flex; justify-content: space-between; margin-top: 22px; position: relative; z-index: 1; }
+.sig-box { text-align: center; width: 30%; }
+.sig-line { border-top: 1px solid #000; margin-top: 22px; padding-top: 2px; font-size: 10px; color: #444; }
+.wm { position: absolute; font-size: 64px; font-weight: bold; transform: rotate(-30deg); pointer-events: none; z-index: 0; bottom: 38mm; right: 14mm; }
+.wm.pass { color: rgba(0,130,0,.07); }
+.wm.fail { color: rgba(200,0,0,.07); }
+.print-btn { position: fixed; top: 10px; right: 10px; z-index: 99; background: #b8962e; color: #fff; border: none; padding: 8px 18px; font-size: 13px; cursor: pointer; border-radius: 4px; }
+@media print { .print-btn { display: none; } body { margin: 0; } .page { border: 3px solid #b8962e; width: 100%; padding: 5mm 7mm; } }
+</style>
+</head>
+<body>
+<button class="print-btn" onclick="window.print()">&#128424; Print</button>
+<div class="page">
+  <div class="wm {{ 'pass' if result_status == 'Passed' else 'fail' }}">{{ result_status.upper() }}</div>
+  <div class="school-header">
+    <div class="school-name">{{ school.school_name }}</div>
+    {% if school.school_address %}<div class="school-sub">{{ school.school_address }}</div>{% endif %}
+    {% if school.school_phone %}<div class="school-sub">Ph: {{ school.school_phone }}</div>{% endif %}
+  </div>
+  <div class="title-strip">ACADEMIC TRANSCRIPT</div>
+  <div class="meta-row">
+    <div class="meta-left">
+      <div class="meta-item"><span class="meta-label">Name of Student</span><span class="meta-val">{{ student.full_name }}</span></div>
+      <div class="meta-item"><span class="meta-label">Student ID</span><span class="meta-val">STU{{ student.created_at.year if student.created_at else '' }}{{ '%04d' % student.id }}</span></div>
+      <div class="meta-item"><span class="meta-label">Roll No.</span><span class="meta-val">{{ roll_number if roll_number else '\u2014' }}</span></div>
+      <div class="meta-item"><span class="meta-label">Class</span><span class="meta-val">{{ batch.name }}</span></div>
+    </div>
+    <div class="meta-right">
+      <div class="meta-item"><span class="meta-label">Section</span><span class="meta-val">{{ batch.code if batch.code else batch.name }}</span></div>
+      <div class="meta-item"><span class="meta-label">Year / Session</span><span class="meta-val">{{ monthly_exam.year }}</span></div>
+      <div class="meta-item"><span class="meta-label">Exam</span><span class="meta-val">{{ monthly_exam.title }}</span></div>
+      <div class="meta-item"><span class="meta-label">Section Position</span><span class="meta-val">{{ position if position else '\u2014' }}</span></div>
+    </div>
+  </div>
+  <div class="body-row">
+    <div class="marks-col">
+      <table class="marks">
+        <thead>
+          <tr>
+            <th style="width:34%; text-align:left; padding-left:6px;">Name of Subjects</th>
+            <th>Full<br>Marks</th><th>Marks<br>Obtained</th><th>%</th><th>Letter<br>Grade</th><th>Grade<br>Point</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in subject_rows %}
+          <tr>
+            <td class="subj">{{ row.subject }}</td>
+            <td>{{ row.full_marks }}</td>
+            <td {% if row.absent %}style="color:#888;"{% elif row.grade=='F' %}class="fc"{% endif %}>{% if row.absent %}Absent{% else %}{{ row.obtained }}{% endif %}</td>
+            <td {% if row.grade=='F' and not row.absent %}class="fc"{% endif %}>{% if row.absent %}\u2014{% else %}{{ row.percentage }}{% endif %}</td>
+            <td {% if row.grade=='F' %}class="fc"{% else %}class="pc"{% endif %}>{% if row.absent %}AB{% else %}{{ row.grade }}{% endif %}</td>
+            <td>{% if row.absent %}0.00{% else %}{{ '%.2f' % row.gpa }}{% endif %}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+        <tfoot>
+          <tr>
+            <td class="subj"><strong>GRAND TOTAL</strong></td>
+            <td><strong>{{ total_full }}</strong></td>
+            <td><strong>{{ total_obtained }}</strong></td>
+            <td><strong>{{ total_pct }}%</strong></td>
+            <td class="{{ 'pc' if result_status=='Passed' else 'fc' }}"><strong>{{ overall_grade }}</strong></td>
+            <td><strong>{{ '%.2f' % overall_gpa }}</strong></td>
+          </tr>
+        </tfoot>
+      </table>
+      {% if failed_subjects > 0 %}
+      <p style="font-size:9.5px;color:#c00;margin-top:3px;">&#9888; Failed in {{ failed_subjects }} subject(s). {% if failed_subjects <= 2 %}Eligible for supplementary exam.{% endif %}</p>
+      {% endif %}
+    </div>
+    <div class="right-col">
+      <table class="gs">
+        <caption>Grade Scale</caption>
+        <thead><tr><th>Range</th><th>Grade</th><th>GPA</th></tr></thead>
+        <tbody>
+          {% for lo, hi, g, gp in grade_scale %}
+          <tr><td>{{ lo }}\u2013{{ hi }}</td><td>{{ g }}</td><td>{{ '%.2f' % gp }}</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="extra-block">
+    <table class="extra">
+      <thead>
+        <tr><th colspan="3">Co-Curricular Activities</th><th colspan="3">Attendance</th></tr>
+        <tr><th>Subject(s)</th><th>Working Days</th><th>Total Present</th><th>Working Days</th><th>Present</th><th>Attendance %</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>\u2014</td>
+          <td>{{ total_working_days }}</td>
+          <td>{{ present_days }}</td>
+          <td>{{ total_working_days }}</td>
+          <td>{{ present_days }}</td>
+          <td>{{ '%.1f' % ((present_days / total_working_days * 100) if total_working_days > 0 else 0) }}%</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="result-bar">
+    <div class="res-word {{ 'pass' if result_status=='Passed' else 'fail' }}">{{ result_status | upper }}</div>
+    <div class="res-stats">
+      <span>Total: <strong>{{ total_obtained }}/{{ total_full }}</strong></span>
+      <span>Percentage: <strong>{{ total_pct }}%</strong></span>
+      <span>CGPA: <strong>{{ '%.2f' % overall_gpa }}</strong></span>
+      <span>Grade: <strong>{{ overall_grade }}</strong></span>
+    </div>
+  </div>
+  <div class="sig-row">
+    <div class="sig-box"><div class="sig-line">Class Teacher</div></div>
+    <div class="sig-box"><div class="sig-line">Date of Publication: {{ print_date }}</div></div>
+    <div class="sig-box"><div class="sig-line">Principal's Signature</div></div>
+  </div>
+</div>
+</body>
+</html>

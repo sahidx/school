@@ -12,6 +12,7 @@ from sqlalchemy import or_
 import re
 import secrets
 import string
+import base64
 from datetime import datetime
 
 students_bp = Blueprint('students', __name__)
@@ -854,3 +855,94 @@ def get_my_batches():
         
     except Exception as e:
         return error_response(f'Failed to get batches: {str(e)}', 500)
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# PHOTO UPLOAD
+# ──────────────────────────────────────────────────────────────────────────────
+
+@students_bp.route('/<int:student_id>/photo', methods=['PUT', 'POST'])
+@login_required
+def upload_student_photo(student_id):
+    """Upload or update a student profile photo.
+    Accepts multipart/form-data with 'photo' file OR JSON { "photo": "<base64 data URI>" }
+    """
+    try:
+        current_user = get_current_user()
+        if not current_user:
+            return error_response('Not authenticated', 401)
+
+        student = User.query.get(student_id)
+        if not student or student.role != UserRole.STUDENT:
+            return error_response('Student not found', 404)
+
+        # Only teacher/super_user OR the student themselves
+        is_self = (current_user.id == student_id)
+        is_staff = current_user.role in (UserRole.TEACHER, UserRole.SUPER_USER)
+        if not is_self and not is_staff:
+            return error_response('Permission denied', 403)
+
+        # ── Case 1: file upload ──────────────────────────────────────────────
+        if 'photo' in request.files:
+            file = request.files['photo']
+            if file.filename == '':
+                return error_response('No file selected', 400)
+            allowed = {'jpg', 'jpeg', 'png', 'gif', 'webp'}
+            ext = file.filename.rsplit('.', 1)[-1].lower() if '.' in file.filename else ''
+            if ext not in allowed:
+                return error_response('File type not allowed', 400)
+            mime = f'image/{ext}' if ext != 'jpg' else 'image/jpeg'
+            raw = file.read()
+            if len(raw) > 5 * 1024 * 1024:
+                return error_response('File too large (max 5 MB)', 400)
+            data_uri = f'data:{mime};base64,{base64.b64encode(raw).decode()}'
+            student.profile_image = data_uri
+
+        # ── Case 2: base64 JSON body ─────────────────────────────────────────
+        elif request.is_json:
+            body = request.get_json(silent=True) or {}
+            photo = body.get('photo', '')
+            if not photo:
+                return error_response('No photo data provided', 400)
+            if not photo.startswith('data:image/'):
+                return error_response('Invalid photo format', 400)
+            # Rough size guard: base64 is ~1.37x raw
+            if len(photo) > 7 * 1024 * 1024:
+                return error_response('File too large (max 5 MB)', 400)
+            student.profile_image = photo
+
+        else:
+            return error_response('No photo provided', 400)
+
+        db.session.commit()
+        return success_response('Photo updated', {'profile_image': student.profile_image[:80] + '...'})
+
+    except Exception as e:
+        db.session.rollback()
+        return error_response(f'Failed to upload photo: {str(e)}', 500)
+
+
+@students_bp.route('/<int:student_id>/photo', methods=['DELETE'])
+@login_required
+def delete_student_photo(student_id):
+    """Remove a student's profile photo."""
+    try:
+        current_user = get_current_user()
+        if not current_user:
+            return error_response('Not authenticated', 401)
+
+        student = User.query.get(student_id)
+        if not student or student.role != UserRole.STUDENT:
+            return error_response('Student not found', 404)
+
+        is_staff = current_user.role in (UserRole.TEACHER, UserRole.SUPER_USER)
+        if not is_staff:
+            return error_response('Permission denied', 403)
+
+        student.profile_image = None
+        db.session.commit()
+        return success_response('Photo removed')
+
+    except Exception as e:
+        db.session.rollback()
+        return error_response(f'Failed to remove photo: {str(e)}', 500)

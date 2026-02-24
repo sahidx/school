@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Student List{% if selected_class %} – {{ selected_class.name }}{% endif %}</title>
+  <style>
+    /* ── Base ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Times New Roman', Times, serif; background: #f5f5f5; color: #111; }
+
+    /* ── Screen controls ── */
+    .screen-only {
+      background: #fff;
+      padding: 20px 24px;
+      border-bottom: 1px solid #ddd;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+    }
+    .screen-only label { font-family: Arial, sans-serif; font-size: 14px; font-weight: 600; margin-right: 6px; }
+    .screen-only select, .screen-only button {
+      font-family: Arial, sans-serif;
+      font-size: 14px;
+      padding: 8px 14px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      cursor: pointer;
+    }
+    .screen-only button {
+      background: #1a6b3c; color: #fff; border: none; font-weight: 600;
+    }
+    .screen-only button:hover { background: #145530; }
+    .screen-only .btn-print { background: #b8860b; }
+    .screen-only .btn-print:hover { background: #9a6e08; }
+    .screen-only .btn-admit { background: #1150a0; }
+    .screen-only .btn-admit:hover { background: #0d3f80; }
+
+    /* ── Page wrapper ── */
+    .page {
+      max-width: 1100px;
+      margin: 24px auto;
+      background: #fff;
+      border: 4px solid #b8860b;
+      padding: 6px;
+    }
+    .page-inner {
+      border: 1.5px solid #b8860b;
+      padding: 20px 28px 28px;
+    }
+
+    /* ── Header ── */
+    .school-header { text-align: center; border-bottom: 2px solid #b8860b; padding-bottom: 12px; margin-bottom: 14px; }
+    .school-name { font-size: 26px; font-weight: bold; letter-spacing: 1px; color: #1a1a1a; text-transform: uppercase; }
+    .school-address { font-size: 13px; color: #444; margin-top: 3px; }
+    .school-phone { font-size: 12px; color: #666; margin-top: 2px; }
+    .doc-title {
+      display: inline-block;
+      margin: 10px auto 12px;
+      border: 2px solid #b8860b;
+      background: #b8860b;
+      color: #fff;
+      font-size: 15px;
+      font-weight: bold;
+      letter-spacing: 2px;
+      padding: 5px 28px;
+      text-transform: uppercase;
+    }
+    .batch-info { font-size: 13px; color: #333; margin-bottom: 14px; text-align: center; }
+    .batch-info span { display: inline-block; margin: 0 14px; }
+
+    /* ── Table ── */
+    .list-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    .list-table thead tr { background: #1a3a6b; color: #fff; }
+    .list-table thead th {
+      padding: 9px 8px;
+      text-align: center;
+      font-size: 12px;
+      letter-spacing: 0.5px;
+      white-space: nowrap;
+    }
+    .list-table tbody tr:nth-child(even) { background: #fafaf5; }
+    .list-table tbody tr:hover { background: #fffbe6; }
+    .list-table td {
+      padding: 7px 8px;
+      border: 1px solid #ddd;
+      vertical-align: middle;
+    }
+    .list-table td.center { text-align: center; }
+    .list-table td.bold { font-weight: bold; }
+    .photo-cell { width: 54px; text-align: center; }
+    .photo-cell img {
+      width: 44px; height: 54px;
+      object-fit: cover;
+      border: 1px solid #bbb;
+      border-radius: 2px;
+      display: block;
+      margin: auto;
+    }
+    .photo-placeholder {
+      width: 44px; height: 54px;
+      border: 1px dashed #bbb;
+      border-radius: 2px;
+      background: #eee;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: auto;
+      font-size: 20px;
+      color: #aaa;
+    }
+
+    /* ── Footer ── */
+    .sig-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 20px;
+      margin-top: 36px;
+      padding-top: 8px;
+    }
+    .sig-box { text-align: center; }
+    .sig-line { border-top: 1px solid #333; padding-top: 5px; font-size: 12px; color: #444; margin-top: 28px; }
+    .summary-bar {
+      background: #1a3a6b;
+      color: #fff;
+      font-size: 12px;
+      padding: 7px 14px;
+      margin-top: 6px;
+      display: flex;
+      gap: 24px;
+    }
+    .print-note { font-size: 11px; color: #888; margin-top: 10px; text-align: right; }
+
+    /* ── Print ── */
+    @media print {
+      body { background: #fff; }
+      .screen-only { display: none !important; }
+      .page { max-width: 100%; margin: 0; border: 4px solid #b8860b; }
+      .list-table tbody tr:hover { background: inherit; }
+      thead { display: table-header-group; }
+      tfoot { display: table-footer-group; }
+      tr { page-break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Screen-only controls ── -->
+<div class="screen-only">
+  <div>
+    <label>Select Class:</label>
+    <select id="classSelect" onchange="changeClass()">
+      <option value="">-- Choose Class --</option>
+      {% for c in classes %}
+      <option value="{{ c.id }}" {% if class_id == c.id %}selected{% endif %}>{{ c.name }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  {% if selected_class %}
+  <button class="btn-print" onclick="window.print()">🖨 Print List</button>
+  <button class="btn-admit" onclick="window.location.href='/students/admit-cards?class_id={{ class_id }}'">🪪 Admit Cards</button>
+  {% endif %}
+</div>
+
+<!-- ── Main Page ── -->
+<div class="page">
+  <div class="page-inner">
+
+    <!-- Header -->
+    <div class="school-header">
+      <div class="school-name">{{ school.name }}</div>
+      {% if school.address %}<div class="school-address">{{ school.address }}</div>{% endif %}
+      {% if school.phone %}<div class="school-phone">Phone: {{ school.phone }}</div>{% endif %}
+    </div>
+    <div style="text-align:center;">
+      <span class="doc-title">Student List</span>
+    </div>
+
+    {% if selected_class %}
+    <div class="batch-info">
+      <span><strong>Class:</strong> {{ selected_class.name }}</span>
+      <span><strong>Total Students:</strong> {{ students|length }}</span>
+      <span><strong>Date:</strong> {{ print_date }}</span>
+    </div>
+
+    {% if students %}
+    <table class="list-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Photo</th>
+          <th>Student ID</th>
+          <th>Roll</th>
+          <th>Student Name</th>
+          <th>Date of Birth</th>
+          <th>Guardian Name</th>
+          <th>Guardian Phone</th>
+          <th>Admission Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for s in students %}
+        <tr>
+          <td class="center">{{ s.serial }}</td>
+          <td class="photo-cell">
+            {% if s.profile_image %}
+            <img src="{{ s.profile_image }}" alt="{{ s.full_name }}" />
+            {% else %}
+            <div class="photo-placeholder">👤</div>
+            {% endif %}
+          </td>
+          <td class="center bold">{{ s.student_id }}</td>
+          <td class="center">{{ s.roll or '—' }}</td>
+          <td class="bold">{{ s.full_name }}</td>
+          <td class="center">{{ s.date_of_birth or '—' }}</td>
+          <td>{{ s.guardian_name or '—' }}</td>
+          <td class="center">{{ s.guardian_phone or '—' }}</td>
+          <td class="center">{{ s.admission_date or '—' }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <!-- Summary bar -->
+    <div class="summary-bar">
+      <span>Total Students: <strong>{{ students|length }}</strong></span>
+      <span>With Photo: <strong>{{ students|selectattr('profile_image')|list|length }}</strong></span>
+      <span>Without Photo: <strong>{{ students|rejectattr('profile_image')|list|length }}</strong></span>
+    </div>
+
+    <!-- Signatures -->
+    <div class="sig-row">
+      <div class="sig-box"><div class="sig-line">Class Teacher</div></div>
+      <div class="sig-box"><div class="sig-line">Head Teacher</div></div>
+      <div class="sig-box"><div class="sig-line">Principal</div></div>
+    </div>
+    <div class="print-note">Printed on {{ print_date }}</div>
+
+    {% else %}
+    <div style="text-align:center; padding: 40px; color:#888; font-size:15px;">
+      No students found in this class.
+    </div>
+    {% endif %}
+
+    {% else %}
+    <div style="text-align:center; padding: 60px; color:#888; font-size:15px;">
+      Please select a class from the dropdown above to view the student list.
+    </div>
+    {% endif %}
+
+  </div>
+</div>
+
+<script>
+function changeClass() {
+  const id = document.getElementById('classSelect').value;
+  if (id) window.location.href = '/students/list-print?class_id=' + id;
+}
+</script>
+</body>
+</html>

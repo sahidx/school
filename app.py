@@ -52,6 +52,7 @@ def create_app(config_name=None):
     from routes.debug import debug_bp
     from routes.documents import documents_bp
     from routes.database import database_bp
+    from routes.school import school_bp
     
     app.register_blueprint(auth_bp, url_prefix='/api/auth')
     app.register_blueprint(users_bp, url_prefix='/api/users')
@@ -72,6 +73,7 @@ def create_app(config_name=None):
     app.register_blueprint(debug_bp, url_prefix='/api/debug')
     app.register_blueprint(documents_bp, url_prefix='/api/documents')
     app.register_blueprint(database_bp, url_prefix='/api/database')
+    app.register_blueprint(school_bp)  # routes define /api/school/...
     
     # Register template routes
     from routes.templates import templates_bp
@@ -170,7 +172,7 @@ if __name__ == '__main__':
     port = int(os.environ.get('PORT', 8001))
     debug = os.environ.get('DEBUG', 'False').lower() == 'true'
     
-    print(f"Starting SmartGardenHub on port {port}")
+    print(f"Starting Modern Ideal Non Government Primary School on port {port}")
     print(f"Debug mode: {debug}")
     print(f"Environment: {os.environ.get('FLASK_ENV', 'development')}")
     

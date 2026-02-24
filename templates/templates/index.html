@@ -1,337 +1,523 @@
 {% extends "base.html" %}
-
-{% block title %}GS Student Nursing Center by Golam Sarowar Sir - Mathematics & Science Coaching Center{% endblock %}
-
+{% block title %}Modern Ideal Non Government Primary School{% endblock %}
+{% block extra_head %}
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--primary:#1a56db;--primary-dark:#1238a0;--primary-light:#e8f0fe;--gold:#f59e0b;--gold-light:#fef3c7;--green:#059669;--dark:#1e293b;--gray:#64748b;--light:#f1f5f9;--gradient:linear-gradient(135deg,#1a56db 0%,#0e3fa0 40%,#0a2d7a 100%)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Poppins',sans-serif;background:#f8fafc;color:var(--dark);overflow-x:hidden}
+.bn{font-family:'Hind Siliguri','Poppins',sans-serif}
+.top-bar{background:#0f172a;color:#cbd5e1;font-size:12.5px;padding:7px 0;border-bottom:2px solid var(--gold)}
+.top-bar .wrap{max-width:1280px;margin:0 auto;padding:0 20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px}
+.top-bar i{margin-right:5px;color:var(--gold)}.top-bar a{color:#cbd5e1;text-decoration:none;transition:.2s}.top-bar a:hover{color:#fff}
+.login-btn{background:var(--gold);color:#1e293b!important;padding:4px 16px;border-radius:20px;font-weight:700;font-size:12px;margin-left:12px}
+.school-header{background:#fff;box-shadow:0 3px 20px rgba(0,0,0,.1);padding:16px 0;position:sticky;top:0;z-index:1000}
+.school-header .wrap{max-width:1280px;margin:0 auto;padding:0 24px;display:flex;align-items:center;gap:18px}
+.logo-circle{width:72px;height:72px;background:var(--gradient);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 4px 16px rgba(26,86,219,.4);animation:pulse-logo 3s ease-in-out infinite}
+@keyframes pulse-logo{0%,100%{box-shadow:0 4px 16px rgba(26,86,219,.4)}50%{box-shadow:0 4px 28px rgba(26,86,219,.7)}}
+.logo-circle img{width:52px;height:52px;border-radius:50%;object-fit:cover}
+.school-info-head h1{font-size:clamp(14px,2.2vw,21px);font-weight:800;color:var(--primary);line-height:1.2}
+.school-info-head .estd-line{font-size:11px;color:#94a3b8;font-weight:500;letter-spacing:.5px}
+.school-info-head .tagline{font-size:12px;color:var(--gray);margin-top:2px}
+.school-nav{background:var(--primary)}.school-nav .wrap{max-width:1280px;margin:0 auto;padding:0 20px;display:flex;align-items:center;flex-wrap:wrap}
+.school-nav a{color:rgba(255,255,255,.85);text-decoration:none;padding:13px 14px;font-size:13.5px;font-weight:500;display:inline-flex;align-items:center;gap:6px;transition:.2s}
+.school-nav a:hover,.school-nav a.active{color:#fff;background:rgba(255,255,255,.18)}
+.dropdown{position:relative}.dropdown-menu{display:none;position:absolute;top:100%;left:0;background:#fff;min-width:210px;border-radius:0 0 10px 10px;box-shadow:0 10px 30px rgba(0,0,0,.15);z-index:2000}
+.dropdown-menu a{color:var(--dark)!important;padding:11px 20px!important;background:transparent!important;display:block;font-size:13px;transition:.2s}
+.dropdown-menu a:hover{background:var(--primary-light)!important;color:var(--primary)!important}
+.dropdown:hover .dropdown-menu{display:block}
+.ticker-wrap{background:#1e3a5f;overflow:hidden;white-space:nowrap;border-bottom:3px solid var(--gold)}
+.ticker-inner{display:inline-flex;animation:ticker 50s linear infinite}.ticker-inner:hover{animation-play-state:paused}
+.ticker-item{display:inline-block;padding:9px 48px;color:#e2e8f0;font-size:13px;font-weight:500}
+.ticker-item i{color:var(--gold);margin-right:8px}.ticker-sep{color:var(--gold);margin:0 20px;padding:9px 0}
+@keyframes ticker{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.hero{background:var(--gradient);min-height:420px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;padding:64px 20px}
+.hero-p span{position:absolute;border-radius:50%;animation:fp var(--d) ease-in-out infinite}
+.hero-p span:nth-child(1){width:180px;height:180px;background:rgba(255,255,255,.05);top:-50px;right:8%;--d:9s}
+.hero-p span:nth-child(2){width:120px;height:120px;background:rgba(255,255,255,.06);bottom:-30px;left:6%;--d:7s;animation-delay:2s}
+.hero-p span:nth-child(3){width:60px;height:60px;background:rgba(245,158,11,.15);top:35%;right:18%;--d:6s;animation-delay:1s}
+.hero-p span:nth-child(4){width:90px;height:90px;background:rgba(255,255,255,.04);top:20%;left:12%;--d:11s;animation-delay:3s}
+@keyframes fp{0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(-25px) rotate(12deg)}}
+.hero-content{text-align:center;color:#fff;position:relative;z-index:1;max-width:800px}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.15);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.25);padding:7px 20px;border-radius:30px;font-size:12.5px;font-weight:600;margin-bottom:20px;animation:fid .8s ease both}
+@keyframes fid{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:translateY(0)}}
+.hero-content h2{font-size:clamp(22px,4vw,44px);font-weight:900;line-height:1.2;margin-bottom:10px;text-shadow:0 2px 12px rgba(0,0,0,.3);animation:fiu .9s ease .1s both}
+.hero-content .bn-title{font-family:'Hind Siliguri',sans-serif;font-size:clamp(15px,2.2vw,22px);font-weight:600;color:rgba(255,255,255,.85);margin-bottom:10px;animation:fiu .9s ease .2s both}
+.hero-content p{font-size:15px;color:rgba(255,255,255,.8);margin-bottom:28px;animation:fiu .9s ease .3s both}
+@keyframes fiu{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.hero-btns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;animation:fiu .9s ease .4s both}
+.hero-btn{padding:14px 32px;border-radius:50px;font-weight:700;font-size:14px;text-decoration:none;display:inline-flex;align-items:center;gap:8px;transition:all .3s;border:2px solid transparent}
+.hero-btn-gold{background:var(--gold);color:#1e293b;box-shadow:0 8px 24px rgba(245,158,11,.5);animation:pb 2.5s infinite}
+.hero-btn-gold:hover{background:#d97706;transform:translateY(-3px)}
+@keyframes pb{0%,100%{box-shadow:0 8px 24px rgba(245,158,11,.4)}50%{box-shadow:0 8px 36px rgba(245,158,11,.8)}}
+.hero-btn-out{background:transparent;color:#fff;border-color:rgba(255,255,255,.5)}.hero-btn-out:hover{background:rgba(255,255,255,.15);transform:translateY(-3px)}
+.stats-strip{background:#fff;box-shadow:0 4px 20px rgba(0,0,0,.08)}.stats-inner{max-width:1280px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr)}
+@media(max-width:900px){.stats-inner{grid-template-columns:repeat(2,1fr)}}
+.stat-box{padding:22px 20px;text-align:center;border-right:1px solid #e2e8f0;transition:.3s}.stat-box:last-child{border-right:none}.stat-box:hover{background:var(--primary-light)}
+.stat-label{font-size:11.5px;color:#64748b;font-weight:500;display:flex;align-items:center;justify-content:center;gap:5px;margin-bottom:6px}.stat-label i{color:var(--primary)}
+.stat-value{font-size:clamp(20px,3vw,28px);font-weight:800;color:var(--primary)}
+.section{padding:60px 20px}.section-alt{background:#fff}.section-inner{max-width:1280px;margin:0 auto}
+.section-title{text-align:center;margin-bottom:44px}.section-title h2{font-size:clamp(20px,3.5vw,30px);font-weight:700;color:var(--dark)}
+.section-title p{font-size:14px;color:var(--gray);margin-top:6px}
+.section-title .line{width:60px;height:4px;background:linear-gradient(90deg,var(--gold),var(--primary));margin:12px auto 0;border-radius:2px}
+.features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:24px}
+.feature-card{background:#fff;border-radius:16px;padding:32px 24px;text-align:center;box-shadow:0 2px 20px rgba(0,0,0,.07);border:1px solid #e2e8f0;transition:all .35s}
+.feature-card:hover{transform:translateY(-8px);box-shadow:0 16px 40px rgba(26,86,219,.18);border-color:var(--primary)}
+.feature-icon{width:76px;height:76px;background:var(--gradient);border-radius:20px;display:flex;align-items:center;justify-content:center;margin:0 auto 18px;transition:.3s}
+.feature-card:hover .feature-icon{transform:rotate(8deg) scale(1.1)}.feature-icon i{color:#fff;font-size:28px}
+.feature-card h3{font-size:16px;font-weight:700;color:var(--primary);margin-bottom:10px}.feature-card p{font-size:13.5px;color:#64748b;line-height:1.7}
+.nr-grid{display:grid;grid-template-columns:1fr 1fr;gap:28px}
+@media(max-width:768px){.nr-grid{grid-template-columns:1fr}}
+.board-card{background:#fff;border-radius:16px;padding:28px;box-shadow:0 2px 20px rgba(0,0,0,.07);border:1px solid #e2e8f0}
+.board-title{font-size:17px;font-weight:700;color:var(--dark);margin-bottom:18px;display:flex;align-items:center;gap:10px}
+.board-title i{color:var(--primary);font-size:20px}
+.board-title::after{content:'';flex:1;height:3px;background:linear-gradient(90deg,var(--gold),transparent);border-radius:2px;margin-left:10px}
+.n-item{padding:12px 0;border-bottom:1px solid #f1f5f9;display:flex;align-items:flex-start;gap:12px}
+.n-item:last-child{border-bottom:none}
+.n-badge{font-size:10.5px;font-weight:700;padding:3px 10px;border-radius:4px;white-space:nowrap;flex-shrink:0;color:#fff}
+.badge-urgent{background:#dc2626}.badge-high{background:#d97706}.badge-normal{background:var(--primary)}.badge-low{background:#64748b}
+.n-text{font-size:13.5px;color:var(--dark);line-height:1.5}
+.n-date{font-size:11px;color:#94a3b8;margin-top:2px}
+.view-all{display:block;text-align:right;color:var(--primary);font-size:13px;font-weight:600;text-decoration:none;margin-top:14px;transition:.2s}.view-all:hover{color:var(--primary-dark)}
+.result-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px}
+.r-card{background:var(--gradient);border-radius:16px;padding:28px 20px;color:#fff;text-align:center;transition:all .3s;cursor:pointer;text-decoration:none;display:block}
+.r-card:hover{transform:translateY(-6px);box-shadow:0 16px 40px rgba(26,86,219,.4)}
+.r-card i{font-size:34px;margin-bottom:12px;color:var(--gold)}
+.r-card h3{font-size:17px;font-weight:700;margin-bottom:6px}.r-card p{font-size:12.5px;opacity:.85}
+.r-card .rc{font-size:22px;font-weight:800;color:var(--gold);margin-top:8px}
+.teachers-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:24px}
+.t-card{background:#fff;border-radius:16px;padding:28px 20px;text-align:center;box-shadow:0 2px 20px rgba(0,0,0,.07);border:1px solid #e2e8f0;transition:.3s}
+.t-card:hover{transform:translateY(-6px);box-shadow:0 12px 32px rgba(26,86,219,.15)}
+.t-avatar{width:86px;height:86px;border-radius:50%;background:var(--gradient);display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:32px;color:#fff;overflow:hidden;border:4px solid var(--gold-light)}
+.t-avatar img{width:100%;height:100%;object-fit:cover}
+.t-card h4{font-size:15px;font-weight:700;color:var(--dark);margin-bottom:4px}
+.t-role{font-size:12px;color:var(--primary);font-weight:600;background:var(--primary-light);padding:3px 10px;border-radius:20px;display:inline-block;margin-bottom:6px}
+.t-sub{font-size:12.5px;color:var(--gray)}
+.gallery-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media(max-width:600px){.gallery-grid{grid-template-columns:repeat(2,1fr)}}
+.g-item{position:relative;border-radius:12px;overflow:hidden;aspect-ratio:4/3;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.1)}
+.g-item img{width:100%;height:100%;object-fit:cover;transition:.4s}.g-item:hover img{transform:scale(1.1)}
+.g-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(26,86,219,.85),transparent);opacity:0;transition:.3s;display:flex;align-items:flex-end;padding:14px}
+.g-item:hover .g-overlay{opacity:1}.g-overlay span{color:#fff;font-size:13px;font-weight:600}
+.search-box{background:#fff;border-radius:16px;padding:32px;box-shadow:0 4px 24px rgba(0,0,0,.1);max-width:720px;margin:0 auto}
+.search-box h3{font-size:20px;font-weight:700;color:var(--dark);margin-bottom:20px;text-align:center}
+.s-form{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:12px;align-items:end}
+@media(max-width:640px){.s-form{grid-template-columns:1fr 1fr}}
+.fg label{font-size:12px;font-weight:600;color:var(--gray);margin-bottom:5px;display:block}
+.fg select,.fg input{width:100%;padding:10px 14px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13.5px;transition:.2s;outline:none;background:#fff}
+.fg select:focus,.fg input:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(26,86,219,.1)}
+.btn-srch{background:var(--primary);color:#fff;padding:11px 22px;border-radius:8px;border:none;font-size:14px;font-weight:600;cursor:pointer;transition:.2s;white-space:nowrap}
+.btn-srch:hover{background:var(--primary-dark);transform:translateY(-1px)}
+.site-footer{background:#0f172a;color:#94a3b8;padding:52px 20px 24px}
+.footer-inner{max-width:1280px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:36px}
+.footer-col h4{color:#fff;font-size:15px;font-weight:700;margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid var(--gold);display:inline-block}
+.footer-col p{font-size:13px;line-height:1.8}
+.footer-col ul{list-style:none}.footer-col ul li{margin-bottom:10px}
+.footer-col ul li a{color:#94a3b8;text-decoration:none;font-size:13px;display:flex;align-items:center;gap:8px;transition:.2s}.footer-col ul li a:hover{color:var(--gold)}
+.footer-col ul li a i{color:var(--gold);font-size:10px}
+.fc-list li{display:flex;gap:10px;font-size:13px;margin-bottom:10px}.fc-list li i{color:var(--gold);margin-top:2px;flex-shrink:0}
+.f-social{display:flex;gap:10px;margin-top:14px}
+.f-social a{width:36px;height:36px;background:rgba(255,255,255,.08);color:#94a3b8;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:.2s;font-size:15px;text-decoration:none}
+.f-social a:hover{background:var(--primary);color:#fff}
+.f-bottom{border-top:1px solid #1e293b;margin-top:36px;padding-top:18px;text-align:center;font-size:12px;color:#475569}
+.sml{display:inline-block;width:16px;height:16px;border:2px solid #e2e8f0;border-top-color:var(--primary);border-radius:50%;animation:spin .8s linear infinite;vertical-align:middle;margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.lb{text-align:center;padding:22px;color:#94a3b8;font-size:13px}
+.reveal{opacity:0;transform:translateY(30px);transition:all .7s ease}.reveal.visible{opacity:1;transform:translateY(0)}
+</style>
+{% endblock %}
 {% block content %}
-<div class="min-h-screen bg-gradient-to-br from-blue-600 via-blue-700 to-blue-800">
-    <!-- Hero Section -->
-    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <!-- Service Icons Row -->
-        <div class="flex justify-center mb-12">
-            <div class="bg-white rounded-2xl p-4 shadow-xl">
-                <div class="flex space-x-4">
-                    <div class="bg-blue-600 p-4 rounded-xl">
-                        <i class="fas fa-book text-white text-xl"></i>
-                    </div>
-                    <div class="bg-green-600 p-4 rounded-xl">
-                        <i class="fas fa-users text-white text-xl"></i>
-                    </div>
-                    <div class="bg-orange-600 p-4 rounded-xl">
-                        <i class="fas fa-clock text-white text-xl"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
 
-        <!-- Main Title -->
-        <div class="text-center text-white mb-16">
-            <h1 class="text-5xl md:text-6xl font-bold mb-6">GS Student Nursing Center</h1>
-            <h2 class="text-2xl md:text-3xl font-semibold text-yellow-300 mb-4">by Golam Sarowar Sir</h2>
-            <p class="text-lg text-blue-300">Excellence in Mathematics & Science Education for students from class 6 to 10.</p>
-        </div>
-
-        <!-- Service Cards -->
-        <div class="grid md:grid-cols-3 gap-8 mb-16">
-            <!-- Mathematics Excellence -->
-            <div class="bg-white rounded-2xl p-8 shadow-xl text-center hover:transform hover:scale-105 transition-all duration-300">
-                <div class="bg-blue-600 p-4 rounded-xl w-16 h-16 mx-auto mb-6 flex items-center justify-center">
-                    <i class="fas fa-calculator text-white text-2xl"></i>
-                </div>
-                <h3 class="text-xl font-bold text-gray-800 mb-4">Mathematics Excellence</h3>
-                <p class="text-gray-600">Special training in mathematics with excellence and simplicity</p>
-            </div>
-
-            <!-- Science Education -->
-            <div class="bg-white rounded-2xl p-8 shadow-xl text-center hover:transform hover:scale-105 transition-all duration-300">
-                <div class="bg-green-600 p-4 rounded-xl w-16 h-16 mx-auto mb-6 flex items-center justify-center">
-                    <i class="fas fa-flask text-white text-2xl"></i>
-                </div>
-                <h3 class="text-xl font-bold text-gray-800 mb-4">Science Education</h3>
-                <p class="text-gray-600">Complete courses in Physics, Chemistry and Biology</p>
-            </div>
-
-            <!-- Goal Achievement -->
-            <div class="bg-white rounded-2xl p-8 shadow-xl text-center hover:transform hover:scale-105 transition-all duration-300">
-                <div class="bg-orange-600 p-4 rounded-xl w-16 h-16 mx-auto mb-6 flex items-center justify-center">
-                    <i class="fas fa-trophy text-white text-2xl"></i>
-                </div>
-                <h3 class="text-xl font-bold text-gray-800 mb-4">Goal Achievement</h3>
-                <p class="text-gray-600">Guarantee of highest results in examinations</p>
-            </div>
-        </div>
-
-        <!-- Top Performers of the Month Section -->
-        <div id="topPerformersSection" class="mb-16" style="display: none;">
-            <div class="text-center mb-8">
-                <h2 class="text-3xl font-bold text-white mb-2">
-                    <i class="fas fa-star text-yellow-300 mr-2"></i>
-                    Top Performers of the Month
-                </h2>
-                <p class="text-blue-200">Excellence Recognized</p>
-            </div>
-            
-            <div id="topPerformersContainer" class="space-y-8">
-                <!-- Featured exam results will be inserted here dynamically -->
-            </div>
-        </div>
-
-        <!-- Call to Action -->
-        <div class="text-center">
-            <p class="text-xl text-white mb-8">Ready to start your journey in Mathematics & Science?</p>
-            <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                <button onclick="openLoginModal('student')" class="bg-green-600 hover:bg-green-700 text-white px-8 py-4 rounded-xl font-semibold text-lg shadow-xl transition-all duration-300 transform hover:scale-105">
-                    <i class="fas fa-user-graduate mr-3"></i>Student Login
-                </button>
-                <button onclick="openLoginModal('teacher')" class="bg-white text-blue-600 px-8 py-4 rounded-xl font-semibold text-lg shadow-xl transition-all duration-300 transform hover:scale-105 border-2 border-white hover:bg-blue-50">
-                    <i class="fas fa-chalkboard-teacher mr-3"></i>Teacher Login
-                </button>
-            </div>
-        </div>
+<!-- TOP BAR -->
+<div class="top-bar">
+  <div class="wrap">
+    <div class="left">
+      <span><i class="fas fa-envelope"></i><span id="sch-email">info@modernideal.edu.bd</span></span>
+      <span style="margin-left:18px"><i class="fas fa-phone"></i><span id="sch-phone">—</span></span>
     </div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <a id="fb-link" href="#"><i class="fab fa-facebook-f"></i></a>
+      <a id="yt-link" href="#"><i class="fab fa-youtube"></i></a>
+      <a href="{{ url_for('templates.login_page') }}" class="login-btn"><i class="fas fa-user"></i> Login</a>
+    </div>
+  </div>
 </div>
 
-<script>
-// Load top performers on page load
-document.addEventListener('DOMContentLoaded', function() {
-    loadTopPerformers();
-});
-
-async function loadTopPerformers() {
-    try {
-        const response = await fetch('/api/monthly-exams/homepage-top-performers');
-        const data = await response.json();
-        
-        if (data.success && data.data.featured_results && data.data.featured_results.length > 0) {
-            const container = document.getElementById('topPerformersContainer');
-            const section = document.getElementById('topPerformersSection');
-            
-            container.innerHTML = '';
-            
-            data.data.featured_results.forEach(exam => {
-                const examCard = document.createElement('div');
-                examCard.className = 'bg-white rounded-2xl shadow-xl p-6';
-                
-                let studentsHTML = '';
-                exam.top_students.forEach((student, index) => {
-                    const medalEmoji = index === 0 ? '🥇' : (index === 1 ? '🥈' : '🥉');
-                    const bgColor = index === 0 ? 'bg-yellow-50' : (index === 1 ? 'bg-gray-50' : 'bg-orange-50');
-                    
-                    studentsHTML += `
-                        <div class="${bgColor} rounded-xl p-4 flex items-center justify-between">
-                            <div class="flex items-center space-x-4">
-                                <div class="text-4xl">${medalEmoji}</div>
-                                <div>
-                                    <div class="font-bold text-gray-800 text-lg">${student.student_name}</div>
-                                    <div class="text-sm text-gray-600">Roll: ${student.roll_number || 'N/A'}</div>
-                                </div>
-                            </div>
-                            <div class="text-right">
-                                <div class="text-2xl font-bold text-blue-600">${student.percentage}%</div>
-                                <div class="text-sm text-gray-600">${student.total_marks}/${student.total_possible}</div>
-                                <div class="text-sm font-semibold text-green-600">Grade: ${student.grade}</div>
-                            </div>
-                        </div>
-                    `;
-                });
-                
-                examCard.innerHTML = `
-                    <div class="mb-4">
-                        <h3 class="text-2xl font-bold text-gray-800">${exam.exam_title}</h3>
-                        <p class="text-gray-600">${exam.batch_name} - ${exam.month}/${exam.year}</p>
-                    </div>
-                    <div class="space-y-3">
-                        ${studentsHTML}
-                    </div>
-                `;
-                
-                container.appendChild(examCard);
-            });
-            
-            // Show the section
-            section.style.display = 'block';
-        }
-    } catch (error) {
-        console.error('Failed to load top performers:', error);
-    }
-}
-</script>
-
-<!-- Login Modal -->
-<div id="loginModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
-    <div class="flex items-center justify-center min-h-screen p-4">
-        <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-8">
-            <div class="text-center mb-6">
-                <h2 id="modalTitle" class="text-2xl font-bold text-gray-800">Login</h2>
-                <p class="text-gray-600 mt-2">Enter your credentials to continue</p>
-            </div>
-            <form id="loginForm" onsubmit="return handleLogin(event)">
-                <div class="mb-4">
-                    <label class="block text-gray-700 text-sm font-bold mb-2">Phone Number</label>
-                    <input type="tel" id="phoneNumber" name="phoneNumber" required 
-                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500" 
-                           placeholder="Enter phone number">
-                </div>
-                <div class="mb-6">
-                    <label class="block text-gray-700 text-sm font-bold mb-2">Password</label>
-                    <input type="password" id="password" name="password" required 
-                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500" 
-                           placeholder="Enter password">
-                </div>
-                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-semibold transition-all duration-300">
-                    Login
-                </button>
-            </form>
-            <button onclick="closeLoginModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
-                <i class="fas fa-times text-xl"></i>
-            </button>
-        </div>
+<!-- SCHOOL HEADER -->
+<div class="school-header">
+  <div class="wrap">
+    <div class="logo-circle">
+      <img id="sch-logo" src="" alt="" style="display:none" onerror="this.style.display='none';document.getElementById('logo-icon').style.display='flex'">
+      <i class="fas fa-graduation-cap" id="logo-icon" style="color:#fff;font-size:30px"></i>
     </div>
+    <div class="school-info-head">
+      <div class="estd-line">ESTD: <span id="sch-estd">2005</span> &nbsp;|&nbsp; EIIN: <span id="sch-eiin">—</span></div>
+      <h1 id="sch-name">Modern Ideal Non Government Primary School</h1>
+      <div class="tagline bn" id="sch-tagline">মডার্ন আইডিয়াল নন-গভর্নমেন্ট প্রাইমারি স্কুল | প্রথম শ্রেণি থেকে পঞ্চম শ্রেণি</div>
+    </div>
+  </div>
 </div>
 
+<!-- NAVIGATION -->
+<div class="school-nav">
+  <div class="wrap">
+    <a href="/" class="active"><i class="fas fa-home"></i> Home</a>
+    <div class="dropdown">
+      <a href="#about"><i class="fas fa-info-circle"></i> About <i class="fas fa-chevron-down" style="font-size:9px"></i></a>
+      <div class="dropdown-menu">
+        <a href="#about">School Overview</a>
+        <a href="#about">Mission &amp; Vision</a>
+        <a href="#teachers">Our Teachers</a>
+      </div>
+    </div>
+    <div class="dropdown">
+      <a href="#academic"><i class="fas fa-book-open"></i> Academic <i class="fas fa-chevron-down" style="font-size:9px"></i></a>
+      <div class="dropdown-menu">
+        <a href="#academic">Class 1 – 5</a>
+        <a href="#academic">Syllabus</a>
+        <a href="#academic">Activities</a>
+      </div>
+    </div>
+    <div class="dropdown">
+      <a href="#results"><i class="fas fa-chart-bar"></i> Results <i class="fas fa-chevron-down" style="font-size:9px"></i></a>
+      <div class="dropdown-menu">
+        <a href="/results">All Results</a>
+        <a href="/results?term=1st_term">1st Term Results</a>
+        <a href="/results?term=2nd_term">2nd Term Results</a>
+        <a href="/results/transcript">Individual Transcript</a>
+      </div>
+    </div>
+    <a href="#notices"><i class="fas fa-bullhorn"></i> Notice Board</a>
+    <a href="#gallery"><i class="fas fa-images"></i> Gallery</a>
+    <a href="#contact"><i class="fas fa-envelope"></i> Contact</a>
+    <a href="{{ url_for('templates.login_page') }}" style="margin-left:auto;background:var(--gold);color:#1e293b!important;border-radius:20px;padding:10px 18px;font-weight:700">
+      <i class="fas fa-user-graduate"></i> Portal
+    </a>
+  </div>
+</div>
+
+<!-- TICKER -->
+<div class="ticker-wrap">
+  <div class="ticker-inner" id="ticker-inner">
+    <span class="ticker-item"><i class="fas fa-star"></i>Welcome to Modern Ideal Non Government Primary School</span>
+    <span class="ticker-sep">◆</span>
+    <span class="ticker-item"><i class="fas fa-bell"></i>Admissions Open for Academic Year 2026</span>
+    <span class="ticker-sep">◆</span>
+    <span class="ticker-item"><i class="fas fa-trophy"></i>Excellence in Primary Education – Class 1 to Class 5</span>
+    <span class="ticker-sep">◆</span>
+    <span class="ticker-item"><i class="fas fa-star"></i>Welcome to Modern Ideal Non Government Primary School</span>
+    <span class="ticker-sep">◆</span>
+    <span class="ticker-item"><i class="fas fa-bell"></i>Admissions Open for Academic Year 2026</span>
+    <span class="ticker-sep">◆</span>
+    <span class="ticker-item"><i class="fas fa-trophy"></i>Excellence in Primary Education – Class 1 to Class 5</span>
+  </div>
+</div>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-p"><span></span><span></span><span></span><span></span></div>
+  <div class="hero-content">
+    <div class="hero-badge"><i class="fas fa-award" style="color:var(--gold)"></i> Quality Primary Education Since <span id="hero-since">2005</span></div>
+    <h2 id="hero-title">Modern Ideal Non Government Primary School</h2>
+    <div class="bn-title bn" id="hero-title-bn">মডার্ন আইডিয়াল নন-গভর্নমেন্ট প্রাইমারি স্কুল</div>
+    <p>Nurturing Young Minds &bull; Building Bright Futures &bull; Class 1 to Class 5</p>
+    <div class="hero-btns">
+      <a href="#results" class="hero-btn hero-btn-gold"><i class="fas fa-chart-bar"></i> View Results</a>
+      <a href="{{ url_for('templates.login_page') }}" class="hero-btn hero-btn-out"><i class="fas fa-user-graduate"></i> Student Login</a>
+    </div>
+  </div>
+</div>
+
+<!-- STATS -->
+<div class="stats-strip">
+  <div class="stats-inner">
+    <div class="stat-box"><div class="stat-label"><i class="fas fa-user-graduate"></i> Total Students</div><div class="stat-value" id="stat-students">—</div></div>
+    <div class="stat-box"><div class="stat-label"><i class="fas fa-chalkboard-teacher"></i> Teachers</div><div class="stat-value" id="stat-teachers">—</div></div>
+    <div class="stat-box"><div class="stat-label"><i class="fas fa-door-open"></i> Classes</div><div class="stat-value">1 – 5</div></div>
+    <div class="stat-box"><div class="stat-label"><i class="fas fa-id-card"></i> EIIN No.</div><div class="stat-value" id="stat-eiin2" style="font-size:18px">—</div></div>
+  </div>
+</div>
+
+<!-- NOTICES + RESULTS -->
+<div class="section section-alt" id="notices">
+  <div class="section-inner">
+    <div class="nr-grid">
+      <div class="board-card reveal">
+        <div class="board-title"><i class="fas fa-bullhorn"></i> Notice Board</div>
+        <div id="notice-list"><div class="lb"><span class="sml"></span>Loading…</div></div>
+        <a class="view-all" href="#notices">View All <i class="fas fa-arrow-right"></i></a>
+      </div>
+      <div class="board-card reveal">
+        <div class="board-title"><i class="fas fa-chart-bar"></i> Published Results – ফলাফল</div>
+        <div id="result-list"><div class="lb"><span class="sml"></span>Loading…</div></div>
+        <a class="view-all" href="/results">View All Results <i class="fas fa-arrow-right"></i></a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- RESULT SEARCH -->
+<div class="section" id="results" style="background:linear-gradient(135deg,#e8f0fe,#f1f5f9)">
+  <div class="section-inner">
+    <div class="section-title">
+      <h2><i class="fas fa-search" style="color:var(--primary);margin-right:8px"></i>Find Your Result</h2>
+      <p class="bn">আপনার ফলাফল খুঁজুন</p>
+      <div class="line"></div>
+    </div>
+    <div class="search-box reveal">
+      <h3><i class="fas fa-file-alt" style="color:var(--gold);margin-right:8px"></i>Result Search</h3>
+      <div class="s-form">
+        <div class="fg"><label>Class</label><select id="s-class" onchange="loadSSections()"><option value="">-- Class --</option></select></div>
+        <div class="fg"><label>Section</label><select id="s-section"><option value="">-- All Sections --</option></select></div>
+        <div class="fg"><label>Term</label><select id="s-term"><option value="">-- Term --</option><option value="1st_term">1st Term</option><option value="2nd_term">2nd Term</option></select></div>
+        <div class="fg"><label>&nbsp;</label><button class="btn-srch" onclick="doSearch()"><i class="fas fa-search"></i> Search</button></div>
+      </div>
+      <div id="s-out" style="margin-top:16px"></div>
+    </div>
+    <div class="result-cards" style="margin-top:30px" id="term-cards"></div>
+  </div>
+</div>
+
+<!-- WHY CHOOSE -->
+<div class="section section-alt" id="academic">
+  <div class="section-inner">
+    <div class="section-title"><h2>Why Choose Our School</h2><p class="bn">কেন আমাদের বিদ্যালয় বেছে নেবেন</p><div class="line"></div></div>
+    <div class="features-grid">
+      <div class="feature-card reveal"><div class="feature-icon"><i class="fas fa-user-graduate"></i></div><h3>Quality Education</h3><p>Comprehensive curriculum from Class 1 to Class 5 with focus on academic excellence and holistic development of young learners.</p></div>
+      <div class="feature-card reveal"><div class="feature-icon"><i class="fas fa-chalkboard-teacher"></i></div><h3>Experienced Teachers</h3><p>Dedicated and qualified teachers who create a nurturing, safe learning environment for every child at every stage.</p></div>
+      <div class="feature-card reveal"><div class="feature-icon"><i class="fas fa-child"></i></div><h3>Child-Friendly Campus</h3><p>Spacious, colorful and engaging classrooms designed for young children to learn, explore, and grow safely every day.</p></div>
+      <div class="feature-card reveal"><div class="feature-icon"><i class="fas fa-palette"></i></div><h3>Creative Activities</h3><p>Art, craft, music, sports, and cultural programs to develop creativity, motor skills, and overall personality of students.</p></div>
+      <div class="feature-card reveal"><div class="feature-icon"><i class="fas fa-laptop"></i></div><h3>Digital Learning</h3><p>Modern teaching aids including computers and digital boards for interactive and engaging education in every classroom.</p></div>
+      <div class="feature-card reveal"><div class="feature-icon"><i class="fas fa-shield-alt"></i></div><h3>Safe &amp; Secure</h3><p>CCTV surveillance, secure premises, and trained staff ensuring complete safety and well-being of every student always.</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- TEACHERS -->
+<div class="section" id="teachers">
+  <div class="section-inner">
+    <div class="section-title"><h2>Our Teaching Staff</h2><p class="bn">আমাদের শিক্ষক-শিক্ষিকা মণ্ডলী</p><div class="line"></div></div>
+    <div class="teachers-grid" id="teachers-grid"><div class="lb" style="grid-column:1/-1"><span class="sml"></span>Loading staff information…</div></div>
+  </div>
+</div>
+
+<!-- GALLERY -->
+<div class="section section-alt" id="gallery">
+  <div class="section-inner">
+    <div class="section-title"><h2>Photo Gallery</h2><p>Moments from our school life</p><div class="line"></div></div>
+    <div class="gallery-grid" id="gallery-grid">
+      <div class="g-item" style="background:var(--primary-light);display:flex;align-items:center;justify-content:center"><i class="fas fa-image" style="font-size:36px;color:var(--primary);opacity:.3"></i></div>
+      <div class="g-item" style="background:var(--gold-light);display:flex;align-items:center;justify-content:center"><i class="fas fa-image" style="font-size:36px;color:var(--gold);opacity:.3"></i></div>
+      <div class="g-item" style="background:#dcfce7;display:flex;align-items:center;justify-content:center"><i class="fas fa-image" style="font-size:36px;color:var(--green);opacity:.3"></i></div>
+    </div>
+  </div>
+</div>
+
+<!-- CONTACT -->
+<div class="section" id="contact" style="background:linear-gradient(135deg,#0f172a,#1e293b)">
+  <div class="section-inner" style="display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center">
+    <div>
+      <h2 style="color:#fff;font-size:clamp(18px,2.8vw,26px);font-weight:800;margin-bottom:10px">Contact Us</h2>
+      <p style="color:#94a3b8;margin-bottom:22px;font-size:13px" class="bn">যোগাযোগ করুন</p>
+      <ul style="list-style:none;color:#94a3b8">
+        <li style="display:flex;gap:12px;margin-bottom:14px;font-size:14px"><i class="fas fa-map-marker-alt" style="color:var(--gold);width:20px;margin-top:2px;flex-shrink:0"></i><span id="c-addr">—</span></li>
+        <li style="display:flex;gap:12px;margin-bottom:14px;font-size:14px"><i class="fas fa-phone" style="color:var(--gold);width:20px;margin-top:2px;flex-shrink:0"></i><span id="c-phone">—</span></li>
+        <li style="display:flex;gap:12px;margin-bottom:14px;font-size:14px"><i class="fas fa-envelope" style="color:var(--gold);width:20px;margin-top:2px;flex-shrink:0"></i><span id="c-email">—</span></li>
+        <li style="display:flex;gap:12px;margin-bottom:14px;font-size:14px"><i class="fas fa-clock" style="color:var(--gold);width:20px;margin-top:2px;flex-shrink:0"></i><span id="c-hours">Sat – Thu: 8:00 AM – 2:00 PM</span></li>
+      </ul>
+    </div>
+    <div id="map-wrap" style="background:rgba(255,255,255,.05);border-radius:16px;height:240px;display:flex;align-items:center;justify-content:center;color:#475569;border:1px solid rgba(255,255,255,.1)">
+      <div style="text-align:center"><i class="fas fa-map" style="font-size:32px;color:var(--gold);margin-bottom:10px;display:block"></i><span style="font-size:13px">Map coming soon</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-col">
+      <h4>About School</h4>
+      <p id="f-about">Modern Ideal Non Government Primary School provides quality primary education from Class 1 to Class 5, nurturing young minds with strong academic foundations.</p>
+      <div class="f-social">
+        <a id="f-fb" href="#"><i class="fab fa-facebook-f"></i></a>
+        <a id="f-yt" href="#"><i class="fab fa-youtube"></i></a>
+        <a href="#"><i class="fas fa-envelope"></i></a>
+      </div>
+    </div>
+    <div class="footer-col">
+      <h4>Quick Links</h4>
+      <ul>
+        <li><a href="#about"><i class="fas fa-chevron-right"></i>About Us</a></li>
+        <li><a href="#academic"><i class="fas fa-chevron-right"></i>Academic</a></li>
+        <li><a href="/results"><i class="fas fa-chevron-right"></i>Results</a></li>
+        <li><a href="#notices"><i class="fas fa-chevron-right"></i>Notice Board</a></li>
+        <li><a href="#gallery"><i class="fas fa-chevron-right"></i>Gallery</a></li>
+        <li><a href="{{ url_for('templates.login_page') }}"><i class="fas fa-chevron-right"></i>Student Login</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Results</h4>
+      <ul>
+        <li><a href="/results?term=1st_term"><i class="fas fa-chevron-right"></i>1st Term Results</a></li>
+        <li><a href="/results?term=2nd_term"><i class="fas fa-chevron-right"></i>2nd Term Results</a></li>
+        <li><a href="/results/transcript"><i class="fas fa-chevron-right"></i>Individual Transcript</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Contact Info</h4>
+      <ul class="fc-list">
+        <li><i class="fas fa-map-marker-alt"></i><span id="f-addr">—</span></li>
+        <li><i class="fas fa-phone"></i><span id="f-phone">—</span></li>
+        <li><i class="fas fa-envelope"></i><span id="f-email">info@modernideal.edu.bd</span></li>
+      </ul>
+    </div>
+  </div>
+  <div class="f-bottom">&copy; <span id="fy"></span> <strong id="f-sname">Modern Ideal Non Government Primary School</strong>. All Rights Reserved.</div>
+</footer>
+
 <script>
-let currentLoginType = 'student';
+const $ = id=>document.getElementById(id);
+const set=(id,v)=>{ const e=$(id); if(e&&v) e.textContent=v; };
 
-function openLoginModal(type) {
-    currentLoginType = type;
-    const modal = document.getElementById('loginModal');
-    const title = document.getElementById('modalTitle');
-    
-    if (type === 'student') {
-        title.textContent = 'Student Login';
-    } else {
-        title.textContent = 'Teacher Login';
+// Count-up
+function cu(el,target,dur=1600){
+  let s=0,step=Math.max(1,target/80);
+  const t=setInterval(()=>{s+=step;if(s>=target){s=target;clearInterval(t);}el.textContent=Math.round(s);},dur/80);
+}
+
+// Scroll reveal
+const obs=new IntersectionObserver(entries=>entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible');}),{threshold:0.1});
+document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+
+// School info
+async function loadSchoolInfo(){
+  try{
+    const d=await fetch('/api/school/info').then(r=>r.json());
+    if(d.school_name){
+      set('sch-name',d.school_name); set('hero-title',d.school_name);
+      set('f-sname',d.school_name); document.title=d.school_name+' – School Management';
     }
-    
-    modal.classList.remove('hidden');
+    if(d.school_name_bn){set('hero-title-bn',d.school_name_bn);set('sch-tagline',d.school_name_bn+' | Class 1 – 5');}
+    if(d.school_email){set('sch-email',d.school_email);set('c-email',d.school_email);set('f-email',d.school_email);}
+    if(d.school_phone){set('sch-phone',d.school_phone);set('c-phone',d.school_phone);set('f-phone',d.school_phone);}
+    if(d.school_address){set('c-addr',d.school_address);set('f-addr',d.school_address);}
+    if(d.estd_year){set('sch-estd',d.estd_year);set('hero-since',d.estd_year);}
+    if(d.school_eiin){set('sch-eiin',d.school_eiin);set('stat-eiin2',d.school_eiin);}
+    if(d.office_hours) set('c-hours',d.office_hours);
+    if(d.about_text) set('f-about',d.about_text);
+    if(d.facebook_url&&d.facebook_url!='#'){$('fb-link').href=d.facebook_url;$('f-fb').href=d.facebook_url;}
+    if(d.youtube_url&&d.youtube_url!='#'){$('yt-link').href=d.youtube_url;$('f-yt').href=d.youtube_url;}
+    if(d.logo_url){const l=$('sch-logo');l.src=d.logo_url;l.style.display='block';$('logo-icon').style.display='none';}
+    if(d.map_embed_url) $('map-wrap').innerHTML=`<iframe src="${d.map_embed_url}" width="100%" height="240" style="border:0;border-radius:16px" allowfullscreen loading="lazy"></iframe>`;
+  }catch(e){}
 }
 
-function closeLoginModal() {
-    document.getElementById('loginModal').classList.add('hidden');
-    document.getElementById('loginForm').reset();
+// Stats
+async function loadStats(){
+  try{
+    const d=await fetch('/api/school/dashboard').then(r=>r.json());
+    const ss=$('stat-students'),st=$('stat-teachers');
+    if(d.total_students){ss.textContent='0';cu(ss,d.total_students);}
+    if(d.total_teachers){st.textContent='0';cu(st,d.total_teachers);}
+  }catch(e){}
 }
 
-function handleLogin(event) {
-    event.preventDefault();
-    
-    const phoneNumber = document.getElementById('phoneNumber').value;
-    const password = document.getElementById('password').value;
-    
-    // Create form data and submit
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.action = '{{ url_for("auth.login") }}';
-    
-    const phoneInput = document.createElement('input');
-    phoneInput.type = 'hidden';
-    phoneInput.name = 'phoneNumber';
-    phoneInput.value = phoneNumber;
-    
-    const passwordInput = document.createElement('input');
-    passwordInput.type = 'hidden';
-    passwordInput.name = 'password';
-    passwordInput.value = password;
-    
-    form.appendChild(phoneInput);
-    form.appendChild(passwordInput);
-    document.body.appendChild(form);
-    form.submit();
-    
-    return false;
-}
-
-// Close modal when clicking outside
-document.getElementById('loginModal').addEventListener('click', function(e) {
-    if (e.target === this) {
-        closeLoginModal();
+// Announcements
+async function loadAnnouncements(){
+  try{
+    const items=await fetch('/api/school/announcements').then(r=>r.json());
+    if(items.length){
+      const h=items.map(a=>`<span class="ticker-item"><i class="fas fa-bullhorn"></i>${a.title}</span><span class="ticker-sep">◆</span>`).join('');
+      $('ticker-inner').innerHTML=h+h;
     }
+    const nl=$('notice-list');
+    if(!items.length){nl.innerHTML='<p style="color:#94a3b8;font-size:13px;padding:8px 0">No notices available.</p>';return;}
+    const bc={urgent:'badge-urgent',high:'badge-high',normal:'badge-normal',low:'badge-low'};
+    nl.innerHTML=items.slice(0,6).map(a=>`<div class="n-item">
+      <span class="n-badge ${bc[a.priority]||'badge-normal'}">${a.category||'Notice'}</span>
+      <div><div class="n-text">${a.title}${a.title_bn?'<br><span class="bn" style="font-size:11.5px;color:#64748b">'+a.title_bn+'</span>':''}</div>
+      <div class="n-date"><i class="fas fa-calendar-alt" style="margin-right:3px"></i>${(a.publish_date||a.created_at||'').split('T')[0]}</div></div>
+    </div>`).join('');
+  }catch(e){$('notice-list').innerHTML='<p style="color:#94a3b8;font-size:13px">Could not load notices.</p>';}
+}
+
+// Published results
+async function loadPublishedResults(){
+  try{
+    const yr=new Date().getFullYear();
+    const exams=await fetch('/api/school/term-exams?year='+yr).then(r=>r.json());
+    const pub=exams.filter(e=>e.result_published);
+    const el=$('result-list');
+    if(!pub.length){el.innerHTML='<p style="color:#94a3b8;font-size:13px;padding:8px 0">No published results yet.</p>';$('term-cards').innerHTML='';return;}
+    el.innerHTML=pub.map(e=>`<div class="n-item">
+      <span class="n-badge badge-normal"><i class="fas fa-chart-bar"></i></span>
+      <div><div class="n-text"><strong>${e.title}</strong></div>
+      <div style="margin-top:6px;display:flex;gap:8px;flex-wrap:wrap">
+        <a href="/results?exam_id=${e.id}" style="font-size:12px;background:var(--primary);color:#fff;padding:3px 10px;border-radius:4px;text-decoration:none"><i class="fas fa-list"></i> Class Results</a>
+        <a href="/results/transcript?exam_id=${e.id}" style="font-size:12px;background:var(--gold);color:#1e293b;padding:3px 10px;border-radius:4px;text-decoration:none"><i class="fas fa-file-alt"></i> Transcript</a>
+      </div></div>
+    </div>`).join('');
+    $('term-cards').innerHTML=pub.map(e=>`<a href="/results?exam_id=${e.id}" class="r-card">
+      <i class="fas fa-scroll"></i>
+      <h3>${e.term_display} – ${e.class_name||''}</h3>
+      <p>${e.year} Academic Year</p>
+      <div class="rc"><i class="fas fa-users" style="font-size:14px"></i> View Results</div>
+    </a>`).join('');
+  }catch(e){$('result-list').innerHTML='<p style="color:#94a3b8;font-size:13px">Could not load results.</p>';}
+}
+
+// Search classes
+async function loadSClasses(){
+  try{
+    const cls=await fetch('/api/school/classes').then(r=>r.json());
+    const s=$('s-class');
+    cls.forEach(c=>{const o=document.createElement('option');o.value=c.id;o.textContent=c.name;s.appendChild(o);});
+  }catch(e){}
+}
+async function loadSSections(){
+  const cid=$('s-class').value;
+  const s=$('s-section');
+  s.innerHTML='<option value="">-- All Sections --</option>';
+  if(!cid)return;
+  try{
+    const secs=await fetch('/api/school/classes/'+cid+'/sections').then(r=>r.json());
+    secs.forEach(sec=>{const o=document.createElement('option');o.value=sec.id;o.textContent='Section '+sec.name;s.appendChild(o);});
+  }catch(e){}
+}
+async function doSearch(){
+  const cid=$('s-class').value,sid=$('s-section').value,term=$('s-term').value,out=$('s-out');
+  if(!cid||!term){out.innerHTML='<p style="color:#dc2626;font-size:13px"><i class="fas fa-exclamation-triangle"></i> Please select class and term.</p>';return;}
+  out.innerHTML='<p style="color:#64748b;font-size:13px"><span class="sml"></span> Searching…</p>';
+  try{
+    const yr=new Date().getFullYear();
+    const exams=await fetch('/api/school/term-exams?year='+yr+'&class_id='+cid).then(r=>r.json());
+    const exam=exams.find(e=>e.term===term&&e.result_published);
+    if(!exam){out.innerHTML='<p style="color:#dc2626;font-size:13px"><i class="fas fa-times-circle"></i> No published results found for this selection.</p>';return;}
+    const url=sid?`/results?exam_id=${exam.id}&section_id=${sid}`:`/results?exam_id=${exam.id}`;
+    out.innerHTML=`<p style="color:#059669;font-size:13px"><i class="fas fa-check-circle"></i> Result found! <a href="${url}" style="color:var(--primary);font-weight:700">Click here to view →</a></p>`;
+  }catch(e){out.innerHTML='<p style="color:#dc2626;font-size:13px"><i class="fas fa-times-circle"></i> Error loading results.</p>';}
+}
+
+// Teachers
+async function loadTeachers(){
+  try{
+    const res=await fetch('/api/users?role=teacher&limit=8').then(r=>r.json());
+    const teachers=Array.isArray(res)?res:(res.users||res.data||[]);
+    const g=$('teachers-grid');
+    if(!teachers.length){g.innerHTML='<p style="color:#94a3b8;grid-column:1/-1;text-align:center;padding:24px">Teacher information will be displayed here.</p>';return;}
+    g.innerHTML=teachers.map(t=>`<div class="t-card reveal">
+      <div class="t-avatar">${t.profile_image?`<img src="${t.profile_image}" alt="">`:'<i class="fas fa-user-tie"></i>'}</div>
+      <h4>${(t.first_name||'')+' '+(t.last_name||'')}</h4>
+      <span class="t-role">${t.role==='head_teacher'?'Head Teacher':t.role==='super_user'?'Head Master':'Teacher'}</span>
+      <div class="t-sub">${t.subject||''}</div>
+    </div>`).join('');
+    g.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+  }catch(e){$('teachers-grid').innerHTML='<p style="color:#94a3b8;grid-column:1/-1;text-align:center;padding:24px">Teacher information will be displayed here.</p>';}
+}
+
+$('fy').textContent=new Date().getFullYear();
+document.addEventListener('DOMContentLoaded',()=>{
+  loadSchoolInfo();loadStats();loadAnnouncements();loadPublishedResults();loadSClasses();loadTeachers();
 });
 </script>
-
-    <!-- About Section -->
-    <div class="bg-white py-16">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-12">
-                <h2 class="text-3xl font-bold text-gray-800 mb-4">Meet Our Founder</h2>
-                <p class="text-lg text-blue-600 font-semibold">Excellence in Education</p>
-            </div>
-            
-            <div class="bg-gradient-to-r from-blue-50 to-white rounded-3xl shadow-xl p-8 max-w-4xl mx-auto">
-                <div class="flex flex-col lg:flex-row items-center gap-8">
-                    <div class="flex-shrink-0">
-                        <div class="w-48 h-48 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center">
-                            <i class="fas fa-user text-white text-6xl"></i>
-                        </div>
-                    </div>
-                    
-                    <div class="flex-1 text-center lg:text-left">
-                        <h3 class="text-3xl font-bold text-gray-800 mb-2">Golam Sarowar Sir</h3>
-                        <p class="text-xl text-green-600 font-semibold mb-4">Mathematics & Science Expert</p>
-                        
-                        <div class="space-y-3 mb-6">
-                            <div class="flex items-center justify-center lg:justify-start">
-                                <div class="bg-blue-600 p-2 rounded-lg mr-3">
-                                    <i class="fas fa-graduation-cap text-white"></i>
-                                </div>
-                                <span class="text-gray-700">Mathematics & Science Teacher - 20+ Years Experience</span>
-                            </div>
-                            
-                            <div class="flex items-center justify-center lg:justify-start">
-                                <div class="bg-green-600 p-2 rounded-lg mr-3">
-                                    <i class="fas fa-users text-white"></i>
-                                </div>
-                                <span class="text-gray-700">Mathematics & Science Expert</span>
-                            </div>
-                            
-                            <div class="flex items-center justify-center lg:justify-start">
-                                <div class="bg-orange-600 p-2 rounded-lg mr-3">
-                                    <i class="fas fa-school text-white"></i>
-                                </div>
-                                <span class="text-gray-700">Assistant Math Teacher at Mohadebpur Sarba Mongala Pilot High School, Mohadevpur, Naogaon</span>
-                            </div>
-                            
-                            <div class="flex items-center justify-center lg:justify-start">
-                                <div class="bg-purple-600 p-2 rounded-lg mr-3">
-                                    <i class="fas fa-award text-white"></i>
-                                </div>
-                                <span class="text-gray-700">5000+ Successful Students</span>
-                            </div>
-                            
-                            <div class="flex items-center justify-center lg:justify-start">
-                                <div class="bg-green-600 p-2 rounded-lg mr-3">
-                                    <i class="fas fa-phone text-white"></i>
-                                </div>
-                                <span class="text-gray-700">01762602056</span>
-                            </div>
-                        </div>
-                        
-                        <div class="bg-blue-100 p-6 rounded-xl">
-                            <p class="text-blue-800 italic leading-relaxed">
-                                "With years of experience in Mathematics and Science education, I am committed to providing students with the knowledge and skills they need to excel in their academic journey. My goal is to make complex mathematical and scientific concepts accessible and engaging for every student."
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Footer -->
-    <footer class="bg-gray-900 text-white py-8">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <div class="flex items-center justify-center mb-4">
-                <div class="bg-blue-600 p-2 rounded-lg mr-3">
-                    <i class="fas fa-graduation-cap text-white"></i>
-                </div>
-                <h3 class="text-xl font-bold">GS Student Nursing Center by Golam Sarowar Sir</h3>
-            </div>
-            <p class="text-gray-400 mb-2">Excellence in Mathematics & Science Education</p>
-            <p class="text-gray-400 mb-4">
-                <i class="fas fa-phone mr-2"></i>01762602056
-            </p>
-            <p class="text-gray-500 text-sm mb-2">© 2025 All Rights Reserved</p>
-            <p class="text-gray-400 text-sm">
-                Created by <a href="https://www.facebook.com/shahid.rahman111" target="_blank" class="text-blue-400 hover:text-blue-300 transition-colors duration-200 font-semibold">Sahid Rahman</a> - CEO of Praggo
-            </p>
-        </div>
-    </footer>
 {% endblock %}

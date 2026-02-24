@@ -1,0 +1,361 @@
+{% extends "base.html" %}
+{% block title %}Student Transcript – Modern Ideal Non Government Primary School{% endblock %}
+{% block extra_head %}
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--primary:#1a56db;--gold:#f59e0b;--green:#059669;--red:#dc2626;--dark:#1e293b;--gray:#64748b;--gradient:linear-gradient(135deg,#1a56db,#0a2d7a)}
+body{font-family:'Poppins',sans-serif;background:#f0f4f8;color:var(--dark)}
+.bn{font-family:'Hind Siliguri','Poppins',sans-serif}
+.page-header{background:var(--gradient);padding:36px 20px;text-align:center;color:#fff}
+.page-header h1{font-size:clamp(20px,3.5vw,32px);font-weight:800;margin-bottom:6px}
+.page-header p{font-size:14px;opacity:.85}
+.wrap{max-width:1200px;margin:0 auto;padding:0 20px}
+.search-area{background:#fff;border-radius:0 0 16px 16px;padding:20px;box-shadow:0 4px 20px rgba(0,0,0,.08);margin-bottom:28px}
+.s-form{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;align-items:end}
+.fg label{font-size:12px;font-weight:600;color:var(--gray);margin-bottom:5px;display:block}
+.fg select,.fg input{width:100%;padding:10px 14px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13.5px;outline:none;background:#fff;transition:.2s}
+.fg select:focus,.fg input:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(26,86,219,.1)}
+.btn-load{background:var(--primary);color:#fff;padding:11px 22px;border-radius:8px;border:none;font-size:14px;font-weight:600;cursor:pointer;transition:.2s;display:inline-flex;align-items:center;gap:6px}
+.btn-load:hover{background:#1238a0;transform:translateY(-1px)}
+.btn-print{background:var(--gold);color:#1e293b;padding:11px 22px;border-radius:8px;border:none;font-size:14px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px;cursor:pointer}
+.btn-print:hover{background:#d97706}
+.empty-state{text-align:center;padding:60px 20px;color:#94a3b8;background:#fff;border-radius:16px;box-shadow:0 2px 12px rgba(0,0,0,.06)}
+.empty-state i{font-size:48px;margin-bottom:16px;display:block}
+.empty-state h3{font-size:18px;font-weight:600;margin-bottom:8px}
+.sml{display:inline-block;width:18px;height:18px;border:2px solid #e2e8f0;border-top-color:var(--primary);border-radius:50%;animation:spin .8s linear infinite;vertical-align:middle}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── TRANSCRIPT CARD ── */
+.transcript-card{background:#fff;border-radius:16px;box-shadow:0 4px 24px rgba(0,0,0,.1);overflow:hidden;margin-bottom:32px}
+.tc-header{background:var(--gradient);padding:28px;text-align:center;color:#fff;position:relative}
+.tc-school-name{font-size:clamp(16px,2.5vw,22px);font-weight:800;margin-bottom:4px}
+.tc-school-bn{font-family:'Hind Siliguri',sans-serif;font-size:clamp(13px,2vw,16px);color:rgba(255,255,255,.85);margin-bottom:10px}
+.tc-exam-title{font-size:16px;font-weight:700;background:rgba(255,255,255,.15);padding:8px 24px;border-radius:30px;display:inline-block;margin-top:6px}
+.tc-body{padding:28px}
+.student-info-grid{display:grid;grid-template-columns:1fr 1fr;gap:0;margin-bottom:24px;border:1px solid #e2e8f0;border-radius:10px;overflow:hidden}
+.si-row{display:contents}
+.si-label{background:#f8fafc;padding:10px 14px;font-size:12.5px;font-weight:600;color:var(--gray);border-right:1px solid #e2e8f0;border-bottom:1px solid #e2e8f0}
+.si-value{padding:10px 14px;font-size:13px;font-weight:500;color:var(--dark);border-bottom:1px solid #e2e8f0}
+.marks-table{width:100%;border-collapse:collapse;margin-bottom:24px}
+.mt-head{background:var(--gradient);color:#fff}
+.mt-head th{padding:12px 16px;font-size:13px;font-weight:600;text-align:center}
+.mt-head th:first-child,.mt-head th:nth-child(2){text-align:left}
+.marks-table td{padding:11px 16px;font-size:13.5px;border-bottom:1px solid #f1f5f9;text-align:center}
+.marks-table td:first-child,.marks-table td:nth-child(2){text-align:left}
+.marks-table tr:nth-child(even){background:#f8fafc}
+.marks-table tr:last-child td{border-bottom:none;font-weight:700;background:#f1f5f9}
+.grade-badge{display:inline-block;font-size:12px;font-weight:700;padding:3px 10px;border-radius:4px}
+.g-Ap{background:#dcfce7;color:#166534}
+.g-A{background:#d1fae5;color:#065f46}
+.g-Am{background:#e0f2fe;color:#0369a1}
+.g-B{background:#fef3c7;color:#92400e}
+.g-C{background:#fff7ed;color:#c2410c}
+.g-D{background:#fff1f2;color:#9f1239}
+.g-F{background:#fee2e2;color:#dc2626}
+.summary-box{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:14px;margin-bottom:24px}
+.sum-item{background:linear-gradient(135deg,#e8f0fe,#f1f5f9);border-radius:10px;padding:14px;text-align:center;border-left:4px solid var(--primary)}
+.sum-item .sum-val{font-size:clamp(18px,3vw,24px);font-weight:800;color:var(--primary)}
+.sum-item .sum-lab{font-size:11.5px;color:var(--gray);font-weight:500;margin-top:4px}
+.result-banner{padding:16px 24px;border-radius:10px;text-align:center;font-size:16px;font-weight:700;margin-bottom:24px}
+.passed-banner{background:#dcfce7;color:#166534;border:2px solid #22c55e}
+.failed-banner{background:#fee2e2;color:#dc2626;border:2px solid #ef4444}
+.progress-bar{background:#e2e8f0;border-radius:50px;height:10px;overflow:hidden;margin-top:6px}
+.progress-inner{height:100%;border-radius:50px;background:linear-gradient(90deg,var(--primary),var(--gold));transition:width 1.2s ease}
+.tc-footer{border-top:1px solid #e2e8f0;padding:20px 28px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;text-align:center}
+.sig-box .sig-line{border-top:1.5px solid #64748b;margin-top:40px;padding-top:8px;font-size:12.5px;color:var(--gray);font-weight:500}
+.back-btn{display:inline-flex;align-items:center;gap:8px;color:var(--primary);text-decoration:none;font-size:14px;font-weight:600;margin-bottom:20px;transition:.2s}
+.back-btn:hover{color:#1238a0}
+
+@media print{
+  .page-header,.search-area,.back-btn,.no-print{display:none!important}
+  body{background:#fff}
+  .transcript-card{box-shadow:none;border:1px solid #e2e8f0}
+  .tc-header{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .mt-head,.mt-head th{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+</style>
+{% endblock %}
+{% block content %}
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+  <div class="wrap">
+    <h1><i class="fas fa-file-alt" style="margin-right:10px"></i>Student Transcript</h1>
+    <p class="bn">Modern Ideal Non Government Primary School – মার্কশিট / ট্রান্সক্রিপ্ট</p>
+  </div>
+</div>
+
+<div class="wrap">
+  <!-- SEARCH -->
+  <div class="search-area no-print">
+    <div class="s-form">
+      <div class="fg">
+        <label><i class="fas fa-school"></i> Class</label>
+        <select id="t-class" onchange="loadTSections()">
+          <option value="">-- Select Class --</option>
+        </select>
+      </div>
+      <div class="fg">
+        <label><i class="fas fa-calendar-check"></i> Term</label>
+        <select id="t-term">
+          <option value="">-- Select Term --</option>
+          <option value="1st_term">1st Term</option>
+          <option value="2nd_term">2nd Term</option>
+        </select>
+      </div>
+      <div class="fg">
+        <label><i class="fas fa-calendar-alt"></i> Year</label>
+        <select id="t-year">
+          <option value="2026">2026</option>
+          <option value="2025">2025</option>
+        </select>
+      </div>
+      <div class="fg">
+        <label><i class="fas fa-user"></i> Student (Roll / Name)</label>
+        <input type="text" id="t-search" placeholder="Search student…" oninput="filterStudents()">
+      </div>
+      <div class="fg">
+        <label>&nbsp;</label>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn-load" onclick="loadStudentList()"><i class="fas fa-search"></i> Find Students</button>
+          <button class="btn-print no-print" onclick="window.print()"><i class="fas fa-print"></i> Print</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Student list (quick select) -->
+    <div id="student-list-area" style="margin-top:14px;display:none">
+      <div style="font-size:12.5px;font-weight:600;color:var(--gray);margin-bottom:8px">Select a student:</div>
+      <div id="student-list" style="display:flex;flex-wrap:wrap;gap:8px"></div>
+    </div>
+  </div>
+
+  <a href="/results" class="back-btn no-print"><i class="fas fa-arrow-left"></i> Back to Results</a>
+
+  <!-- OUTPUT -->
+  <div id="transcript-output">
+    <div class="empty-state">
+      <i class="fas fa-file-alt"></i>
+      <h3>Student Transcript</h3>
+      <p>Select the class, term, and student to generate the transcript.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+let currentExamId = null, allStudents = [];
+
+function gClass(g){ const m={'A+':'Ap','A':'A','A-':'Am','B':'B','C':'C','D':'D','F':'F'}; return m[g]||'other'; }
+
+async function loadClasses(){
+  try{
+    const cls = await fetch('/api/school/classes').then(r=>r.json());
+    const s = $('t-class');
+    cls.forEach(c=>{const o=document.createElement('option');o.value=c.id;o.textContent=c.name;s.appendChild(o);});
+    // Pre-fill from URL
+    const p=new URLSearchParams(location.search);
+    if(p.get('exam_id') && p.get('student_id')){
+      loadTranscript(parseInt(p.get('student_id')), parseInt(p.get('exam_id')));
+    }else if(p.get('exam_id')){
+      currentExamId = parseInt(p.get('exam_id'));
+      loadStudentsForExam(currentExamId);
+    }
+  }catch(e){}
+}
+
+async function loadTSections(){} // placeholder
+
+async function loadStudentList(){
+  const cid  = $('t-class').value;
+  const term = $('t-term').value;
+  const year = $('t-year').value;
+  if(!cid||!term){ alert('Please select class and term'); return; }
+
+  $('student-list-area').style.display='none';
+  $('transcript-output').innerHTML='<div style="text-align:center;padding:40px;color:#64748b"><span class="sml"></span> Loading students…</div>';
+
+  try{
+    const exams = await fetch(`/api/school/term-exams?year=${year}&class_id=${cid}`).then(r=>r.json());
+    const exam  = exams.find(e=>e.term===term&&e.result_published);
+    if(!exam){
+      $('transcript-output').innerHTML='<div class="empty-state"><i class="fas fa-times-circle"></i><h3>No Published Results</h3><p>Results not yet published for this selection.</p></div>';
+      return;
+    }
+    currentExamId = exam.id;
+    await loadStudentsForExam(exam.id);
+  }catch(e){
+    $('transcript-output').innerHTML='<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><h3>Error</h3><p>Could not load students.</p></div>';
+  }
+}
+
+async function loadStudentsForExam(examId){
+  try{
+    // Get students from marks data
+    const data = await fetch(`/api/school/results/class-wise?exam_id=${examId}`).then(r=>r.json());
+    allStudents = data.results||[];
+    renderStudentList(allStudents, examId);
+    $('transcript-output').innerHTML='<div class="empty-state"><i class="fas fa-user-graduate"></i><h3>Select a Student</h3><p>Click on a student name above to view their transcript.</p></div>';
+  }catch(e){}
+}
+
+function renderStudentList(students, examId){
+  const area = $('student-list-area');
+  const list = $('student-list');
+  list.innerHTML = students.map(s=>`
+    <button onclick="loadTranscript(${s.student_id},${examId})" 
+      style="background:#e8f0fe;color:var(--primary);border:none;padding:6px 14px;border-radius:20px;font-size:12.5px;font-weight:600;cursor:pointer;transition:.2s"
+      onmouseover="this.style.background='var(--primary)';this.style.color='#fff'"
+      onmouseout="this.style.background='#e8f0fe';this.style.color='var(--primary)'">
+      ${s.roll_number ? s.roll_number+'. ' : ''}${s.student_name}
+    </button>`).join('');
+  area.style.display='block';
+}
+
+function filterStudents(){
+  const q = $('t-search').value.toLowerCase();
+  if(!q||!allStudents.length) return;
+  const filtered = allStudents.filter(s=>
+    s.student_name.toLowerCase().includes(q)||
+    (s.roll_number&&String(s.roll_number).includes(q))
+  );
+  renderStudentList(filtered, currentExamId);
+}
+
+async function loadTranscript(studentId, examId){
+  $('transcript-output').innerHTML='<div style="text-align:center;padding:60px;color:#64748b"><span class="sml"></span> Generating transcript…</div>';
+  try{
+    const d = await fetch(`/api/school/results/transcript/${studentId}?exam_id=${examId}`).then(r=>r.json());
+    if(d.error){ $('transcript-output').innerHTML=`<div class="empty-state"><i class="fas fa-times-circle"></i><h3>Error</h3><p>${d.error}</p></div>`; return; }
+    renderTranscript(d);
+  }catch(e){
+    $('transcript-output').innerHTML='<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><h3>Error</h3><p>Could not load transcript.</p></div>';
+  }
+}
+
+function renderTranscript(d){
+  const s = d.student;
+  const e = d.exam;
+  const sub = d.subjects;
+  const sum = d.summary;
+  const passed = sum.result!=='FAILED';
+
+  // Build subject rows
+  const subRows = sub.map((r,i)=>`<tr>
+    <td>${i+1}</td>
+    <td>${r.subject_name}${r.subject_name_bn?'<br><small class="bn" style="color:#94a3b8;font-size:11px">'+r.subject_name_bn+'</small>':''}</td>
+    <td>${r.full_marks}</td>
+    <td>${r.is_absent?'<span style="color:#dc2626">Absent</span>':r.marks_obtained}</td>
+    <td>${r.is_absent?'—':((r.marks_obtained/r.full_marks)*100).toFixed(1)+'%'}</td>
+    <td><span class="grade-badge g-${gClass(r.grade)}">${r.grade||'—'}</span></td>
+    <td>${r.gpa!=null?r.gpa.toFixed(2):'—'}</td>
+  </tr>`).join('');
+
+  const totalRow = `<tr>
+    <td colspan="2"><strong>TOTAL</strong></td>
+    <td><strong>${sum.total_full}</strong></td>
+    <td><strong>${sum.total_obtained}</strong></td>
+    <td><strong>${sum.percentage}%</strong></td>
+    <td><span class="grade-badge g-${gClass(sum.overall_grade)}">${sum.overall_grade}</span></td>
+    <td><strong>${sum.overall_gpa?.toFixed(2)}</strong></td>
+  </tr>`;
+
+  $('transcript-output').innerHTML = `
+  <div class="transcript-card">
+    <!-- HEADER -->
+    <div class="tc-header">
+      <div class="tc-school-name" id="tc-sname">Modern Ideal Non Government Primary School</div>
+      <div class="tc-school-bn bn">মডার্ন আইডিয়াল নন-গভর্নমেন্ট প্রাইমারি স্কুল</div>
+      <div class="tc-exam-title">${e.title}</div>
+    </div>
+
+    <div class="tc-body">
+      <!-- STUDENT INFO -->
+      <div class="student-info-grid">
+        <div class="si-label">Student Name</div>
+        <div class="si-value"><strong>${s.name}</strong></div>
+        <div class="si-label">Class</div>
+        <div class="si-value">${s.class_name||'—'}</div>
+        <div class="si-label">Section</div>
+        <div class="si-value">${s.section||'—'}</div>
+        <div class="si-label">Roll Number</div>
+        <div class="si-value">${s.roll_number||'—'}</div>
+        <div class="si-label">Reg. Number</div>
+        <div class="si-value">${s.reg_number||'—'}</div>
+        <div class="si-label">Date of Birth</div>
+        <div class="si-value">${s.date_of_birth||'—'}</div>
+        <div class="si-label">Father/Guardian</div>
+        <div class="si-value">${s.guardian_name||'—'}</div>
+        <div class="si-label">Blood Group</div>
+        <div class="si-value">${s.blood_group||'—'}</div>
+      </div>
+
+      <!-- RESULT BANNER -->
+      <div class="result-banner ${passed?'passed-banner':'failed-banner'}">
+        <i class="fas fa-${passed?'check-circle':'times-circle'}"></i>
+        ${passed?'PASSED – পাশ করেছে':'FAILED – অনুত্তীর্ণ'}
+      </div>
+
+      <!-- SUMMARY -->
+      <div class="summary-box">
+        <div class="sum-item"><div class="sum-val">${sum.total_obtained}/${sum.total_full}</div><div class="sum-lab">Total Marks</div></div>
+        <div class="sum-item">
+          <div class="sum-val">${sum.percentage}%</div>
+          <div class="sum-lab">Percentage</div>
+          <div class="progress-bar"><div class="progress-inner" style="width:${Math.min(sum.percentage,100)}%"></div></div>
+        </div>
+        <div class="sum-item"><div class="sum-val"><span class="grade-badge g-${gClass(sum.overall_grade)}" style="font-size:20px">${sum.overall_grade}</span></div><div class="sum-lab">Overall Grade</div></div>
+        <div class="sum-item"><div class="sum-val">${sum.overall_gpa?.toFixed(2)}</div><div class="sum-lab">GPA</div></div>
+        <div class="sum-item"><div class="sum-val">${sum.class_rank||'—'}</div><div class="sum-lab">Class Rank</div></div>
+      </div>
+
+      <!-- MARKS TABLE -->
+      <div style="overflow-x:auto">
+        <table class="marks-table">
+          <thead class="mt-head">
+            <tr>
+              <th>#</th>
+              <th style="text-align:left">Subject</th>
+              <th>Full Marks</th>
+              <th>Obtained</th>
+              <th>Percentage</th>
+              <th>Grade</th>
+              <th>GPA</th>
+            </tr>
+          </thead>
+          <tbody>${subRows}${totalRow}</tbody>
+        </table>
+      </div>
+
+      <!-- GRADE SCALE -->
+      <div style="background:#f8fafc;border-radius:8px;padding:14px;margin-bottom:20px;font-size:12px">
+        <strong style="display:block;margin-bottom:8px;color:var(--dark)">Grade Scale:</strong>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <span><span class="grade-badge g-Ap">A+</span> 80–100%</span>
+          <span><span class="grade-badge g-A">A</span> 70–79%</span>
+          <span><span class="grade-badge g-Am">A-</span> 60–69%</span>
+          <span><span class="grade-badge g-B">B</span> 50–59%</span>
+          <span><span class="grade-badge g-C">C</span> 40–49%</span>
+          <span><span class="grade-badge g-D">D</span> 33–39%</span>
+          <span><span class="grade-badge g-F">F</span> 0–32%</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- SIGNATURE FOOTER -->
+    <div class="tc-footer">
+      <div class="sig-box"><div class="sig-line">Class Teacher</div></div>
+      <div class="sig-box"><div class="sig-line">Head Teacher</div></div>
+      <div class="sig-box"><div class="sig-line">School Seal &amp; Date</div></div>
+    </div>
+  </div>`;
+
+  // Load school name dynamically
+  fetch('/api/school/info').then(r=>r.json()).then(info=>{
+    if(info.school_name) document.getElementById('tc-sname').textContent=info.school_name;
+  }).catch(()=>{});
+}
+
+document.addEventListener('DOMContentLoaded', loadClasses);
+</script>
+{% endblock %}

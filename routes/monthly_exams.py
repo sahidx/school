@@ -2,7 +2,7 @@
 Monthly Exam System Routes
 Ranking, GPA calculation, merit lists, and performance analytics
 """
-from flask import Blueprint, request, jsonify, current_app
+from flask import Blueprint, request, jsonify, current_app, render_template
 from models import (db, MonthlyExam, IndividualExam, MonthlyMark, Batch, User, 
                    UserRole, Settings, SmsLog, SmsStatus, Attendance, AttendanceStatus, MonthlyRanking)
 from utils.auth import login_required, require_role, get_current_user
@@ -1943,3 +1943,727 @@ def get_homepage_top_performers():
     except Exception as e:
         logger.error(f"Error getting homepage top performers: {e}")
         return error_response(f'Failed to get top performers: {str(e)}', 500)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# PRINT-READY TRANSCRIPT ROUTES
+# ─────────────────────────────────────────────────────────────────────────────
+
+def _get_school_info():
+    """Return school name, address, phone from SchoolInfo or Settings table."""
+    info = {}
+    # Try new SchoolInfo model first
+    try:
+        from models import SchoolInfo
+        rows = SchoolInfo.query.all()
+        if rows:
+            info = {r.key: r.value for r in rows}
+    except Exception:
+        pass
+    # Fallback to Settings table
+    if not info:
+        keys = ['school_name', 'school_address', 'school_phone', 'school_logo']
+        for k in keys:
+            s = Settings.query.filter_by(key=k).first()
+            info[k] = s.value if s else None
+    # Sensible defaults
+    info.setdefault('school_name', 'Modern Ideal Non Government Primary School')
+    info.setdefault('school_address', '')
+    info.setdefault('school_phone', '')
+    return info
+
+
+@monthly_exams_bp.route('/<int:exam_id>/transcript/<int:user_id>', methods=['GET'])
+@login_required
+def print_individual_transcript(exam_id, user_id):
+    """Render a print-ready individual result transcript for one student."""
+    try:
+        current_user = get_current_user()
+
+        # Access control: student can only see own transcript
+        if current_user.role == UserRole.STUDENT and current_user.id != user_id:
+            return error_response('Access denied', 403)
+
+        monthly_exam = MonthlyExam.query.get(exam_id)
+        if not monthly_exam:
+            return error_response('Monthly exam not found', 404)
+
+        student = User.query.get(user_id)
+        if not student:
+            return error_response('Student not found', 404)
+
+        # Individual exam subjects
+        individual_exams = IndividualExam.query.filter_by(
+            monthly_exam_id=exam_id
+        ).order_by(IndividualExam.order_index).all()
+
+        # Marks per subject
+        subject_rows = []
+        total_obtained = 0
+        total_full = 0
+        failed_subjects = 0
+
+        for ie in individual_exams:
+            mark = MonthlyMark.query.filter_by(
+                monthly_exam_id=exam_id,
+                individual_exam_id=ie.id,
+                user_id=user_id
+            ).first()
+
+            obtained = mark.marks_obtained if (mark and not mark.is_absent) else 0
+            full_marks = ie.marks
+            absent = mark.is_absent if mark else True
+            pct = (obtained / full_marks * 100) if full_marks > 0 else 0
+            grade, gpa = calculate_grade_and_gpa(pct)
+
+            total_obtained += obtained
+            total_full += full_marks
+            if grade == 'F':
+                failed_subjects += 1
+
+            subject_rows.append({
+                'subject': ie.subject,
+                'full_marks': full_marks,
+                'obtained': obtained,
+                'absent': absent,
+                'percentage': round(pct, 2),
+                'grade': grade,
+                'gpa': gpa,
+            })
+
+        total_pct = (total_obtained / total_full * 100) if total_full > 0 else 0
+        overall_grade, overall_gpa = calculate_grade_and_gpa(total_pct)
+        result_status = 'Failed' if failed_subjects > 0 else 'Passed'
+
+        # Attendance for exam month
+        exam_month = monthly_exam.month
+        exam_year = monthly_exam.year
+        month_start = date(exam_year, exam_month, 1)
+        if exam_month == 12:
+            month_end = date(exam_year + 1, 1, 1) - timedelta(days=1)
+        else:
+            month_end = date(exam_year, exam_month + 1, 1) - timedelta(days=1)
+
+        total_working_days = db.session.query(Attendance.date).filter(
+            Attendance.batch_id == monthly_exam.batch_id,
+            Attendance.date >= month_start,
+            Attendance.date <= month_end
+        ).distinct().count()
+
+        present_days = Attendance.query.filter(
+            Attendance.user_id == user_id,
+            Attendance.batch_id == monthly_exam.batch_id,
+            Attendance.date >= month_start,
+            Attendance.date <= month_end,
+            Attendance.status.in_([AttendanceStatus.PRESENT, AttendanceStatus.LEAVE])
+        ).count()
+
+        # Ranking / roll number
+        ranking = MonthlyRanking.query.filter_by(
+            monthly_exam_id=exam_id,
+            user_id=user_id
+        ).first()
+        roll_number = ranking.roll_number if ranking else None
+        position = ranking.position if ranking else None
+
+        school_info = _get_school_info()
+        batch = monthly_exam.batch
+
+        grade_scale = [
+            (80, 100, 'A+', 5.00),
+            (70, 79, 'A',  4.00),
+            (60, 69, 'A-', 3.50),
+            (50, 59, 'B',  3.00),
+            (40, 49, 'C',  2.00),
+            (33, 39, 'D',  1.00),
+            (0,  32, 'F',  0.00),
+        ]
+
+        return render_template(
+            'partials/result_transcript.html',
+            school=school_info,
+            student=student,
+            monthly_exam=monthly_exam,
+            batch=batch,
+            subject_rows=subject_rows,
+            total_obtained=total_obtained,
+            total_full=total_full,
+            total_pct=round(total_pct, 2),
+            overall_grade=overall_grade,
+            overall_gpa=overall_gpa,
+            result_status=result_status,
+            failed_subjects=failed_subjects,
+            roll_number=roll_number,
+            position=position,
+            total_working_days=total_working_days,
+            present_days=present_days,
+            grade_scale=grade_scale,
+            print_date=datetime.now().strftime('%d-%b-%Y'),
+        )
+
+    except Exception as e:
+        logger.error(f"Error rendering transcript: {e}")
+        return error_response(f'Failed to render transcript: {str(e)}', 500)
+
+
+@monthly_exams_bp.route('/<int:exam_id>/section-result', methods=['GET'])
+@login_required
+@require_role(UserRole.TEACHER, UserRole.SUPER_USER)
+def print_section_result(exam_id):
+    """Render a print-ready section/class-wise result sheet."""
+    try:
+        monthly_exam = MonthlyExam.query.get(exam_id)
+        if not monthly_exam:
+            return error_response('Monthly exam not found', 404)
+
+        batch = monthly_exam.batch
+
+        # Try stored rankings first
+        stored_rankings = MonthlyRanking.query.filter_by(
+            monthly_exam_id=exam_id
+        ).order_by(MonthlyRanking.position).all()
+
+        rows = []
+        if stored_rankings:
+            for r in stored_rankings:
+                student = User.query.get(r.user_id)
+                if not student or not student.is_active or student.is_archived:
+                    continue
+                # Count failed subjects for this student in this exam
+                marks = MonthlyMark.query.filter_by(
+                    monthly_exam_id=exam_id,
+                    user_id=r.user_id
+                ).all()
+                failed = sum(
+                    1 for m in marks
+                    if m.total_marks > 0 and not m.is_absent
+                    and (m.marks_obtained / m.total_marks * 100) < 33
+                )
+                rows.append({
+                    'student_id': f"STU{student.created_at.year if student.created_at else ''}{student.id:04d}",
+                    'student_name': student.full_name,
+                    'roll_number': r.roll_number,
+                    'total_marks': round(r.final_total, 2),
+                    'total_possible': round(r.max_possible_total, 2),
+                    'position': r.position,
+                    'grade': r.grade or 'N/A',
+                    'gpa': round(r.gpa, 2) if r.gpa else 0,
+                    'percentage': round(r.percentage, 2) if r.percentage else 0,
+                    'status': 'Failed' if (r.grade == 'F' or failed > 0) else 'Passed',
+                    'failed_subjects': failed,
+                })
+        else:
+            # Fallback: compute on-the-fly from MonthlyMark
+            batch_students = User.query.join(User.batches).filter(
+                User.role == UserRole.STUDENT,
+                User.is_active == True,
+                User.is_archived == False,
+                Batch.id == monthly_exam.batch_id
+            ).all()
+
+            individual_exams = IndividualExam.query.filter_by(
+                monthly_exam_id=exam_id
+            ).all()
+
+            for student in batch_students:
+                total_obt = 0
+                total_poss = 0
+                failed = 0
+                for ie in individual_exams:
+                    m = MonthlyMark.query.filter_by(
+                        monthly_exam_id=exam_id,
+                        individual_exam_id=ie.id,
+                        user_id=student.id
+                    ).first()
+                    if m and not m.is_absent:
+                        total_obt += m.marks_obtained
+                        if (m.marks_obtained / m.total_marks * 100) < 33:
+                            failed += 1
+                    total_poss += ie.marks
+
+                pct = (total_obt / total_poss * 100) if total_poss > 0 else 0
+                grade, gpa = calculate_grade_and_gpa(pct)
+                rows.append({
+                    'student_id': f"STU{student.created_at.year if student.created_at else ''}{student.id:04d}",
+                    'student_name': student.full_name,
+                    'roll_number': None,
+                    'total_marks': total_obt,
+                    'total_possible': total_poss,
+                    'position': 0,
+                    'grade': grade,
+                    'gpa': round(gpa, 2),
+                    'percentage': round(pct, 2),
+                    'status': 'Failed' if (grade == 'F' or failed > 0) else 'Passed',
+                    'failed_subjects': failed,
+                })
+            rows.sort(key=lambda x: -x['percentage'])
+            for i, r in enumerate(rows, 1):
+                r['position'] = i
+
+        school_info = _get_school_info()
+
+        return render_template(
+            'partials/section_result.html',
+            school=school_info,
+            monthly_exam=monthly_exam,
+            batch=batch,
+            rows=rows,
+            total_students=len(rows),
+            passed=sum(1 for r in rows if r['status'] == 'Passed'),
+            failed_count=sum(1 for r in rows if r['status'] == 'Failed'),
+            print_date=datetime.now().strftime('%d-%b-%Y'),
+        )
+
+    except Exception as e:
+        logger.error(f"Error rendering section result: {e}")
+        return error_response(f'Failed to render section result: {str(e)}', 500)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# PUBLIC RESULT SEARCH  (no login required – only published exams returned)
+# ─────────────────────────────────────────────────────────────────────────────
+
+@monthly_exams_bp.route('/public-result-search', methods=['GET'])
+def public_result_search():
+    """
+    Public API – search a student's published results.
+    Query params (at least one of student_id OR roll_number required):
+        student_id  – numeric database user id  (e.g. 97 or 100097)
+        year        – academic year             (e.g. 2025)
+        section     – batch code or batch name  (partial, case-insensitive)
+        roll_number – roll number from MonthlyRanking
+    Returns only exams where show_results=True.
+    """
+    try:
+        student_id_raw = request.args.get('student_id', '').strip()
+        year_raw       = request.args.get('year', '').strip()
+        section_raw    = request.args.get('section', '').strip()
+        roll_raw       = request.args.get('roll_number', '').strip()
+
+        if not student_id_raw and not roll_raw:
+            return error_response('Provide at least student_id or roll_number', 400)
+
+        # ── Resolve year ──
+        year = int(year_raw) if year_raw.isdigit() else None
+
+        # ── Resolve section → batch ids ──
+        batch_ids = None
+        if section_raw:
+            batches = Batch.query.filter(
+                or_(
+                    Batch.code.ilike(f'%{section_raw}%'),
+                    Batch.name.ilike(f'%{section_raw}%')
+                )
+            ).all()
+            batch_ids = [b.id for b in batches]
+            if not batch_ids:
+                return success_response('No results found', {'results': []})
+
+        # ── Resolve student_id → user ──
+        user = None
+        if student_id_raw:
+            # Accept raw numeric id (e.g. "97") or prefixed (e.g. "100097")
+            # Try direct cast first
+            num = None
+            if student_id_raw.isdigit():
+                num = int(student_id_raw)
+            # Also try stripping leading "100" prefix (common formatting)
+            if num is None and len(student_id_raw) > 4:
+                try:
+                    num = int(student_id_raw[-4:])  # last 4 digits
+                except ValueError:
+                    pass
+            if num:
+                user = User.query.filter(
+                    User.id == num,
+                    User.role == UserRole.STUDENT,
+                    User.is_archived == False
+                ).first()
+                # Fallback: try direct match as-is
+                if user is None:
+                    user = User.query.filter(
+                        User.id == int(student_id_raw) if student_id_raw.isdigit() else -1,
+                        User.role == UserRole.STUDENT,
+                        User.is_archived == False
+                    ).first()
+
+        # ── Build exam query ──
+        exam_query = MonthlyExam.query.filter(MonthlyExam.show_results == True)
+        if year:
+            exam_query = exam_query.filter(MonthlyExam.year == year)
+        if batch_ids is not None:
+            exam_query = exam_query.filter(MonthlyExam.batch_id.in_(batch_ids))
+
+        published_exams = exam_query.order_by(
+            MonthlyExam.year.desc(), MonthlyExam.month.desc()
+        ).all()
+
+        if not published_exams:
+            return success_response('No published results found', {'results': []})
+
+        results = []
+        for exam in published_exams:
+            # If student resolved by ID, use directly; otherwise match by roll number
+            target_user = user
+            if target_user is None and roll_raw and roll_raw.isdigit():
+                # Find the ranking with this roll number for this exam
+                ranking = MonthlyRanking.query.filter_by(
+                    monthly_exam_id=exam.id,
+                    roll_number=int(roll_raw)
+                ).first()
+                if ranking:
+                    target_user = User.query.get(ranking.user_id)
+
+            if target_user is None:
+                continue
+
+            # If roll_number filter provided, verify it matches this student+exam
+            if roll_raw and roll_raw.isdigit():
+                ranking_check = MonthlyRanking.query.filter_by(
+                    monthly_exam_id=exam.id,
+                    user_id=target_user.id
+                ).first()
+                if ranking_check is None or ranking_check.roll_number != int(roll_raw):
+                    continue
+
+            # Make sure student is in this batch
+            student_in_batch = any(b.id == exam.batch_id for b in target_user.batches)
+            if not student_in_batch:
+                continue
+
+            # Summary marks
+            ranking = MonthlyRanking.query.filter_by(
+                monthly_exam_id=exam.id,
+                user_id=target_user.id
+            ).first()
+
+            results.append({
+                'exam_id':        exam.id,
+                'user_id':        target_user.id,
+                'exam_title':     exam.title,
+                'month':          exam.month,
+                'year':           exam.year,
+                'batch_name':     exam.batch.name if exam.batch else '',
+                'batch_code':     exam.batch.code if exam.batch else '',
+                'student_name':   target_user.full_name,
+                'student_db_id':  target_user.id,
+                'roll_number':    ranking.roll_number if ranking else None,
+                'position':       ranking.position   if ranking else None,
+                'total_marks':    round(ranking.final_total, 2) if ranking else None,
+                'max_marks':      round(ranking.max_possible_total, 2) if ranking else None,
+                'percentage':     round(ranking.percentage, 2) if ranking else None,
+                'grade':          ranking.grade if ranking else None,
+                'gpa':            round(ranking.gpa, 2) if ranking else None,
+                'status':         'Passed' if (ranking and ranking.grade != 'F') else 'Failed',
+                'published_at':   exam.result_published_at.strftime('%d-%b-%Y') if exam.result_published_at else '',
+                'transcript_url': f'/api/monthly-exams/public-result/{exam.id}/{target_user.id}',
+            })
+
+        return success_response('Search complete', {
+            'results': results,
+            'total':   len(results),
+        })
+
+    except Exception as e:
+        logger.error(f"Public result search error: {e}")
+        return error_response(f'Search failed: {str(e)}', 500)
+
+
+@monthly_exams_bp.route('/public-result/<int:exam_id>/<int:user_id>', methods=['GET'])
+def public_result_transcript(exam_id, user_id):
+    """
+    Public print-ready transcript – no login needed.
+    Only works for exams with show_results=True.
+    """
+    try:
+        monthly_exam = MonthlyExam.query.get(exam_id)
+        if not monthly_exam:
+            return "Result not found.", 404
+        if not monthly_exam.show_results:
+            return "Results have not been published yet.", 403
+
+        student = User.query.filter_by(id=user_id, role=UserRole.STUDENT, is_archived=False).first()
+        if not student:
+            return "Student not found.", 404
+
+        # Verify student belongs to this batch
+        if not any(b.id == monthly_exam.batch_id for b in student.batches):
+            return "Access denied.", 403
+
+        individual_exams = IndividualExam.query.filter_by(
+            monthly_exam_id=exam_id
+        ).order_by(IndividualExam.order_index).all()
+
+        subject_rows = []
+        total_obtained = 0
+        total_full = 0
+        failed_subjects = 0
+
+        for ie in individual_exams:
+            mark = MonthlyMark.query.filter_by(
+                monthly_exam_id=exam_id,
+                individual_exam_id=ie.id,
+                user_id=user_id
+            ).first()
+            obtained   = mark.marks_obtained if (mark and not mark.is_absent) else 0
+            full_marks = ie.marks
+            absent     = mark.is_absent if mark else True
+            pct        = (obtained / full_marks * 100) if full_marks > 0 else 0
+            grade, gpa = calculate_grade_and_gpa(pct)
+            total_obtained += obtained
+            total_full     += full_marks
+            if grade == 'F':
+                failed_subjects += 1
+            subject_rows.append({
+                'subject':    ie.subject,
+                'full_marks': full_marks,
+                'obtained':   obtained,
+                'absent':     absent,
+                'percentage': round(pct, 2),
+                'grade':      grade,
+                'gpa':        gpa,
+            })
+
+        total_pct      = (total_obtained / total_full * 100) if total_full > 0 else 0
+        overall_grade, overall_gpa = calculate_grade_and_gpa(total_pct)
+        result_status  = 'Failed' if failed_subjects > 0 else 'Passed'
+
+        # Attendance
+        exam_month   = monthly_exam.month
+        exam_year    = monthly_exam.year
+        month_start  = date(exam_year, exam_month, 1)
+        month_end    = (date(exam_year + 1, 1, 1) if exam_month == 12 else date(exam_year, exam_month + 1, 1)) - timedelta(days=1)
+
+        total_working_days = db.session.query(Attendance.date).filter(
+            Attendance.batch_id == monthly_exam.batch_id,
+            Attendance.date >= month_start,
+            Attendance.date <= month_end
+        ).distinct().count()
+
+        present_days = Attendance.query.filter(
+            Attendance.user_id == user_id,
+            Attendance.batch_id == monthly_exam.batch_id,
+            Attendance.date >= month_start,
+            Attendance.date <= month_end,
+            Attendance.status.in_([AttendanceStatus.PRESENT, AttendanceStatus.LEAVE])
+        ).count()
+
+        ranking      = MonthlyRanking.query.filter_by(monthly_exam_id=exam_id, user_id=user_id).first()
+        roll_number  = ranking.roll_number if ranking else None
+        position     = ranking.position    if ranking else None
+        school_info  = _get_school_info()
+        batch        = monthly_exam.batch
+
+        grade_scale = [
+            (80, 100, 'A+', 5.00),
+            (70,  79, 'A',  4.00),
+            (60,  69, 'A-', 3.50),
+            (50,  59, 'B',  3.00),
+            (40,  49, 'C',  2.00),
+            (33,  39, 'D',  1.00),
+            ( 0,  32, 'F',  0.00),
+        ]
+
+        return render_template(
+            'partials/result_transcript.html',
+            school=school_info,
+            student=student,
+            monthly_exam=monthly_exam,
+            batch=batch,
+            subject_rows=subject_rows,
+            total_obtained=total_obtained,
+            total_full=total_full,
+            total_pct=round(total_pct, 2),
+            overall_grade=overall_grade,
+            overall_gpa=overall_gpa,
+            result_status=result_status,
+            failed_subjects=failed_subjects,
+            roll_number=roll_number,
+            position=position,
+            total_working_days=total_working_days,
+            present_days=present_days,
+            grade_scale=grade_scale,
+            print_date=datetime.now().strftime('%d-%b-%Y'),
+        )
+
+    except Exception as e:
+        logger.error(f"Public transcript error: {e}")
+        return f"Error: {str(e)}", 500
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# CLASS-WISE (ALL SECTIONS) RESULT  – no login needed, published only
+# ─────────────────────────────────────────────────────────────────────────────
+
+@monthly_exams_bp.route('/class-result', methods=['GET'])
+def public_class_result():
+    """
+    Print-ready class-wise result: all sections (batches) whose name starts
+    with `class_name` for the given `year` and optional `exam_title`.
+    Falls back to returning a 404 page if nothing is found.
+
+    Query params:
+        class_name   – batch name prefix  (e.g. "Class Two" or "TWO")
+        year         – academic year
+        exam_title   – exam title keyword  (optional – to pick a term e.g. "2nd Term")
+    """
+    try:
+        class_name  = request.args.get('class_name', '').strip()
+        year_raw    = request.args.get('year', '').strip()
+        exam_kw     = request.args.get('exam_title', '').strip()
+
+        if not class_name or not year_raw:
+            return render_template('partials/class_result.html',
+                                   error='Please provide class_name and year.',
+                                   school=_get_school_info(),
+                                   sections=[], class_name='', year='', exam_title='')
+
+        year = int(year_raw) if year_raw.isdigit() else None
+        if not year:
+            return render_template('partials/class_result.html',
+                                   error='Invalid year.',
+                                   school=_get_school_info(),
+                                   sections=[], class_name=class_name, year=year_raw, exam_title=exam_kw)
+
+        # Find all batches whose name matches class_name (prefix or contains)
+        batches = Batch.query.filter(
+            or_(
+                Batch.name.ilike(f'{class_name}%'),
+                Batch.name.ilike(f'%{class_name}%'),
+            )
+        ).all()
+
+        if not batches:
+            return render_template('partials/class_result.html',
+                                   error=f'No class found matching "{class_name}".',
+                                   school=_get_school_info(),
+                                   sections=[], class_name=class_name, year=year, exam_title=exam_kw)
+
+        batch_ids = [b.id for b in batches]
+
+        # Published exams for these batches in the given year
+        exam_q = MonthlyExam.query.filter(
+            MonthlyExam.batch_id.in_(batch_ids),
+            MonthlyExam.year == year,
+            MonthlyExam.show_results == True,
+        )
+        if exam_kw:
+            exam_q = exam_q.filter(MonthlyExam.title.ilike(f'%{exam_kw}%'))
+
+        published_exams = exam_q.order_by(MonthlyExam.batch_id, MonthlyExam.month).all()
+
+        if not published_exams:
+            return render_template('partials/class_result.html',
+                                   error='No published results found for this class/year.',
+                                   school=_get_school_info(),
+                                   sections=[], class_name=class_name, year=year, exam_title=exam_kw)
+
+        # Group by batch (section)
+        from collections import defaultdict
+        batch_map  = {b.id: b for b in batches}
+        exam_title_display = published_exams[0].title if published_exams else ''
+
+        sections = []
+        for batch in sorted(batches, key=lambda b: b.code or b.name):
+            batch_exams = [e for e in published_exams if e.batch_id == batch.id]
+            if not batch_exams:
+                continue
+            # Use the most recent exam for this batch
+            exam = batch_exams[-1]
+
+            stored_rankings = MonthlyRanking.query.filter_by(
+                monthly_exam_id=exam.id
+            ).order_by(MonthlyRanking.position).all()
+
+            rows = []
+            if stored_rankings:
+                for r in stored_rankings:
+                    stu = User.query.get(r.user_id)
+                    if not stu or not stu.is_active or stu.is_archived:
+                        continue
+                    marks_list = MonthlyMark.query.filter_by(
+                        monthly_exam_id=exam.id, user_id=r.user_id
+                    ).all()
+                    failed = sum(
+                        1 for m in marks_list
+                        if m.total_marks > 0 and not m.is_absent
+                        and (m.marks_obtained / m.total_marks * 100) < 33
+                    )
+                    rows.append({
+                        'student_id':    f"STU{stu.created_at.year if stu.created_at else ''}{stu.id:04d}",
+                        'db_id':         stu.id,
+                        'student_name':  stu.full_name,
+                        'roll_number':   r.roll_number,
+                        'total_marks':   round(r.final_total, 2),
+                        'total_possible':round(r.max_possible_total, 2),
+                        'position':      r.position,
+                        'grade':         r.grade or 'N/A',
+                        'gpa':           round(r.gpa, 2) if r.gpa else 0,
+                        'percentage':    round(r.percentage, 2) if r.percentage else 0,
+                        'status':        'Failed' if (r.grade == 'F' or failed > 0) else 'Passed',
+                        'failed_subjects': failed,
+                        'exam_id':       exam.id,
+                    })
+            else:
+                # Fallback: compute from MonthlyMark
+                individual_exams = IndividualExam.query.filter_by(monthly_exam_id=exam.id).all()
+                stu_list = User.query.join(User.batches).filter(
+                    User.role == UserRole.STUDENT,
+                    User.is_active == True,
+                    User.is_archived == False,
+                    Batch.id == batch.id
+                ).all()
+                for stu in stu_list:
+                    tobt = 0; tposs = 0; failed = 0
+                    for ie in individual_exams:
+                        m = MonthlyMark.query.filter_by(
+                            monthly_exam_id=exam.id, individual_exam_id=ie.id, user_id=stu.id
+                        ).first()
+                        if m and not m.is_absent:
+                            tobt += m.marks_obtained
+                            if (m.marks_obtained / m.total_marks * 100) < 33:
+                                failed += 1
+                        tposs += ie.marks
+                    pct = (tobt / tposs * 100) if tposs > 0 else 0
+                    grade, gpa = calculate_grade_and_gpa(pct)
+                    rows.append({
+                        'student_id': f"STU{stu.created_at.year if stu.created_at else ''}{stu.id:04d}",
+                        'db_id': stu.id,
+                        'student_name': stu.full_name,
+                        'roll_number': None,
+                        'total_marks': tobt,
+                        'total_possible': tposs,
+                        'position': 0,
+                        'grade': grade, 'gpa': round(gpa,2),
+                        'percentage': round(pct,2),
+                        'status': 'Failed' if (grade == 'F' or failed > 0) else 'Passed',
+                        'failed_subjects': failed,
+                        'exam_id': exam.id,
+                    })
+                rows.sort(key=lambda x: -x['percentage'])
+                for i, r in enumerate(rows, 1): r['position'] = i
+
+            sections.append({
+                'batch_name': batch.name,
+                'batch_code': batch.code or '',
+                'exam_id':    exam.id,
+                'rows':       rows,
+                'total':      len(rows),
+                'passed':     sum(1 for r in rows if r['status'] == 'Passed'),
+                'failed':     sum(1 for r in rows if r['status'] == 'Failed'),
+            })
+
+        return render_template(
+            'partials/class_result.html',
+            school=_get_school_info(),
+            class_name=class_name,
+            year=year,
+            exam_title=exam_title_display,
+            sections=sections,
+            print_date=datetime.now().strftime('%d-%b-%Y'),
+            error=None,
+        )
+
+    except Exception as e:
+        logger.error(f"Class result error: {e}")
+        return f"Error: {str(e)}", 500

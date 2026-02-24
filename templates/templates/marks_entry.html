@@ -1,0 +1,264 @@
+{% extends "base.html" %}
+{% block title %}Marks Entry - Modern Ideal Non Government Primary School{% endblock %}
+{% block extra_head %}
+<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body{font-family:'Poppins',sans-serif;}
+.bn{font-family:'Hind Siliguri',sans-serif;}
+.input-mark{width:70px;border:1px solid #e5e7eb;border-radius:6px;padding:4px 8px;text-align:center;font-size:14px;}
+.input-mark:focus{border-color:#3b82f6;outline:none;box-shadow:0 0 0 3px rgba(59,130,246,.15);}
+.input-mark.absent{background:#fef2f2;border-color:#fca5a5;}
+.row-pass{background:#f0fdf4;}
+.row-fail{background:#fff7f7;}
+</style>
+{% endblock %}
+
+{% block content %}
+<div x-data="marksEntry()" class="min-h-screen bg-gray-50">
+  <!-- Header -->
+  <header class="bg-white shadow-sm border-b border-gray-200">
+    <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-4">
+        <a href="/" class="text-gray-400 hover:text-blue-600 transition"><i class="fas fa-home text-xl"></i></a>
+        <div>
+          <h1 class="text-xl font-bold text-gray-900">Marks Entry</h1>
+          <p class="text-xs text-gray-400 bn">নম্বর প্রবেশ</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <span x-show="saveMsg" x-text="saveMsg" class="text-sm font-medium" :class="saveOk?'text-green-600':'text-red-600'"></span>
+        <button @click="saveAllMarks()" :disabled="saving||!examId" class="bg-blue-600 text-white px-5 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 disabled:opacity-50 transition flex items-center gap-2">
+          <i class="fas fa-save"></i> <span x-show="!saving">Save All Marks</span><span x-show="saving">Saving…</span>
+        </button>
+        <button @click="publishResult()" x-show="examId&&!examPublished" class="bg-green-600 text-white px-5 py-2 rounded-lg text-sm font-semibold hover:bg-green-700 transition flex items-center gap-2">
+          <i class="fas fa-upload"></i> Publish Result
+        </button>
+        <span x-show="examPublished" class="bg-green-50 text-green-700 px-3 py-1.5 rounded-lg text-sm font-semibold border border-green-200"><i class="fas fa-check-circle mr-1"></i> Published</span>
+        <button @click="window.print()" class="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-gray-200 transition flex items-center gap-2"><i class="fas fa-print"></i> Print</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Controls -->
+  <div class="bg-white border-b border-gray-100 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 py-4">
+      <div class="flex flex-wrap gap-4 items-end">
+        <div>
+          <label class="block text-xs font-semibold text-gray-500 mb-1.5">Class</label>
+          <select x-model="selClass" @change="onClassChange()" class="border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-blue-400 min-w-32">
+            <option value="">-- Class --</option>
+            <template x-for="c in classes" :key="c.id"><option :value="c.id" x-text="c.name"></option></template>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-gray-500 mb-1.5">Term</label>
+          <select x-model="selTermExam" @change="loadExamData()" class="border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-blue-400 min-w-40">
+            <option value="">-- Select Term --</option>
+            <template x-for="e in termExams" :key="e.id"><option :value="e.id" x-text="e.title"></option></template>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-gray-500 mb-1.5">Section (optional)</label>
+          <select x-model="selSection" @change="filterStudents()" class="border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-blue-400">
+            <option value="">All Sections</option>
+            <template x-for="s in sections" :key="s.id"><option :value="s.id" x-text="'Section '+s.name"></option></template>
+          </select>
+        </div>
+        <div x-show="examId" class="ml-auto bg-blue-50 rounded-xl px-5 py-2 text-center">
+          <div class="text-2xl font-bold text-blue-700" x-text="filteredStudents.length"></div>
+          <div class="text-xs text-blue-500 font-medium">Students</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Grid Content -->
+  <div class="max-w-full mx-auto px-4 py-6">
+    <div x-show="loading" class="text-center py-20 text-gray-400">
+      <i class="fas fa-spinner fa-spin text-3xl block mb-4"></i>Loading data…
+    </div>
+
+    <div x-show="!loading && examId && filteredStudents.length" class="overflow-x-auto rounded-xl shadow">
+      <table class="border-collapse min-w-full bg-white text-sm">
+        <thead>
+          <tr class="bg-gradient-to-r from-blue-600 to-blue-700 text-white">
+            <th class="px-3 py-3 text-left font-semibold sticky left-0 bg-blue-700 min-w-8">#</th>
+            <th class="px-3 py-3 text-left font-semibold sticky left-8 bg-blue-700 min-w-40">Student Name</th>
+            <th class="px-3 py-3 text-center font-semibold min-w-16">Roll</th>
+            <template x-for="sub in subjects" :key="sub.id">
+              <th class="px-2 py-3 text-center font-semibold min-w-24" x-text="sub.name+'&#10;('+sub.full_marks+')'"></th>
+            </template>
+            <th class="px-3 py-3 text-center font-semibold min-w-20">Total</th>
+            <th class="px-3 py-3 text-center font-semibold min-w-16">%</th>
+            <th class="px-3 py-3 text-center font-semibold min-w-16">Grade</th>
+            <th class="px-3 py-3 text-center font-semibold min-w-16">Result</th>
+          </tr>
+        </thead>
+        <tbody>
+          <template x-for="(student, idx) in filteredStudents" :key="student.id">
+            <tr :class="rowClass(student)" class="hover:bg-blue-50 transition border-b border-gray-100">
+              <td class="px-3 py-2 text-gray-500 text-xs sticky left-0 bg-inherit" x-text="idx+1"></td>
+              <td class="px-3 py-2 sticky left-8 bg-inherit">
+                <div class="font-semibold text-gray-800" x-text="student.name"></div>
+                <div class="text-xs text-gray-400" x-text="student.reg_number||student.username||''"></div>
+              </td>
+              <td class="px-2 py-2 text-center text-gray-600 text-xs" x-text="student.roll_number||'—'"></td>
+              <template x-for="sub in subjects" :key="sub.id">
+                <td class="px-2 py-2 text-center">
+                  <input type="number" :min="0" :max="sub.full_marks"
+                    :value="getMarks(student.id, sub.id)"
+                    @change="setMarks(student.id, sub.id, $event.target.value, sub.full_marks, sub.pass_marks)"
+                    :class="isAbsent(student.id, sub.id)?'absent':''"
+                    class="input-mark">
+                  <div class="mt-0.5">
+                    <label class="flex items-center justify-center gap-1 text-xs text-gray-400 cursor-pointer">
+                      <input type="checkbox" :checked="isAbsent(student.id, sub.id)" @change="setAbsent(student.id, sub.id, $event.target.checked)" class="w-3 h-3">
+                      Absent
+                    </label>
+                  </div>
+                </td>
+              </template>
+              <td class="px-2 py-2 text-center font-bold text-gray-800" x-text="studentTotal(student.id)"></td>
+              <td class="px-2 py-2 text-center" x-text="studentPct(student.id)+'%'"></td>
+              <td class="px-2 py-2 text-center">
+                <span class="text-xs font-bold px-2 py-0.5 rounded-full" :class="gradeClass(studentGrade(student.id))" x-text="studentGrade(student.id)"></span>
+              </td>
+              <td class="px-2 py-2 text-center">
+                <span class="text-xs font-bold px-2 py-0.5 rounded-full" :class="studentPass(student.id)?'bg-green-100 text-green-700':'bg-red-100 text-red-700'" x-text="studentPass(student.id)?'Pass':'Fail'"></span>
+              </td>
+            </tr>
+          </template>
+        </tbody>
+      </table>
+    </div>
+
+    <div x-show="!loading && !examId" class="text-center py-20 text-gray-400">
+      <i class="fas fa-clipboard-list text-5xl block mb-4"></i>
+      <p class="text-lg font-medium">Select a class and term exam to enter marks</p>
+    </div>
+    <div x-show="!loading && examId && !filteredStudents.length" class="text-center py-20 text-gray-400">
+      <i class="fas fa-users text-5xl block mb-4"></i>
+      <p>No students found for this class/term.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+function marksEntry(){
+  return {
+    classes:[], selClass:'', selSection:'', selTermExam:'',
+    sections:[], subjects:[], termExams:[],
+    allStudents:[], filteredStudents:[],
+    marksData:{}, // {studentId_subjectId: {marks, is_absent}}
+    examId:null, examPublished:false,
+    loading:false, saving:false,
+    saveMsg:'', saveOk:true,
+
+    async init(){
+      // Pre-fill from URL params
+      const p = new URLSearchParams(location.search);
+      const preExamId = p.get('exam_id');
+      await this.loadClasses();
+      if(preExamId){
+        // Load term exams to find the class
+        const exams = await fetch('/api/school/term-exams').then(r=>r.json());
+        const exam = exams.find(e=>e.id==preExamId);
+        if(exam){ this.selClass=exam.school_class_id; await this.onClassChange(); this.selTermExam=preExamId; await this.loadExamData(); }
+      }
+    },
+    async loadClasses(){ try{ this.classes=await fetch('/api/school/classes').then(r=>r.json()); }catch(e){} },
+    async onClassChange(){
+      this.selSection=''; this.selTermExam=''; this.examId=null;
+      if(!this.selClass) return;
+      try{ this.sections=await fetch('/api/school/classes/'+this.selClass+'/sections').then(r=>r.json()); }catch(e){}
+      try{
+        const all=await fetch('/api/school/term-exams').then(r=>r.json());
+        this.termExams=all.filter(e=>e.school_class_id==this.selClass||e.class_id==this.selClass);
+      }catch(e){}
+    },
+    async loadExamData(){
+      if(!this.selTermExam) return;
+      this.loading=true; this.examId=this.selTermExam;
+      try{
+        // Load subjects for the selected class
+        this.subjects=await fetch('/api/school/classes/'+this.selClass+'/subjects').then(r=>r.json());
+        // Load existing marks for this exam
+        const marks=await fetch('/api/school/term-exams/'+this.examId+'/marks').then(r=>r.json());
+        this.marksData={};
+        if(Array.isArray(marks)) marks.forEach(m=>{ this.marksData[m.student_id+'_'+m.subject_id]={marks:m.marks_obtained,is_absent:m.is_absent}; });
+        // Load students in this class
+        const studResp=await fetch('/api/school/student-info?class_id='+this.selClass).then(r=>r.json());
+        this.allStudents=Array.isArray(studResp)?studResp:(studResp.students||[]);
+        // Check published status
+        const examInfo=(await fetch('/api/school/term-exams').then(r=>r.json())).find(e=>e.id==this.examId);
+        this.examPublished=examInfo?.result_published||false;
+        this.filterStudents();
+      }catch(e){ console.error(e); }
+      this.loading=false;
+    },
+    filterStudents(){
+      if(!this.selSection) this.filteredStudents=[...this.allStudents];
+      else this.filteredStudents=this.allStudents.filter(s=>s.section_id==this.selSection);
+    },
+    getMarks(studentId, subjectId){
+      return this.marksData[studentId+'_'+subjectId]?.marks??'';
+    },
+    setMarks(studentId, subjectId, value, full, pass){
+      const key=studentId+'_'+subjectId;
+      if(!this.marksData[key]) this.marksData[key]={marks:null,is_absent:false};
+      this.marksData[key].marks=value===''?null:Math.min(Number(value),full);
+    },
+    isAbsent(studentId, subjectId){ return this.marksData[studentId+'_'+subjectId]?.is_absent??false; },
+    setAbsent(studentId, subjectId, val){
+      const key=studentId+'_'+subjectId;
+      if(!this.marksData[key]) this.marksData[key]={marks:null,is_absent:false};
+      this.marksData[key].is_absent=val;
+      if(val) this.marksData[key].marks=null;
+    },
+    studentTotal(sid){
+      let t=0; this.subjects.forEach(sub=>{ const m=this.marksData[sid+'_'+sub.id]; if(m&&!m.is_absent&&m.marks!=null) t+=Number(m.marks); }); return t;
+    },
+    studentPct(sid){
+      const total=this.subjects.reduce((a,s)=>a+s.full_marks,0);
+      return total?Math.round(this.studentTotal(sid)/total*100):0;
+    },
+    studentGrade(sid){
+      const p=this.studentPct(sid);
+      if(p>=80)return'A+';if(p>=70)return'A';if(p>=60)return'A-';if(p>=50)return'B';if(p>=40)return'C';if(p>=33)return'D';return'F';
+    },
+    studentPass(sid){
+      return this.subjects.every(sub=>{ const m=this.marksData[sid+'_'+sub.id]; return m?.is_absent||((m?.marks??0)>=sub.pass_marks); });
+    },
+    gradeClass(g){ const map={'A+':'bg-green-100 text-green-800','A':'bg-blue-100 text-blue-800','A-':'bg-teal-100 text-teal-800','B':'bg-yellow-100 text-yellow-800','C':'bg-orange-100 text-orange-800','D':'bg-red-100 text-red-800','F':'bg-gray-100 text-gray-600'}; return map[g]||''; },
+    rowClass(s){ return this.studentPass(s.id)?'row-pass':'row-fail'; },
+    async saveAllMarks(){
+      if(!this.examId||this.saving) return;
+      this.saving=true;
+      const rows=[];
+      this.allStudents.forEach(s=>{
+        this.subjects.forEach(sub=>{
+          const key=s.id+'_'+sub.id;
+          const m=this.marksData[key]||{marks:null,is_absent:false};
+          rows.push({student_id:s.id,subject_id:sub.id,marks_obtained:m.marks,is_absent:m.is_absent||false});
+        });
+      });
+      try{
+        const r=await fetch('/api/school/term-exams/'+this.examId+'/marks',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({marks:rows})});
+        const d=await r.json();
+        this.saveOk=d.success;
+        this.saveMsg=d.success?'✓ Marks saved successfully!':'Error: '+(d.error||'Failed');
+      }catch(e){ this.saveOk=false; this.saveMsg='Network error.'; }
+      this.saving=false;
+      setTimeout(()=>this.saveMsg='',5000);
+    },
+    async publishResult(){
+      if(!confirm('Publish result? Students will be able to see their marks.')) return;
+      try{
+        await fetch('/api/school/term-exams/'+this.examId,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({result_published:true})});
+        this.examPublished=true;
+      }catch(e){}
+    },
+  };
+}
+</script>
+{% endblock %}

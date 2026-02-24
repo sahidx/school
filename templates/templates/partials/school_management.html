@@ -1,0 +1,608 @@
+<!-- School Management CMS Partial -->
+<!-- Tabs: Info | Announcements | Classes | Subjects | Results -->
+<div x-data="schoolCMS()" @school-tab.window="syncTab($event.detail)" class="fade-in">
+
+  <!-- Sub-nav tabs -->
+  <div class="flex gap-2 mb-6 flex-wrap border-b border-gray-200 pb-2">
+    <template x-for="tab in tabs" :key="tab.id">
+      <button @click="activeTab=tab.id"
+        :class="activeTab===tab.id?'bg-blue-600 text-white':'bg-gray-100 text-gray-700 hover:bg-gray-200'"
+        class="px-4 py-2 rounded-t-lg text-sm font-semibold transition-colors flex items-center gap-2">
+        <i :class="tab.icon"></i>
+        <span x-text="tab.label"></span>
+      </button>
+    </template>
+  </div>
+
+  <!-- ══ SCHOOL INFO ══ -->
+  <div x-show="activeTab==='info'" x-cloak>
+    <div class="bg-white rounded-xl shadow p-6 max-w-3xl">
+      <h3 class="text-lg font-bold text-gray-900 mb-6 flex items-center gap-3">
+        <div class="w-9 h-9 bg-blue-100 rounded-lg flex items-center justify-center"><i class="fas fa-school text-blue-600"></i></div>
+        School Information (CMS)
+      </h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <template x-for="field in infoFields" :key="field.key">
+          <div>
+            <label class="block text-xs font-semibold text-gray-500 mb-1.5" x-text="field.label"></label>
+            <input :type="field.type||'text'" :placeholder="field.placeholder||''"
+              x-model="schoolInfo[field.key]"
+              class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:border-blue-400 focus:ring-2 focus:ring-blue-100 outline-none">
+          </div>
+        </template>
+      </div>
+      <div class="mt-6 flex gap-3">
+        <button @click="saveSchoolInfo()" class="bg-blue-600 text-white px-6 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition flex items-center gap-2">
+          <i class="fas fa-save"></i> Save School Info
+        </button>
+        <span x-show="infoMsg" x-text="infoMsg" class="text-sm text-green-600 font-medium self-center"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ ANNOUNCEMENTS ══ -->
+  <div x-show="activeTab==='announcements'" x-cloak>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <!-- Form -->
+      <div class="bg-white rounded-xl shadow p-6">
+        <h3 class="text-lg font-bold text-gray-900 mb-5 flex items-center gap-3">
+          <div class="w-9 h-9 bg-yellow-100 rounded-lg flex items-center justify-center"><i class="fas fa-bullhorn text-yellow-600"></i></div>
+          <span x-text="editingAnn?'Edit Announcement':'New Announcement'"></span>
+        </h3>
+        <div class="space-y-4">
+          <div>
+            <label class="block text-xs font-semibold text-gray-500 mb-1">Title (English) *</label>
+            <input type="text" x-model="annForm.title" placeholder="Announcement title…" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-gray-500 mb-1">Title (Bengali)</label>
+            <input type="text" x-model="annForm.title_bn" placeholder="বাংলায় শিরোনাম…" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-gray-500 mb-1">Content</label>
+            <textarea x-model="annForm.content" rows="3" placeholder="Announcement content…" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100"></textarea>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-semibold text-gray-500 mb-1">Priority</label>
+              <select x-model="annForm.priority" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-blue-400">
+                <option value="normal">Normal</option>
+                <option value="high">High</option>
+                <option value="urgent">Urgent</option>
+                <option value="low">Low</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-gray-500 mb-1">Category</label>
+              <select x-model="annForm.category" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-blue-400">
+                <option value="general">General</option>
+                <option value="exam">Exam</option>
+                <option value="result">Result</option>
+                <option value="holiday">Holiday</option>
+                <option value="event">Event</option>
+                <option value="admission">Admission</option>
+              </select>
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-semibold text-gray-500 mb-1">Publish Date</label>
+              <input type="date" x-model="annForm.publish_date" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-blue-400">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-gray-500 mb-1">Expire Date</label>
+              <input type="date" x-model="annForm.expire_date" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-blue-400">
+            </div>
+          </div>
+          <div class="flex gap-5">
+            <label class="flex items-center gap-2 text-sm cursor-pointer"><input type="checkbox" x-model="annForm.is_pinned" class="rounded"> Pinned</label>
+            <label class="flex items-center gap-2 text-sm cursor-pointer"><input type="checkbox" x-model="annForm.show_on_homepage" class="rounded"> Show on Homepage</label>
+          </div>
+          <div class="flex gap-3">
+            <button @click="saveAnnouncement()" class="bg-blue-600 text-white px-5 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition flex items-center gap-2">
+              <i class="fas fa-save"></i> <span x-text="editingAnn?'Update':'Publish'"></span>
+            </button>
+            <button x-show="editingAnn" @click="resetAnnForm()" class="bg-gray-200 text-gray-700 px-5 py-2 rounded-lg text-sm font-semibold hover:bg-gray-300 transition">
+              Cancel
+            </button>
+            <span x-show="annMsg" x-text="annMsg" class="text-sm text-green-600 font-medium self-center"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- List -->
+      <div class="bg-white rounded-xl shadow p-6">
+        <h3 class="text-lg font-bold text-gray-900 mb-5 flex items-center gap-3">
+          <div class="w-9 h-9 bg-blue-100 rounded-lg flex items-center justify-center"><i class="fas fa-list text-blue-600"></i></div>
+          All Announcements
+          <span class="ml-auto bg-blue-100 text-blue-700 text-xs font-bold px-2 py-0.5 rounded-full" x-text="announcements.length"></span>
+        </h3>
+        <div x-show="loadingAnn" class="text-center text-gray-400 py-8"><i class="fas fa-spinner fa-spin"></i></div>
+        <div class="space-y-3 max-h-96 overflow-y-auto">
+          <template x-for="ann in announcements" :key="ann.id">
+            <div class="border border-gray-100 rounded-lg p-3 hover:bg-gray-50 transition">
+              <div class="flex items-start justify-between gap-2">
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center gap-2 mb-1">
+                    <span :class="{
+                      'bg-red-100 text-red-700':ann.priority==='urgent',
+                      'bg-orange-100 text-orange-700':ann.priority==='high',
+                      'bg-blue-100 text-blue-700':ann.priority==='normal',
+                      'bg-gray-100 text-gray-600':ann.priority==='low'
+                    }" class="text-xs font-bold px-2 py-0.5 rounded-full" x-text="ann.priority||'normal'"></span>
+                    <span class="bg-gray-100 text-gray-600 text-xs px-2 py-0.5 rounded" x-text="ann.category||'general'"></span>
+                    <span x-show="ann.is_pinned" class="text-yellow-500 text-xs"><i class="fas fa-thumbtack"></i></span>
+                  </div>
+                  <div class="text-sm font-semibold text-gray-800 truncate" x-text="ann.title"></div>
+                  <div class="text-xs text-gray-400 mt-0.5" x-text="ann.publish_date||ann.created_at?.split('T')[0]"></div>
+                </div>
+                <div class="flex gap-1 flex-shrink-0">
+                  <button @click="editAnnouncement(ann)" class="w-7 h-7 bg-blue-50 text-blue-600 rounded flex items-center justify-center hover:bg-blue-100 transition text-xs"><i class="fas fa-edit"></i></button>
+                  <button @click="toggleAnnouncementStatus(ann)" :title="ann.is_active?'Deactivate':'Activate'"
+                    :class="ann.is_active?'bg-green-50 text-green-600':'bg-gray-50 text-gray-400'"
+                    class="w-7 h-7 rounded flex items-center justify-center hover:bg-green-100 transition text-xs"><i class="fas fa-toggle-on"></i></button>
+                  <button @click="deleteAnnouncement(ann.id)" class="w-7 h-7 bg-red-50 text-red-600 rounded flex items-center justify-center hover:bg-red-100 transition text-xs"><i class="fas fa-trash"></i></button>
+                </div>
+              </div>
+            </div>
+          </template>
+          <div x-show="!loadingAnn&&!announcements.length" class="text-center text-gray-400 py-8 text-sm">No announcements yet.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ CLASSES & SECTIONS ══ -->
+  <div x-show="activeTab==='classes'" x-cloak>
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- Add Class -->
+      <div class="bg-white rounded-xl shadow p-6">
+        <h3 class="text-base font-bold text-gray-900 mb-4 flex items-center gap-2"><i class="fas fa-plus-circle text-blue-600"></i> Add Class</h3>
+        <div class="space-y-3">
+          <div>
+            <label class="text-xs font-semibold text-gray-500 block mb-1">Class Name (English)</label>
+            <input type="text" x-model="clsForm.name" placeholder="e.g. Class 1" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-blue-400">
+          </div>
+          <div>
+            <label class="text-xs font-semibold text-gray-500 block mb-1">Class Name (Bengali)</label>
+            <input type="text" x-model="clsForm.name_bn" placeholder="প্রথম শ্রেণি" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-blue-400">
+          </div>
+          <div>
+            <label class="text-xs font-semibold text-gray-500 block mb-1">Class Number</label>
+            <input type="number" x-model="clsForm.class_number" min="1" max="5" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-blue-400">
+          </div>
+          <button @click="addClass()" class="w-full bg-blue-600 text-white py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition"><i class="fas fa-plus"></i> Add Class</button>
+        </div>
+        <!-- Classes list -->
+        <div class="mt-6">
+          <div class="text-xs font-semibold text-gray-500 mb-3">Existing Classes</div>
+          <div class="space-y-2">
+            <template x-for="cls in classes" :key="cls.id">
+              <div @click="selectClass(cls)" :class="selectedClass?.id===cls.id?'border-blue-400 bg-blue-50':'border-gray-100'"
+                class="border rounded-lg p-2.5 cursor-pointer hover:bg-gray-50 flex items-center justify-between transition">
+                <div @click.stop="selectClass(cls)" class="flex-1">
+                  <div class="text-sm font-semibold text-gray-800" x-text="cls.name"></div>
+                  <div class="text-xs text-gray-400" x-text="cls.name_bn||''"></div>
+                </div>
+                <div class="flex items-center gap-1">
+                  <i class="fas fa-chevron-right text-gray-400 text-xs"></i>
+                  <button @click.stop="deleteClass(cls.id)" class="w-6 h-6 bg-red-50 text-red-500 rounded hover:bg-red-100 flex items-center justify-center transition" title="Delete class"><i class="fas fa-trash text-xs"></i></button>
+                </div>
+              </div>
+            </template>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sections -->
+      <div class="bg-white rounded-xl shadow p-6">
+        <h3 class="text-base font-bold text-gray-900 mb-1 flex items-center gap-2"><i class="fas fa-door-open text-green-600"></i> Sections</h3>
+        <p class="text-xs text-gray-400 mb-4" x-text="selectedClass?'for '+selectedClass.name:'Select a class first'"></p>
+        <div x-show="selectedClass">
+          <div class="space-y-3 mb-4">
+            <div>
+              <label class="text-xs font-semibold text-gray-500 block mb-1">Section Name (A/B/C)</label>
+              <input type="text" x-model="secForm.name" placeholder="A" maxlength="3" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-blue-400">
+            </div>
+            <div>
+              <label class="text-xs font-semibold text-gray-500 block mb-1">Room Number</label>
+              <input type="text" x-model="secForm.room_number" placeholder="101" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-blue-400">
+            </div>
+            <div>
+              <label class="text-xs font-semibold text-gray-500 block mb-1">Capacity</label>
+              <input type="number" x-model="secForm.capacity" placeholder="40" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-blue-400">
+            </div>
+            <button @click="addSection()" class="w-full bg-green-600 text-white py-2 rounded-lg text-sm font-semibold hover:bg-green-700 transition"><i class="fas fa-plus"></i> Add Section</button>
+          </div>
+          <div class="space-y-2">
+            <template x-for="sec in sections" :key="sec.id">
+              <div class="border border-gray-100 rounded-lg p-2.5 flex items-center justify-between">
+                <div>
+                  <span class="font-semibold text-gray-800" x-text="'Section '+sec.name"></span>
+                  <span class="text-xs text-gray-400 ml-2" x-text="sec.room_number?'Room '+sec.room_number:''"></span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span class="text-xs bg-green-50 text-green-700 px-2 py-0.5 rounded" x-text="sec.capacity+' seats'"></span>
+                  <button @click="deleteSection(sec.id)" class="w-6 h-6 bg-red-50 text-red-500 rounded hover:bg-red-100 flex items-center justify-center transition" title="Delete section"><i class="fas fa-trash text-xs"></i></button>
+                </div>
+              </div>
+            </template>
+          </div>
+        </div>
+        <div x-show="!selectedClass" class="text-center text-gray-400 py-8 text-sm"><i class="fas fa-arrow-left mr-2"></i>Select a class first</div>
+      </div>
+
+      <!-- Subjects -->
+      <div class="bg-white rounded-xl shadow p-6">
+        <h3 class="text-base font-bold text-gray-900 mb-1 flex items-center gap-2"><i class="fas fa-book text-purple-600"></i> Subjects</h3>
+        <p class="text-xs text-gray-400 mb-4" x-text="selectedClass?'for '+selectedClass.name:'Select a class first'"></p>
+        <div x-show="selectedClass">
+          <div class="space-y-3 mb-4">
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="text-xs font-semibold text-gray-500 block mb-1">Subject Name</label>
+                <input type="text" x-model="subForm.name" placeholder="Bangla" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-blue-400">
+              </div>
+              <div>
+                <label class="text-xs font-semibold text-gray-500 block mb-1">Bengali Name</label>
+                <input type="text" x-model="subForm.name_bn" placeholder="বাংলা" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-blue-400">
+              </div>
+              <div>
+                <label class="text-xs font-semibold text-gray-500 block mb-1">Full Marks</label>
+                <input type="number" x-model="subForm.full_marks" value="100" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-blue-400">
+              </div>
+              <div>
+                <label class="text-xs font-semibold text-gray-500 block mb-1">Pass Marks</label>
+                <input type="number" x-model="subForm.pass_marks" value="33" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-blue-400">
+              </div>
+            </div>
+            <button @click="addSubject()" class="w-full bg-purple-600 text-white py-2 rounded-lg text-sm font-semibold hover:bg-purple-700 transition"><i class="fas fa-plus"></i> Add Subject</button>
+            <button @click="addDefaultSubjects()" class="w-full bg-gray-100 text-gray-700 py-2 rounded-lg text-sm font-semibold hover:bg-gray-200 transition"><i class="fas fa-magic"></i> Add Default Subjects</button>
+          </div>
+          <div class="space-y-1 max-h-52 overflow-y-auto">
+            <template x-for="sub in subjects" :key="sub.id">
+              <div class="flex items-center justify-between border-b border-gray-50 py-1.5 text-sm">
+                <span x-text="sub.name+(sub.name_bn?' ('+sub.name_bn+')':'')"></span>
+                <div class="flex items-center gap-2">
+                  <span class="text-xs text-gray-400" x-text="sub.full_marks+'/'+sub.pass_marks"></span>
+                  <button @click="deleteSubject(sub.id)" class="w-5 h-5 bg-red-50 text-red-500 rounded hover:bg-red-100 flex items-center justify-center transition" title="Delete subject"><i class="fas fa-trash" style="font-size:10px"></i></button>
+                </div>
+              </div>
+            </template>
+          </div>
+        </div>
+        <div x-show="!selectedClass" class="text-center text-gray-400 py-8 text-sm"><i class="fas fa-arrow-left mr-2"></i>Select a class first</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ TERM RESULTS ══ -->
+  <div x-show="activeTab==='results'" x-cloak>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <!-- Create Term Exam -->
+      <div class="bg-white rounded-xl shadow p-6">
+        <h3 class="text-base font-bold text-gray-900 mb-5 flex items-center gap-2"><i class="fas fa-plus-circle text-blue-600"></i> Create Term Exam</h3>
+        <div class="space-y-4">
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="text-xs font-semibold text-gray-500 block mb-1">Class *</label>
+              <select x-model="termForm.school_class_id" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-blue-400">
+                <option value="">-- Class --</option>
+                <template x-for="cls in classes" :key="cls.id">
+                  <option :value="cls.id" x-text="cls.name"></option>
+                </template>
+              </select>
+            </div>
+            <div>
+              <label class="text-xs font-semibold text-gray-500 block mb-1">Term *</label>
+              <select x-model="termForm.term" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-blue-400">
+                <option value="1st_term">1st Term</option>
+                <option value="2nd_term">2nd Term</option>
+              </select>
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="text-xs font-semibold text-gray-500 block mb-1">Year *</label>
+              <input type="number" x-model="termForm.year" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-blue-400">
+            </div>
+            <div>
+              <label class="text-xs font-semibold text-gray-500 block mb-1">Title</label>
+              <input type="text" x-model="termForm.title" placeholder="Auto-generated if blank" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-blue-400">
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="text-xs font-semibold text-gray-500 block mb-1">Start Date</label>
+              <input type="date" x-model="termForm.start_date" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-blue-400">
+            </div>
+            <div>
+              <label class="text-xs font-semibold text-gray-500 block mb-1">End Date</label>
+              <input type="date" x-model="termForm.end_date" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-blue-400">
+            </div>
+          </div>
+          <button @click="createTermExam()" class="w-full bg-blue-600 text-white py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition"><i class="fas fa-plus"></i> Create Term Exam</button>
+          <span x-show="termMsg" x-text="termMsg" class="text-xs text-green-600 font-medium"></span>
+        </div>
+      </div>
+
+      <!-- Term Exams List -->
+      <div class="bg-white rounded-xl shadow p-6">
+        <div class="flex items-center justify-between mb-5">
+          <h3 class="text-base font-bold text-gray-900 flex items-center gap-2"><i class="fas fa-list text-blue-600"></i> Term Exams</h3>
+          <select x-model="termListYear" @change="loadTermExams()" class="border border-gray-200 rounded-lg px-3 py-1.5 text-sm outline-none">
+            <option value="2026">2026</option>
+            <option value="2025">2025</option>
+          </select>
+        </div>
+        <div class="space-y-3 max-h-96 overflow-y-auto">
+          <template x-for="exam in termExams" :key="exam.id">
+            <div class="border border-gray-100 rounded-xl p-3 hover:bg-gray-50 transition">
+              <div class="flex items-start justify-between gap-2">
+                <div class="flex-1">
+                  <div class="text-sm font-semibold text-gray-800 mb-1" x-text="exam.title"></div>
+                  <div class="flex gap-2 flex-wrap">
+                    <span class="bg-blue-50 text-blue-700 text-xs px-2 py-0.5 rounded" x-text="exam.class_name||''"></span>
+                    <span class="bg-purple-50 text-purple-700 text-xs px-2 py-0.5 rounded" x-text="exam.term_display"></span>
+                    <span :class="exam.result_published?'bg-green-50 text-green-700':'bg-gray-100 text-gray-500'" class="text-xs px-2 py-0.5 rounded" x-text="exam.result_published?'Published':'Draft'"></span>
+                  </div>
+                </div>
+                <div class="flex gap-1">
+                  <a :href="'/results?exam_id='+exam.id" target="_blank" class="w-7 h-7 bg-green-50 text-green-600 rounded flex items-center justify-center hover:bg-green-100 transition text-xs" title="View Result"><i class="fas fa-eye"></i></a>
+                  <button @click="togglePublish(exam)" :class="exam.result_published?'bg-orange-50 text-orange-600':'bg-blue-50 text-blue-600'" class="w-7 h-7 rounded flex items-center justify-center hover:opacity-80 transition text-xs" :title="exam.result_published?'Unpublish':'Publish'">
+                    <i :class="exam.result_published?'fas fa-eye-slash':'fas fa-upload'"></i>
+                  </button>
+                  <a :href="'/results/marks-entry?exam_id='+exam.id" class="w-7 h-7 bg-purple-50 text-purple-600 rounded flex items-center justify-center hover:bg-purple-100 transition text-xs" title="Enter Marks"><i class="fas fa-edit"></i></a>
+                </div>
+              </div>
+            </div>
+          </template>
+          <div x-show="!termExams.length" class="text-center text-gray-400 py-8 text-sm">No term exams found.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ TEACHERS ══ -->
+  <div x-show="activeTab==='teachers'" x-cloak>
+    <div class="bg-white rounded-xl shadow p-6">
+      <div class="flex items-center justify-between mb-6">
+        <h3 class="text-lg font-bold text-gray-900 flex items-center gap-3">
+          <div class="w-9 h-9 bg-indigo-100 rounded-lg flex items-center justify-center"><i class="fas fa-chalkboard-teacher text-indigo-600"></i></div>
+          Teaching Staff
+        </h3>
+        <button @click="showAddTeacherModal=true" class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-indigo-700 transition flex items-center gap-2"><i class="fas fa-plus"></i> Add Teacher</button>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <template x-for="t in teachers" :key="t.id">
+          <div class="border border-gray-100 rounded-xl p-4 hover:shadow-md transition text-center">
+            <div class="w-16 h-16 bg-gradient-to-br from-indigo-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-3 overflow-hidden">
+              <template x-if="t.profile_image">
+                <img :src="t.profile_image" :alt="t.first_name" class="w-full h-full object-cover">
+              </template>
+              <template x-if="!t.profile_image">
+                <i class="fas fa-user-tie text-white text-xl"></i>
+              </template>
+            </div>
+            <div class="font-semibold text-gray-800 text-sm leading-tight" x-text="(t.first_name||'')+' '+(t.last_name||'')"></div>
+            <div class="mt-1.5">
+              <span :class="t.role==='head_teacher'?'bg-yellow-100 text-yellow-800':t.role==='super_user'?'bg-red-100 text-red-800':'bg-blue-100 text-blue-800'"
+                class="text-xs font-semibold px-2 py-0.5 rounded-full"
+                x-text="t.role==='head_teacher'?'Head Teacher':t.role==='super_user'?'Head Master':'Teacher'"></span>
+            </div>
+            <div class="text-xs text-gray-400 mt-1.5" x-text="t.phoneNumber||t.phone||''"></div>
+          </div>
+        </template>
+        <div x-show="!teachers.length&&!loadingTeachers" class="col-span-full text-center text-gray-400 py-12">
+          <i class="fas fa-users text-4xl mb-3 block"></i>No teachers found.
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function schoolCMS(){
+  return {
+    activeTab: 'info',
+    tabs:[
+      {id:'info',label:'School Info',icon:'fas fa-school'},
+      {id:'announcements',label:'Announcements',icon:'fas fa-bullhorn'},
+      {id:'classes',label:'Classes & Subjects',icon:'fas fa-door-open'},
+      {id:'results',label:'Term Results',icon:'fas fa-chart-bar'},
+      {id:'teachers',label:'Teachers',icon:'fas fa-chalkboard-teacher'},
+    ],
+    // School info
+    infoFields:[
+      {key:'school_name',label:'School Name (English)',placeholder:'Modern Ideal Non Government Primary School'},
+      {key:'school_name_bn',label:'School Name (Bengali)',placeholder:'মডার্ন আইডিয়াল...'},
+      {key:'school_email',label:'Email Address',type:'email',placeholder:'info@school.edu.bd'},
+      {key:'school_phone',label:'Phone Number',placeholder:'+880 1700-000000'},
+      {key:'school_address',label:'Full Address'},
+      {key:'estd_year',label:'Established Year',placeholder:'2005'},
+      {key:'school_eiin',label:'EIIN Number'},
+      {key:'institution_code',label:'Institution Code'},
+      {key:'office_hours',label:'Office Hours',placeholder:'Sat – Thu: 8:00 AM – 2:00 PM'},
+      {key:'facebook_url',label:'Facebook URL'},
+      {key:'youtube_url',label:'YouTube URL'},
+      {key:'about_text',label:'About Text (for homepage)'},
+      {key:'logo_url',label:'Logo Image URL'},
+      {key:'map_embed_url',label:'Google Map Embed URL'},
+    ],
+    schoolInfo:{},
+    infoMsg:'',
+    // Announcements
+    announcements:[],
+    loadingAnn:true,
+    editingAnn:null,
+    annMsg:'',
+    annForm:{title:'',title_bn:'',content:'',priority:'normal',category:'general',is_pinned:false,show_on_homepage:true,publish_date:'',expire_date:''},
+    // Classes
+    classes:[],
+    selectedClass:null,
+    sections:[],
+    subjects:[],
+    clsForm:{name:'',name_bn:'',class_number:1},
+    secForm:{name:'',room_number:'',capacity:40},
+    subForm:{name:'',name_bn:'',full_marks:100,pass_marks:33},
+    // Term results
+    termExams:[],
+    termListYear: new Date().getFullYear(),
+    termMsg:'',
+    termForm:{school_class_id:'',term:'1st_term',year:new Date().getFullYear(),title:'',start_date:'',end_date:''},
+    // Teachers
+    teachers:[],
+    loadingTeachers:true,
+
+    syncTab(section){
+      // Map parent sidebar section IDs to our local tab IDs
+      const map={'school-cms':'info','announcements':'announcements','class-management':'classes','classes':'classes','term-exams':'results','term-results':'results','teachers':'teachers'};
+      if(map[section]) this.activeTab=map[section];
+    },
+
+    async init(){
+      // Sync with parent section on first render
+      const parentSection = document.querySelector('[x-data="superAdminDashboard()"]')?.__x?.$data?.activeSection;
+      if(parentSection) this.syncTab(parentSection);
+      this.loadSchoolInfo();
+      this.loadAnnouncements();
+      this.loadClasses();
+      this.loadTeachers();
+      this.loadTermExams();
+    },
+    async loadSchoolInfo(){
+      try{ const d=await fetch('/api/school/info').then(r=>r.json()); this.schoolInfo={...d}; }catch(e){}
+    },
+    async saveSchoolInfo(){
+      try{
+        const r=await fetch('/api/school/info',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(this.schoolInfo)});
+        const d=await r.json();
+        this.infoMsg=d.success?'✓ Saved successfully!':'Error saving.';
+        setTimeout(()=>this.infoMsg='',3000);
+      }catch(e){ this.infoMsg='Error saving.'; }
+    },
+    async loadAnnouncements(){
+      this.loadingAnn=true;
+      try{ this.announcements=await fetch('/api/school/announcements?all=true').then(r=>r.json()); }catch(e){}
+      this.loadingAnn=false;
+    },
+    async saveAnnouncement(){
+      const url=this.editingAnn?`/api/school/announcements/${this.editingAnn.id}`:'/api/school/announcements';
+      const method=this.editingAnn?'PUT':'POST';
+      try{
+        const r=await fetch(url,{method,headers:{'Content-Type':'application/json'},body:JSON.stringify(this.annForm)});
+        const d=await r.json();
+        if(d.success){ this.annMsg='✓ Saved!'; this.resetAnnForm(); this.loadAnnouncements(); setTimeout(()=>this.annMsg='',3000); }
+      }catch(e){ this.annMsg='Error.'; }
+    },
+    editAnnouncement(ann){
+      this.editingAnn=ann;
+      this.annForm={...ann};
+    },
+    resetAnnForm(){
+      this.editingAnn=null;
+      this.annForm={title:'',title_bn:'',content:'',priority:'normal',category:'general',is_pinned:false,show_on_homepage:true,publish_date:'',expire_date:''};
+    },
+    async toggleAnnouncementStatus(ann){
+      try{
+        await fetch(`/api/school/announcements/${ann.id}`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({is_active:!ann.is_active})});
+        this.loadAnnouncements();
+      }catch(e){}
+    },
+    async deleteAnnouncement(id){
+      if(!confirm('Delete this announcement?')) return;
+      try{ await fetch(`/api/school/announcements/${id}`,{method:'DELETE'}); this.loadAnnouncements(); }catch(e){}
+    },
+    async loadClasses(){
+      try{ this.classes=await fetch('/api/school/classes').then(r=>r.json()); }catch(e){}
+    },
+    async selectClass(cls){
+      this.selectedClass=cls;
+      try{ this.sections=await fetch('/api/school/classes/'+cls.id+'/sections').then(r=>r.json()); }catch(e){}
+      try{ this.subjects=await fetch('/api/school/classes/'+cls.id+'/subjects').then(r=>r.json()); }catch(e){}
+    },
+    async addClass(){
+      if(!this.clsForm.name) return;
+      try{
+        const r=await fetch('/api/school/classes',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(this.clsForm)});
+        if((await r.json()).success){ this.clsForm={name:'',name_bn:'',class_number:1}; this.loadClasses(); }
+      }catch(e){}
+    },
+    async addSection(){
+      if(!this.selectedClass||!this.secForm.name) return;
+      const body={...this.secForm,school_class_id:this.selectedClass.id};
+      try{
+        const r=await fetch('/api/school/sections',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+        if((await r.json()).success){ this.secForm={name:'',room_number:'',capacity:40}; this.selectClass(this.selectedClass); }
+      }catch(e){}
+    },
+    async addSubject(){
+      if(!this.selectedClass||!this.subForm.name) return;
+      const body={...this.subForm,school_class_id:this.selectedClass.id};
+      try{
+        const r=await fetch('/api/school/subjects',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+        if((await r.json()).success){ this.subForm={name:'',name_bn:'',full_marks:100,pass_marks:33}; this.selectClass(this.selectedClass); }
+      }catch(e){}
+    },
+    async addDefaultSubjects(){
+      if(!this.selectedClass) return;
+      const defaults=[
+        {name:'Bangla',name_bn:'বাংলা',full_marks:100,pass_marks:33},
+        {name:'English',name_bn:'ইংরেজি',full_marks:100,pass_marks:33},
+        {name:'Mathematics',name_bn:'গণিত',full_marks:100,pass_marks:33},
+        {name:'Science',name_bn:'বিজ্ঞান',full_marks:100,pass_marks:33},
+        {name:'Social Studies',name_bn:'সমাজ পরিচয়',full_marks:100,pass_marks:33},
+        {name:'Islamic Studies',name_bn:'ধর্ম ও নৈতিক শিক্ষা',full_marks:50,pass_marks:17},
+      ];
+      for(const sub of defaults){
+        await fetch('/api/school/subjects',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...sub,school_class_id:this.selectedClass.id,order_index:defaults.indexOf(sub)})});
+      }
+      this.selectClass(this.selectedClass);
+    },
+    async deleteClass(id){
+      if(!confirm('Delete this class? This will also hide its sections and subjects.')) return;
+      try{
+        const r=await fetch('/api/school/classes/'+id,{method:'DELETE'});
+        if((await r.json()).success){ if(this.selectedClass?.id===id) this.selectedClass=null; this.loadClasses(); }
+      }catch(e){ alert('Delete failed'); }
+    },
+    async deleteSection(id){
+      if(!confirm('Delete this section?')) return;
+      try{
+        const r=await fetch('/api/school/sections/'+id,{method:'DELETE'});
+        if((await r.json()).success && this.selectedClass) this.selectClass(this.selectedClass);
+      }catch(e){ alert('Delete failed'); }
+    },
+    async deleteSubject(id){
+      if(!confirm('Delete this subject?')) return;
+      try{
+        const r=await fetch('/api/school/subjects/'+id,{method:'DELETE'});
+        if((await r.json()).success && this.selectedClass) this.selectClass(this.selectedClass);
+      }catch(e){ alert('Delete failed'); }
+    },
+    async loadTermExams(){
+      try{ this.termExams=await fetch(`/api/school/term-exams?year=${this.termListYear}`).then(r=>r.json()); }catch(e){}
+    },
+    async createTermExam(){
+      if(!this.termForm.school_class_id){ alert('Select a class'); return; }
+      try{
+        const r=await fetch('/api/school/term-exams',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(this.termForm)});
+        const d=await r.json();
+        if(d.success){ this.termMsg='✓ Term exam created!'; this.loadTermExams(); setTimeout(()=>this.termMsg='',3000); }
+      }catch(e){ this.termMsg='Error.'; }
+    },
+    async togglePublish(exam){
+      try{
+        await fetch(`/api/school/term-exams/${exam.id}`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({result_published:!exam.result_published})});
+        this.loadTermExams();
+      }catch(e){}
+    },
+    async loadTeachers(){
+      this.loadingTeachers=true;
+      try{ const d=await fetch('/api/users?role=teacher&limit=30').then(r=>r.json()); this.teachers=Array.isArray(d)?d:(d.users||d.data||[]); }catch(e){}
+      this.loadingTeachers=false;
+    },
+  };
+}
+</script>

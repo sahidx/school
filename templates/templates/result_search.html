@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Result Search – Modern Ideal Non Government Primary School</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: Arial, sans-serif; background: #f0f4fa; min-height: 100vh; }
+
+/* ── Page wrapper ── */
+.wrapper { max-width: 820px; margin: 0 auto; padding: 30px 16px 60px; }
+
+/* ── School header card ── */
+.school-header {
+  background: #fff;
+  border-top: 6px solid #b8962e;
+  border-radius: 8px;
+  padding: 22px 24px 16px;
+  text-align: center;
+  box-shadow: 0 2px 12px rgba(0,0,0,.10);
+  margin-bottom: 24px;
+}
+.school-name { font-size: 24px; font-weight: bold; color: #b8962e; letter-spacing: 1px; }
+.school-sub  { font-size: 12px; color: #666; margin-top: 2px; }
+.page-title  { font-size: 15px; font-weight: bold; color: #fff; background: #b8962e;
+               display: inline-block; padding: 4px 22px; border-radius: 20px; margin-top: 10px; letter-spacing: 2px; }
+
+/* ── Search card ── */
+.search-card {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 12px rgba(0,0,0,.10);
+  padding: 28px 28px 22px;
+  margin-bottom: 28px;
+}
+.search-card h2 { font-size: 16px; color: #333; margin-bottom: 18px; border-bottom: 2px solid #b8962e; padding-bottom: 8px; }
+
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.form-group { display: flex; flex-direction: column; gap: 5px; }
+.form-group label { font-size: 12px; font-weight: bold; color: #555; }
+.form-group input {
+  border: 1px solid #ccc; border-radius: 5px; padding: 9px 12px; font-size: 13px;
+  transition: border .2s;
+}
+.form-group input:focus { outline: none; border-color: #b8962e; box-shadow: 0 0 0 3px rgba(184,150,46,.15); }
+.form-group .hint { font-size: 10px; color: #999; }
+
+.search-btn {
+  margin-top: 18px; width: 100%; padding: 12px;
+  background: #b8962e; color: #fff; border: none; border-radius: 6px;
+  font-size: 15px; font-weight: bold; cursor: pointer; letter-spacing: 1px;
+  transition: background .2s;
+}
+.search-btn:hover { background: #9a7b23; }
+.search-btn:disabled { background: #ccc; cursor: not-allowed; }
+
+/* ── Spinner ── */
+.spinner { display: none; text-align: center; padding: 20px; color: #888; font-size: 13px; }
+.spinner.active { display: block; }
+.spin { display: inline-block; width: 28px; height: 28px; border: 3px solid #eee;
+        border-top-color: #b8962e; border-radius: 50%; animation: spin .8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Error / info ── */
+.alert { padding: 12px 16px; border-radius: 6px; font-size: 13px; margin-bottom: 16px; }
+.alert-error { background: #fff0f0; border: 1px solid #e44; color: #a00; }
+.alert-info  { background: #fffbe6; border: 1px solid #e8c800; color: #7a5800; }
+
+/* ── Result cards ── */
+.result-list { display: flex; flex-direction: column; gap: 16px; }
+.result-card {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 12px rgba(0,0,0,.10);
+  border-left: 5px solid #b8962e;
+  overflow: hidden;
+}
+.result-card.fail { border-left-color: #c00; }
+.result-card.pass { border-left-color: #006600; }
+
+.card-header {
+  background: #faf6ed; padding: 12px 18px;
+  display: flex; justify-content: space-between; align-items: center;
+  border-bottom: 1px solid #e8dfc0;
+}
+.card-title { font-size: 14px; font-weight: bold; color: #333; }
+.card-batch { font-size: 11px; color: #888; }
+.card-status-pass { background: #e8f5e9; color: #006600; font-size: 12px; font-weight: bold;
+                    padding: 3px 12px; border-radius: 12px; }
+.card-status-fail { background: #ffebee; color: #c00; font-size: 12px; font-weight: bold;
+                    padding: 3px 12px; border-radius: 12px; }
+
+.card-body { padding: 14px 18px; }
+.card-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 12px; }
+.card-stat { text-align: center; }
+.card-stat .val { font-size: 20px; font-weight: bold; color: #b8962e; }
+.card-stat .lbl { font-size: 10px; color: #888; margin-top: 1px; }
+.card-stat.pass .val { color: #006600; }
+.card-stat.fail .val { color: #c00; }
+
+.card-footer { padding: 10px 18px; background: #f7f7f7; display: flex; justify-content: space-between; align-items: center; }
+.pub-date { font-size: 11px; color: #999; }
+.view-btn {
+  background: #b8962e; color: #fff; padding: 7px 18px; border-radius: 5px;
+  font-size: 12px; font-weight: bold; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;
+}
+.view-btn:hover { background: #9a7b23; }
+.section-result-btn {
+  background: #2e6ab8; color: #fff; padding: 7px 18px; border-radius: 5px;
+  font-size: 12px; font-weight: bold; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; margin-left: 8px;
+}
+.section-result-btn:hover { background: #1d4e8f; }
+
+.class-result-btn {
+  display: block; text-align: center; margin: 16px 0 0;
+  background: #444; color: #fff; padding: 9px 18px; border-radius: 5px;
+  font-size: 12px; font-weight: bold; text-decoration: none;
+}
+.class-result-btn:hover { background: #222; }
+
+/* ── Footer ── */
+.footer { text-align: center; font-size: 11px; color: #aaa; margin-top: 40px; }
+
+@media (max-width: 560px) {
+  .form-grid  { grid-template-columns: 1fr; }
+  .card-grid  { grid-template-columns: repeat(2, 1fr); }
+}
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+  <!-- ── School Header ── -->
+  <div class="school-header">
+    <div class="school-name">Modern Ideal Non Government Primary School</div>
+    <div class="school-sub">Rabeya Polly, Mohadebpur, Naogaon | Ph: 01712-185138</div>
+    <div class="page-title">RESULT SEARCH</div>
+  </div>
+
+  <!-- ── Search Form ── -->
+  <div class="search-card">
+    <h2>&#128269; Search Your Result</h2>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Student ID *</label>
+        <input type="text" id="inp_student_id" placeholder="e.g. 100097" />
+        <span class="hint">Your numeric student ID</span>
+      </div>
+      <div class="form-group">
+        <label>Roll Number</label>
+        <input type="text" id="inp_roll" placeholder="e.g. 1" />
+        <span class="hint">Roll number from result sheet</span>
+      </div>
+      <div class="form-group">
+        <label>Academic Year *</label>
+        <input type="text" id="inp_year" placeholder="e.g. 2025" maxlength="4" />
+        <span class="hint">4-digit academic year</span>
+      </div>
+      <div class="form-group">
+        <label>Section / Class</label>
+        <input type="text" id="inp_section" placeholder="e.g. TWO-Day-BUD" />
+        <span class="hint">Class or section name (optional)</span>
+      </div>
+    </div>
+    <button class="search-btn" id="searchBtn" onclick="doSearch()">&#128270; Search Result</button>
+  </div>
+
+  <!-- ── Spinner ── -->
+  <div class="spinner" id="spinner">
+    <div class="spin"></div>
+    <p style="margin-top:8px;">Searching results…</p>
+  </div>
+
+  <!-- ── Alert ── -->
+  <div id="alertBox" style="display:none;"></div>
+
+  <!-- ── Results ── -->
+  <div class="result-list" id="resultList"></div>
+
+  <!-- ── Class Result Link (shown after search) ── -->
+  <div id="classResultLink" style="display:none;"></div>
+
+  <div class="footer">© Modern Ideal Non Government Primary School &nbsp;|&nbsp; Result Portal</div>
+
+</div><!-- /wrapper -->
+
+<script>
+async function doSearch() {
+  const sid  = document.getElementById('inp_student_id').value.trim();
+  const roll = document.getElementById('inp_roll').value.trim();
+  const year = document.getElementById('inp_year').value.trim();
+  const sec  = document.getElementById('inp_section').value.trim();
+
+  // Validate
+  if (!sid && !roll) {
+    showAlert('error', 'Please enter your Student ID or Roll Number.');
+    return;
+  }
+  if (!year || !/^\d{4}$/.test(year)) {
+    showAlert('error', 'Please enter a valid 4-digit Academic Year.');
+    return;
+  }
+
+  clearResults();
+  setLoading(true);
+
+  try {
+    const params = new URLSearchParams();
+    if (sid)  params.set('student_id',  sid);
+    if (roll) params.set('roll_number', roll);
+    if (year) params.set('year',        year);
+    if (sec)  params.set('section',     sec);
+
+    const resp = await fetch(`/api/monthly-exams/public-result-search?${params}`);
+    const data = await resp.json();
+    setLoading(false);
+
+    if (!data.success) {
+      showAlert('error', data.message || 'Search failed.');
+      return;
+    }
+
+    const results = data.data?.results || [];
+    if (results.length === 0) {
+      showAlert('info', 'No published results found for the given details. Please verify your information.');
+      return;
+    }
+
+    renderResults(results, year, sec);
+
+  } catch (e) {
+    setLoading(false);
+    showAlert('error', 'Network error. Please try again.');
+  }
+}
+
+function renderResults(results, year, sec) {
+  const list = document.getElementById('resultList');
+  list.innerHTML = '';
+
+  results.forEach(r => {
+    const isPass = r.status === 'Passed';
+    const card = document.createElement('div');
+    card.className = `result-card ${isPass ? 'pass' : 'fail'}`;
+    card.innerHTML = `
+      <div class="card-header">
+        <div>
+          <div class="card-title">&#127891; ${esc(r.student_name)}</div>
+          <div class="card-batch">${esc(r.batch_name)}${r.batch_code ? ' · ' + esc(r.batch_code) : ''} &nbsp;|&nbsp; ${esc(r.exam_title)}</div>
+        </div>
+        <span class="${isPass ? 'card-status-pass' : 'card-status-fail'}">${esc(r.status)}</span>
+      </div>
+      <div class="card-body">
+        <div class="card-grid">
+          <div class="card-stat">
+            <div class="val">${r.roll_number ?? '—'}</div>
+            <div class="lbl">Roll No.</div>
+          </div>
+          <div class="card-stat">
+            <div class="val">${r.position ?? '—'}</div>
+            <div class="lbl">Position</div>
+          </div>
+          <div class="card-stat">
+            <div class="val">${r.total_marks ?? '—'} <span style="font-size:12px;color:#aaa;">/ ${r.max_marks ?? '—'}</span></div>
+            <div class="lbl">Total Marks</div>
+          </div>
+          <div class="card-stat ${isPass ? 'pass' : 'fail'}">
+            <div class="val">${r.percentage ?? '—'}%</div>
+            <div class="lbl">Percentage</div>
+          </div>
+          <div class="card-stat">
+            <div class="val">${r.grade ?? '—'}</div>
+            <div class="lbl">Grade</div>
+          </div>
+          <div class="card-stat">
+            <div class="val">${r.gpa ?? '—'}</div>
+            <div class="lbl">GPA</div>
+          </div>
+          <div class="card-stat">
+            <div class="val">${r.year}</div>
+            <div class="lbl">Year</div>
+          </div>
+          <div class="card-stat">
+            <div class="val">${r.month ?? '—'}</div>
+            <div class="lbl">Month</div>
+          </div>
+        </div>
+      </div>
+      <div class="card-footer">
+        <span class="pub-date">Published: ${esc(r.published_at)}</span>
+        <div>
+          <a class="view-btn" href="${esc(r.transcript_url)}" target="_blank">
+            &#128196; View Transcript
+          </a>
+        </div>
+      </div>
+    `;
+    list.appendChild(card);
+  });
+
+  // Show class-wide result links
+  const classNames = [...new Set(results.map(r => r.batch_name))];
+  const linkDiv = document.getElementById('classResultLink');
+  if (classNames.length > 0) {
+    linkDiv.innerHTML = classNames.map(cn => {
+      const params = new URLSearchParams({ class_name: cn, year });
+      if (sec) params.set('section', sec);
+      return `<a class="class-result-btn" href="/api/monthly-exams/class-result?${params}" target="_blank">
+        &#128203; View Full Class Result – ${esc(cn)}
+      </a>`;
+    }).join('');
+    linkDiv.style.display = 'block';
+  }
+}
+
+function setLoading(on) {
+  document.getElementById('spinner').className = on ? 'spinner active' : 'spinner';
+  document.getElementById('searchBtn').disabled = on;
+}
+
+function showAlert(type, msg) {
+  const box = document.getElementById('alertBox');
+  box.className = `alert alert-${type}`;
+  box.textContent = msg;
+  box.style.display = 'block';
+}
+
+function clearResults() {
+  document.getElementById('alertBox').style.display = 'none';
+  document.getElementById('resultList').innerHTML = '';
+  document.getElementById('classResultLink').style.display = 'none';
+}
+
+function esc(s) {
+  if (s == null) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// Allow pressing Enter to search
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter') doSearch();
+});
+</script>
+</body>
+</html>

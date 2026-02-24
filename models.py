@@ -1,6 +1,6 @@
 """
-Database Models for SmartGardenHub
-MySQL/SQLAlchemy implementation of the complete schema
+Database Models for Modern Ideal Non Government Primary School
+Management System - Flask/SQLAlchemy implementation
 """
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime, date
@@ -14,6 +14,7 @@ db = SQLAlchemy()
 class UserRole(Enum):
     STUDENT = "student"
     TEACHER = "teacher"
+    HEAD_TEACHER = "head_teacher"
     SUPER_USER = "super_user"
 
 class ExamType(Enum):
@@ -748,3 +749,290 @@ class OnlineStudentAnswer(db.Model):
     
     def __repr__(self):
         return f'<OnlineStudentAnswer {self.id} - Question {self.question_id}>'
+
+
+# ============================================================
+#  SCHOOL MANAGEMENT MODELS
+# ============================================================
+
+class SchoolClass(db.Model):
+    """Represents Class 1–5 in the school"""
+    __tablename__ = 'school_classes'
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50), nullable=False)          # e.g. "Class 1", "Class 2"
+    name_bn = db.Column(db.String(50), nullable=True)        # Bengali: "প্রথম শ্রেণি"
+    class_number = db.Column(db.Integer, nullable=False)     # 1-5
+    description = db.Column(db.Text, nullable=True)
+    is_active = db.Column(db.Boolean, default=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    sections = db.relationship('SchoolSection', back_populates='school_class', cascade='all, delete-orphan')
+    subjects = db.relationship('SchoolSubject', back_populates='school_class', cascade='all, delete-orphan')
+    term_exams = db.relationship('TermExam', back_populates='school_class', cascade='all, delete-orphan')
+
+    def __repr__(self):
+        return f'<SchoolClass {self.name}>'
+
+    def to_dict(self):
+        return {
+            'id': self.id, 'name': self.name, 'name_bn': self.name_bn,
+            'class_number': self.class_number, 'is_active': self.is_active,
+            'sections': [s.to_dict() for s in self.sections],
+        }
+
+
+class SchoolSection(db.Model):
+    """Sections within a class (A, B, C …)"""
+    __tablename__ = 'school_sections'
+
+    id = db.Column(db.Integer, primary_key=True)
+    school_class_id = db.Column(db.Integer, db.ForeignKey('school_classes.id'), nullable=False)
+    name = db.Column(db.String(20), nullable=False)   # A / B / C
+    name_bn = db.Column(db.String(20), nullable=True)
+    class_teacher_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
+    room_number = db.Column(db.String(20), nullable=True)
+    capacity = db.Column(db.Integer, default=40)
+    is_active = db.Column(db.Boolean, default=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    school_class = db.relationship('SchoolClass', back_populates='sections')
+    class_teacher = db.relationship('User', foreign_keys=[class_teacher_id])
+
+    def __repr__(self):
+        return f'<Section {self.school_class.name if self.school_class else "?"}-{self.name}>'
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'name_bn': self.name_bn,
+            'school_class_id': self.school_class_id,
+            'class_teacher_id': self.class_teacher_id,
+            'class_teacher_name': self.class_teacher.full_name if self.class_teacher else None,
+            'room_number': self.room_number,
+            'capacity': self.capacity,
+        }
+
+
+class SchoolSubject(db.Model):
+    """Subjects for each class"""
+    __tablename__ = 'school_subjects'
+
+    id = db.Column(db.Integer, primary_key=True)
+    school_class_id = db.Column(db.Integer, db.ForeignKey('school_classes.id'), nullable=False)
+    name = db.Column(db.String(100), nullable=False)       # e.g. "Bangla"
+    name_bn = db.Column(db.String(100), nullable=True)     # "বাংলা"
+    code = db.Column(db.String(20), nullable=True)         # BAN, ENG, MATH …
+    full_marks = db.Column(db.Integer, default=100)
+    pass_marks = db.Column(db.Integer, default=33)
+    order_index = db.Column(db.Integer, default=0)
+    is_active = db.Column(db.Boolean, default=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    school_class = db.relationship('SchoolClass', back_populates='subjects')
+
+    def __repr__(self):
+        return f'<Subject {self.name} (Class {self.school_class_id})>'
+
+    def to_dict(self):
+        return {
+            'id': self.id, 'name': self.name, 'name_bn': self.name_bn,
+            'code': self.code, 'full_marks': self.full_marks,
+            'pass_marks': self.pass_marks, 'order_index': self.order_index,
+        }
+
+
+class TermExam(db.Model):
+    """1st Term / 2nd Term exam definition"""
+    __tablename__ = 'term_exams'
+
+    TERM_FIRST  = '1st_term'
+    TERM_SECOND = '2nd_term'
+    TERM_CHOICES = [TERM_FIRST, TERM_SECOND]
+
+    id = db.Column(db.Integer, primary_key=True)
+    school_class_id = db.Column(db.Integer, db.ForeignKey('school_classes.id'), nullable=False)
+    term = db.Column(db.String(20), nullable=False)       # '1st_term' or '2nd_term'
+    year = db.Column(db.Integer, nullable=False)
+    title = db.Column(db.String(255), nullable=False)     # "1st Term Examination 2026"
+    title_bn = db.Column(db.String(255), nullable=True)
+    start_date = db.Column(db.Date, nullable=True)
+    end_date = db.Column(db.Date, nullable=True)
+    result_published = db.Column(db.Boolean, default=False)
+    result_published_at = db.Column(db.DateTime, nullable=True)
+    show_on_homepage = db.Column(db.Boolean, default=False)
+    created_by = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    school_class = db.relationship('SchoolClass', back_populates='term_exams')
+    created_by_user = db.relationship('User', foreign_keys=[created_by])
+    results = db.relationship('StudentTermResult', back_populates='term_exam', cascade='all, delete-orphan')
+
+    __table_args__ = (
+        db.UniqueConstraint('school_class_id', 'term', 'year', name='unique_term_class_year'),
+    )
+
+    @property
+    def term_display(self):
+        return '1st Term' if self.term == self.TERM_FIRST else '2nd Term'
+
+    def __repr__(self):
+        return f'<TermExam {self.title}>'
+
+    def to_dict(self):
+        return {
+            'id': self.id, 'term': self.term, 'year': self.year,
+            'title': self.title, 'title_bn': self.title_bn,
+            'school_class_id': self.school_class_id,
+            'class_name': self.school_class.name if self.school_class else None,
+            'term_display': self.term_display,
+            'result_published': self.result_published,
+            'show_on_homepage': self.show_on_homepage,
+            'start_date': self.start_date.isoformat() if self.start_date else None,
+            'end_date': self.end_date.isoformat() if self.end_date else None,
+        }
+
+
+class StudentTermResult(db.Model):
+    """Marks of a student for each subject in a term exam"""
+    __tablename__ = 'student_term_results'
+
+    id = db.Column(db.Integer, primary_key=True)
+    term_exam_id   = db.Column(db.Integer, db.ForeignKey('term_exams.id'), nullable=False)
+    student_id     = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    subject_id     = db.Column(db.Integer, db.ForeignKey('school_subjects.id'), nullable=False)
+    section_id     = db.Column(db.Integer, db.ForeignKey('school_sections.id'), nullable=True)
+    marks_obtained = db.Column(db.Float, default=0)
+    full_marks     = db.Column(db.Integer, default=100)
+    pass_marks     = db.Column(db.Integer, default=33)
+    grade          = db.Column(db.String(5), nullable=True)   # A+, A, A-, B, C, D, F
+    gpa            = db.Column(db.Float, nullable=True)
+    is_absent      = db.Column(db.Boolean, default=False)
+    remarks        = db.Column(db.String(200), nullable=True)
+    created_at     = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at     = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    term_exam = db.relationship('TermExam', back_populates='results')
+    student   = db.relationship('User', foreign_keys=[student_id])
+    subject   = db.relationship('SchoolSubject')
+    section   = db.relationship('SchoolSection', foreign_keys=[section_id])
+
+    __table_args__ = (
+        db.UniqueConstraint('term_exam_id', 'student_id', 'subject_id', name='unique_term_student_subject'),
+    )
+
+    def __repr__(self):
+        return f'<TermResult student={self.student_id} subject={self.subject_id} marks={self.marks_obtained}>'
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'term_exam_id': self.term_exam_id,
+            'student_id': self.student_id,
+            'student_name': self.student.full_name if self.student else None,
+            'subject_id': self.subject_id,
+            'subject_name': self.subject.name if self.subject else None,
+            'marks_obtained': self.marks_obtained,
+            'full_marks': self.full_marks,
+            'pass_marks': self.pass_marks,
+            'grade': self.grade,
+            'gpa': self.gpa,
+            'is_absent': self.is_absent,
+        }
+
+
+class StudentClassInfo(db.Model):
+    """Extra school-specific info for each student"""
+    __tablename__ = 'student_class_info'
+
+    id              = db.Column(db.Integer, primary_key=True)
+    student_id      = db.Column(db.Integer, db.ForeignKey('users.id'), unique=True, nullable=False)
+    school_class_id = db.Column(db.Integer, db.ForeignKey('school_classes.id'), nullable=True)
+    section_id      = db.Column(db.Integer, db.ForeignKey('school_sections.id'), nullable=True)
+    roll_number     = db.Column(db.Integer, nullable=True)
+    reg_number      = db.Column(db.String(50), nullable=True)  # registration / board roll
+    blood_group     = db.Column(db.String(5), nullable=True)   # A+, O-, …
+    religion        = db.Column(db.String(50), nullable=True)
+    nationality     = db.Column(db.String(50), default='Bangladeshi')
+    academic_year   = db.Column(db.Integer, nullable=True)
+    created_at      = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at      = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    student     = db.relationship('User', foreign_keys=[student_id])
+    school_class = db.relationship('SchoolClass')
+    section     = db.relationship('SchoolSection')
+
+    def __repr__(self):
+        return f'<StudentClassInfo student={self.student_id}>'
+
+
+class Announcement(db.Model):
+    """School announcements (notice board)"""
+    __tablename__ = 'announcements'
+
+    PRIORITY_LOW    = 'low'
+    PRIORITY_NORMAL = 'normal'
+    PRIORITY_HIGH   = 'high'
+    PRIORITY_URGENT = 'urgent'
+
+    id          = db.Column(db.Integer, primary_key=True)
+    title       = db.Column(db.String(300), nullable=False)
+    title_bn    = db.Column(db.String(300), nullable=True)
+    content     = db.Column(db.Text, nullable=True)
+    content_bn  = db.Column(db.Text, nullable=True)
+    priority    = db.Column(db.String(20), default='normal')   # low/normal/high/urgent
+    category    = db.Column(db.String(50), default='general')  # general/exam/holiday/event/result
+    target      = db.Column(db.String(50), default='all')      # all/students/teachers/parents
+    is_active   = db.Column(db.Boolean, default=True)
+    is_pinned   = db.Column(db.Boolean, default=False)
+    show_on_homepage = db.Column(db.Boolean, default=True)
+    publish_date = db.Column(db.Date, default=date.today)
+    expire_date = db.Column(db.Date, nullable=True)
+    created_by  = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    created_at  = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at  = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    created_by_user = db.relationship('User', foreign_keys=[created_by])
+
+    def __repr__(self):
+        return f'<Announcement {self.title}>'
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'title': self.title,
+            'title_bn': self.title_bn,
+            'content': self.content,
+            'content_bn': self.content_bn,
+            'priority': self.priority,
+            'category': self.category,
+            'target': self.target,
+            'is_active': self.is_active,
+            'is_pinned': self.is_pinned,
+            'show_on_homepage': self.show_on_homepage,
+            'publish_date': self.publish_date.isoformat() if self.publish_date else None,
+            'expire_date': self.expire_date.isoformat() if self.expire_date else None,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'created_by_name': self.created_by_user.full_name if self.created_by_user else None,
+        }
+
+
+class SchoolInfo(db.Model):
+    """Editable school information (CMS)"""
+    __tablename__ = 'school_info'
+
+    id           = db.Column(db.Integer, primary_key=True)
+    key          = db.Column(db.String(100), unique=True, nullable=False)
+    value        = db.Column(db.Text, nullable=True)
+    value_bn     = db.Column(db.Text, nullable=True)
+    description  = db.Column(db.String(255), nullable=True)
+    category     = db.Column(db.String(50), default='general')
+    updated_by   = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
+    updated_at   = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    updated_by_user = db.relationship('User', foreign_keys=[updated_by])
+
+    def __repr__(self):
+        return f'<SchoolInfo {self.key}>'

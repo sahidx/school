@@ -1,0 +1,316 @@
+{% extends "base.html" %}
+{% block title %}Academic Results – Modern Ideal Non Government Primary School{% endblock %}
+{% block extra_head %}
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--primary:#1a56db;--gold:#f59e0b;--green:#059669;--red:#dc2626;--dark:#1e293b;--gray:#64748b;--gradient:linear-gradient(135deg,#1a56db,#0a2d7a)}
+body{font-family:'Poppins',sans-serif;background:#f8fafc;color:var(--dark)}
+.bn{font-family:'Hind Siliguri','Poppins',sans-serif}
+.page-header{background:var(--gradient);padding:40px 20px;text-align:center;color:#fff;position:relative;overflow:hidden}
+.page-header::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")}
+.page-header h1{font-size:clamp(22px,4vw,36px);font-weight:800;margin-bottom:6px;position:relative}
+.page-header p{font-size:14px;opacity:.85;position:relative}
+.wrap{max-width:1280px;margin:0 auto;padding:0 20px}
+.filters{background:#fff;box-shadow:0 2px 16px rgba(0,0,0,.08);padding:20px;border-radius:0 0 16px 16px;margin-bottom:24px}
+.filter-form{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;align-items:end}
+.fg label{font-size:12px;font-weight:600;color:var(--gray);margin-bottom:5px;display:block}
+.fg select,.fg input{width:100%;padding:10px 14px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13.5px;outline:none;background:#fff;transition:.2s}
+.fg select:focus,.fg input:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(26,86,219,.1)}
+.btn-load{background:var(--primary);color:#fff;padding:11px 22px;border-radius:8px;border:none;font-size:14px;font-weight:600;cursor:pointer;transition:.2s;display:inline-flex;align-items:center;gap:6px}
+.btn-load:hover{background:#1238a0;transform:translateY(-1px)}
+.btn-print{background:var(--gold);color:#1e293b;padding:11px 22px;border-radius:8px;border:none;font-size:14px;font-weight:600;cursor:pointer;transition:.2s;display:inline-flex;align-items:center;gap:6px}
+.btn-print:hover{background:#d97706}
+.results-meta{background:#fff;border-radius:12px;padding:20px 24px;margin-bottom:20px;box-shadow:0 2px 12px rgba(0,0,0,.06);display:flex;align-items:center;flex-wrap:wrap;gap:16px;border-left:5px solid var(--primary)}
+.results-meta h2{font-size:18px;font-weight:700;color:var(--dark);flex:1}
+.meta-tag{background:#e8f0fe;color:var(--primary);font-size:12px;font-weight:600;padding:4px 12px;border-radius:20px}
+.result-table-wrap{background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 16px rgba(0,0,0,.07);margin-bottom:32px}
+.result-table{width:100%;border-collapse:collapse}
+.result-table thead{background:var(--gradient);color:#fff}
+.result-table th{padding:12px 14px;font-size:12.5px;font-weight:600;text-align:center;white-space:nowrap}
+.result-table th:first-child,.result-table th:nth-child(2,.result-table th:nth-child(3){text-align:left}
+.result-table td{padding:11px 14px;font-size:13px;border-bottom:1px solid #f1f5f9;text-align:center}
+.result-table td:first-child, .result-table td:nth-child(2), .result-table td:nth-child(3){text-align:left}
+.result-table tr:hover{background:#f8fafc}
+.result-table tr:last-child td{border-bottom:none}
+.rank-badge{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;font-size:12px;font-weight:700}
+.rank-1{background:#ffd700;color:#7c5407}
+.rank-2{background:#c0c0c0;color:#4b5563}
+.rank-3{background:#cd7f32;color:#fff}
+.rank-other{background:#e8f0fe;color:var(--primary)}
+.grade-badge{display:inline-block;font-size:12px;font-weight:700;padding:3px 10px;border-radius:4px}
+.g-Ap{background:#dcfce7;color:#166534}
+.g-A{background:#d1fae5;color:#065f46}
+.g-Am{background:#e0f2fe;color:#0369a1}
+.g-B{background:#fef3c7;color:#92400e}
+.g-C{background:#fff7ed;color:#c2410c}
+.g-D{background:#fff1f2;color:#9f1239}
+.g-F{background:#fee2e2;color:#dc2626}
+.result-stat-strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:14px;margin-bottom:24px}
+.rss-box{background:#fff;border-radius:10px;padding:16px 14px;text-align:center;box-shadow:0 2px 10px rgba(0,0,0,.06);border-top:3px solid var(--primary)}
+.rss-box .val{font-size:22px;font-weight:800;color:var(--primary)}
+.rss-box .lbl{font-size:11.5px;color:var(--gray);font-weight:500;margin-top:4px}
+.empty-state{text-align:center;padding:60px 20px;color:#94a3b8}
+.empty-state i{font-size:48px;margin-bottom:16px;display:block}
+.empty-state h3{font-size:18px;font-weight:600;margin-bottom:8px}
+.loading-box{text-align:center;padding:60px 20px;color:#64748b}
+.sml{display:inline-block;width:18px;height:18px;border:2px solid #e2e8f0;border-top-color:var(--primary);border-radius:50%;animation:spin .8s linear infinite;vertical-align:middle}
+@keyframes spin{to{transform:rotate(360deg)}}
+.back-btn{display:inline-flex;align-items:center;gap:8px;color:var(--primary);text-decoration:none;font-size:14px;font-weight:600;margin-bottom:20px;transition:.2s}
+.back-btn:hover{color:#1238a0}
+@media print{
+  .page-header,.filters,.back-btn,.no-print{display:none}
+  .result-table-wrap{box-shadow:none;border:1px solid #e2e8f0}
+  body{background:#fff}
+  .print-header{display:block!important;text-align:center;margin-bottom:20px;padding-bottom:16px;border-bottom:2px solid #1a56db}
+}
+.print-header{display:none}
+</style>
+{% endblock %}
+{% block content %}
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+  <div class="wrap">
+    <h1><i class="fas fa-chart-bar" style="margin-right:10px"></i>Academic Results</h1>
+    <p class="bn">Modern Ideal Non Government Primary School – একাডেমিক ফলাফল</p>
+  </div>
+</div>
+
+<!-- FILTERS -->
+<div class="wrap">
+  <div class="filters no-print">
+    <div class="filter-form">
+      <div class="fg">
+        <label><i class="fas fa-school"></i> Class</label>
+        <select id="f-class" onchange="loadSections()">
+          <option value="">-- Select Class --</option>
+        </select>
+      </div>
+      <div class="fg">
+        <label><i class="fas fa-door-open"></i> Section</label>
+        <select id="f-section">
+          <option value="">-- All Sections --</option>
+        </select>
+      </div>
+      <div class="fg">
+        <label><i class="fas fa-calendar-check"></i> Term</label>
+        <select id="f-term">
+          <option value="">-- Select Term --</option>
+          <option value="1st_term">1st Term</option>
+          <option value="2nd_term">2nd Term</option>
+        </select>
+      </div>
+      <div class="fg">
+        <label><i class="fas fa-calendar-alt"></i> Year</label>
+        <select id="f-year">
+          <option value="2026">2026</option>
+          <option value="2025">2025</option>
+          <option value="2027">2027</option>
+        </select>
+      </div>
+      <div class="fg">
+        <label>&nbsp;</label>
+        <div style="display:flex;gap:8px">
+          <button class="btn-load" onclick="loadResults()"><i class="fas fa-search"></i> Show Results</button>
+          <button class="btn-print" onclick="window.print()"><i class="fas fa-print"></i> Print</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PRINT HEADER (visible only on print) -->
+<div class="print-header wrap">
+  <h2 id="print-school-name" style="font-size:22px;font-weight:800;color:var(--primary)">Modern Ideal Non Government Primary School</h2>
+  <p id="print-exam-title" style="font-size:16px;font-weight:600;margin-top:6px;color:var(--dark)">Academic Result Sheet</p>
+  <p id="print-date" style="font-size:12px;color:var(--gray)"></p>
+</div>
+
+<!-- MAIN RESULTS AREA -->
+<div class="wrap" style="padding-top:0;padding-bottom:40px">
+  <a href="/" class="back-btn no-print"><i class="fas fa-arrow-left"></i> Back to Home</a>
+
+  <!-- Summary stats (shown after loading) -->
+  <div id="summary-stats" class="result-stat-strip" style="display:none"></div>
+
+  <!-- Results Meta -->
+  <div id="results-meta" style="display:none" class="results-meta">
+    <div>
+      <h2 id="meta-title">Result Sheet</h2>
+      <div style="margin-top:6px;display:flex;gap:8px;flex-wrap:wrap" id="meta-tags"></div>
+    </div>
+    <a href="#" id="print-btn-2" onclick="window.print();return false" class="btn-print no-print"><i class="fas fa-print"></i> Print</a>
+  </div>
+
+  <!-- Table -->
+  <div id="result-output">
+    <div class="empty-state">
+      <i class="fas fa-chart-bar"></i>
+      <h3>Select Class, Term and Year</h3>
+      <p>Choose filters above and click "Show Results" to view the academic results.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const YEAR = new Date().getFullYear();
+let currentExamId = null, currentSubjects = [], currentResults = [];
+
+// Load classes
+async function loadClasses(){
+  try{
+    const cls = await fetch('/api/school/classes').then(r=>r.json());
+    const sel = $('f-class');
+    cls.forEach(c=>{
+      const o=document.createElement('option');
+      o.value=c.id; o.textContent=c.name;
+      sel.appendChild(o);
+    });
+    // Read URL params
+    const p = new URLSearchParams(location.search);
+    if(p.get('exam_id')){ 
+      loadResultsByExamId(parseInt(p.get('exam_id')), p.get('section_id'));
+      return;
+    }
+    if(p.get('term')) $('f-term').value = p.get('term');
+  }catch(e){}
+}
+
+async function loadSections(){
+  const cid = $('f-class').value;
+  const sel = $('f-section');
+  sel.innerHTML='<option value="">-- All Sections --</option>';
+  if(!cid) return;
+  try{
+    const secs = await fetch('/api/school/classes/'+cid+'/sections').then(r=>r.json());
+    secs.forEach(s=>{const o=document.createElement('option');o.value=s.id;o.textContent='Section '+s.name;sel.appendChild(o);});
+  }catch(e){}
+}
+
+async function loadResults(){
+  const cid    = $('f-class').value;
+  const secid  = $('f-section').value;
+  const term   = $('f-term').value;
+  const year   = $('f-year').value;
+  if(!cid||!term){ alert('Please select Class and Term'); return; }
+  $('result-output').innerHTML='<div class="loading-box"><span class="sml"></span> Loading results…</div>';
+  $('results-meta').style.display='none';
+  $('summary-stats').style.display='none';
+
+  try{
+    const exams = await fetch(`/api/school/term-exams?year=${year}&class_id=${cid}`).then(r=>r.json());
+    const exam  = exams.find(e=>e.term===term && e.result_published);
+    if(!exam){
+      $('result-output').innerHTML='<div class="empty-state"><i class="fas fa-times-circle"></i><h3>No Published Results</h3><p>Results for this selection have not been published yet.</p></div>';
+      return;
+    }
+    await loadResultsByExamId(exam.id, secid||null);
+  }catch(e){
+    $('result-output').innerHTML='<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><h3>Error</h3><p>Could not load results. Please try again.</p></div>';
+  }
+}
+
+async function loadResultsByExamId(examId, sectionId){
+  currentExamId = examId;
+  const url = sectionId
+    ? `/api/school/results/section-wise?exam_id=${examId}&section_id=${sectionId}`
+    : `/api/school/results/class-wise?exam_id=${examId}`;
+  $('result-output').innerHTML='<div class="loading-box"><span class="sml"></span> Loading results…</div>';
+
+  try{
+    const data = await fetch(url).then(r=>r.json());
+    if(data.error){ $('result-output').innerHTML=`<div class="empty-state"><i class="fas fa-times-circle"></i><h3>Error</h3><p>${data.error}</p></div>`; return; }
+    currentSubjects = data.subjects||[];
+    currentResults  = data.results||[];
+    renderResults(data, sectionId);
+  }catch(e){
+    $('result-output').innerHTML='<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><h3>Error</h3><p>Could not load results. Please try again.</p></div>';
+  }
+}
+
+function gradeClass(g){ return {A:g==='A+'?'Ap':'A-'?'Am':'A','A+':'Ap','A-':'Am','B':'B','C':'C','D':'D','F':'F'}[g]||'other'; }
+function gClass(g){ const m={'A+':'Ap','A':'A','A-':'Am','B':'B','C':'C','D':'D','F':'F'}; return m[g]||'other'; }
+
+function renderResults(data, sectionId){
+  const exam     = data.exam;
+  const subjects = data.subjects;
+  const results  = data.results;
+
+  // Meta
+  $('meta-title').textContent = exam.title;
+  const tags = $('meta-tags');
+  tags.innerHTML = `<span class="meta-tag"><i class="fas fa-layer-group"></i> ${exam.class_name||''}</span>
+    <span class="meta-tag"><i class="fas fa-calendar-check"></i> ${exam.term_display}</span>
+    <span class="meta-tag"><i class="fas fa-calendar-alt"></i> ${exam.year}</span>
+    <span class="meta-tag"><i class="fas fa-users"></i> ${results.length} Students</span>`;
+  $('results-meta').style.display='flex';
+
+  // Print info
+  $('print-exam-title').textContent = exam.title;
+  $('print-date').textContent = 'Printed: '+new Date().toLocaleDateString('en-BD');
+
+  // Summary stats
+  if(results.length){
+    const passed   = results.filter(r=>!r.failed).length;
+    const avgPct   = (results.reduce((s,r)=>s+r.percentage,0)/results.length).toFixed(1);
+    const topScore = results[0];
+    $('summary-stats').innerHTML = `
+      <div class="rss-box"><div class="val">${results.length}</div><div class="lbl">Total Students</div></div>
+      <div class="rss-box"><div class="val" style="color:var(--green)">${passed}</div><div class="lbl">Passed</div></div>
+      <div class="rss-box"><div class="val" style="color:var(--red)">${results.length-passed}</div><div class="lbl">Failed</div></div>
+      <div class="rss-box"><div class="val">${avgPct}%</div><div class="lbl">Class Average</div></div>
+      <div class="rss-box"><div class="val" style="color:var(--gold)">${topScore?.percentage?.toFixed(1)||'—'}%</div><div class="lbl">Highest Score</div></div>
+    `;
+    $('summary-stats').style.display='grid';
+  }
+
+  // Build table
+  const subHeaders = subjects.map(s=>`<th>${s.name}<br><span style="font-size:10px;font-weight:400;opacity:.7">${s.full_marks}</span></th>`).join('');
+  const rows = results.map(r=>{
+    const rankBadge = r.rank<=3
+      ? `<span class="rank-badge rank-${r.rank}">${r.rank}</span>`
+      : `<span class="rank-badge rank-other">${r.rank}</span>`;
+    const subCells = subjects.map(s=>{
+      const m = r.subjects?.[s.id];
+      if(!m) return '<td>—</td>';
+      if(m.is_absent) return '<td><span class="grade-badge g-F">Absent</span></td>';
+      return `<td>${m.marks||0}<br><small class="grade-badge g-${gClass(m.grade)||'other'}">${m.grade||'—'}</small></td>`;
+    }).join('');
+    const failStyle = r.failed ? 'background:#fff5f5' : '';
+    const transcriptLink = `<a href="/results/transcript?exam_id=${exam.id}&student_id=${r.student_id}" title="View Transcript" style="color:var(--primary);font-size:11px;display:block;margin-top:3px"><i class="fas fa-file-alt"></i></a>`;
+    return `<tr style="${failStyle}">
+      <td>${rankBadge}</td>
+      <td>${r.roll_number||'—'}</td>
+      <td style="text-align:left">
+        <strong>${r.student_name}</strong><br>
+        <small style="color:#94a3b8">${r.section?' Sec-'+r.section:''}</small>
+        ${transcriptLink}
+      </td>
+      ${subCells}
+      <td><strong>${r.total_marks}</strong><br><small style="color:#94a3b8">/ ${r.total_full}</small></td>
+      <td><strong>${r.percentage?.toFixed(1)}%</strong></td>
+      <td><span class="grade-badge g-${gClass(r.overall_grade)>">${r.overall_grade||'—'}</span></td>
+    </tr>`;
+  }).join('')||'<tr><td colspan="999" style="text-align:center;color:#94a3b8;padding:30px">No results found.</td></tr>';
+
+  $('result-output').innerHTML = `
+    <div class="result-table-wrap">
+      <div style="overflow-x:auto">
+        <table class="result-table">
+          <thead>
+            <tr>
+              <th>Rank</th><th>Roll</th><th style="text-align:left">Student Name</th>
+              ${subHeaders}
+              <th>Total</th><th>%</th><th>Grade</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+    </div>`;
+}
+
+document.addEventListener('DOMContentLoaded', loadClasses);
+</script>
+{% endblock %}

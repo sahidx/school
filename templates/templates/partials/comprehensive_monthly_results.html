@@ -81,6 +81,13 @@
                         x-show="isTeacher && rankings.length > 0">
                     <i class="fas fa-edit mr-2"></i>Assign Roll Numbers
                 </button>
+                <!-- ── Print Section Result ── -->
+                <a :href="`/api/monthly-exams/${currentExamId}/section-result`"
+                   target="_blank"
+                   class="px-3 py-2 bg-green-600 text-white text-sm rounded hover:bg-green-700 flex items-center"
+                   x-show="isTeacher && rankings.length > 0">
+                    <i class="fas fa-print mr-2"></i>Section Result
+                </a>
             </div>
         </div>
     </div>
@@ -126,6 +133,7 @@
                         <th class="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase whitespace-nowrap">Total Marks</th>
                         <th class="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase whitespace-nowrap">%</th>
                         <th class="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase whitespace-nowrap">Grade</th>
+                        <th class="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase whitespace-nowrap" x-show="isTeacher">Print</th>
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
@@ -210,6 +218,14 @@
                                       }"
                                       x-text="rank.grade">
                                 </span>
+                            </td>
+                            <!-- Transcript -->
+                            <td class="px-2 py-2 whitespace-nowrap text-center" x-show="isTeacher">
+                                <a :href="`/api/monthly-exams/${currentExamId}/transcript/${rank.user_id}`"
+                                   target="_blank"
+                                   class="text-xs px-2 py-1 bg-indigo-600 text-white rounded hover:bg-indigo-700">
+                                    📄 Transcript
+                                </a>
                             </td>
                         </tr>
                     </template>
@@ -562,8 +578,8 @@ function comprehensiveResults() {
             // Prepare CSV data with proper Unicode handling
             let csv = [];
             
-            // Add coaching center header at the top
-            csv.push('"জি. এস. স্টুডেন্ট নার্সিং সেন্টার, মহাদেবপুর, নওগাঁ।"');
+            // Add school header at the top
+            csv.push('"Modern Ideal Non Government Primary School"');
             csv.push(`"মাসিক পরীক্ষার ফলাফল - ${this.examData?.title || 'Monthly Exam'}"`);
             csv.push('""'); // Empty row for spacing
             
