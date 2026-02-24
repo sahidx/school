@@ -60,46 +60,43 @@
                 </button>
             </div>
 
-            <div x-show="monthlyExams.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div x-show="monthlyExams.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                 <template x-for="monthExam in monthlyExams" :key="monthExam.id">
-                    <div class="bg-gray-50 rounded-lg p-6 border border-gray-200">
-                        <div class="flex justify-between items-start mb-4">
-                            <div>
-                                <h3 class="text-lg font-semibold text-gray-900" x-text="monthExam.title"></h3>
-                                <p class="text-sm text-gray-600" x-text="monthExam.batch_name"></p>
-                                <p class="text-xs text-gray-500" x-text="`${monthExam.month_name} ${monthExam.year}`"></p>
+                    <div class="bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow overflow-hidden">
+                        <!-- card header -->
+                        <div class="px-5 py-4 border-b border-gray-100 flex items-start justify-between gap-3">
+                            <div class="flex-1 min-w-0">
+                                <h3 class="font-semibold text-gray-900 truncate" x-text="monthExam.title"></h3>
+                                <p class="text-sm text-indigo-600 font-medium mt-0.5 truncate" x-text="monthExam.batch_name"></p>
+                                <p class="text-xs text-gray-400 mt-0.5" x-text="`${monthExam.month_name} ${monthExam.year}`"></p>
                             </div>
-                            <span 
-                                x-text="monthExam.status" 
-                                x-bind:class="monthExam.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'"
-                                class="px-2 py-1 text-xs font-medium rounded-full"
-                            ></span>
-                        </div>
-                        
-                        <div class="space-y-2 mb-4">
-                            <div class="flex justify-between text-sm">
-                                <span class="text-gray-600">Period:</span>
-                                <span class="font-medium" x-text="`${new Date(monthExam.start_date).toLocaleDateString()} - ${new Date(monthExam.end_date).toLocaleDateString()}`"></span>
-                            </div>
-                            <div class="flex justify-between text-sm">
-                                <span class="text-gray-600">Individual Exams:</span>
-                                <span class="font-medium" x-text="monthExam.individual_exams_count || 0"></span>
-                            </div>
-                        </div>
-                        
-                        <div class="flex gap-2">
-                            <button 
-                                x-on:click="selectMonthlyExam(monthExam)" 
-                                class="flex-1 btn-primary text-sm"
+                            <span
+                                x-bind:class="monthExam.status === 'active' ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : 'bg-gray-100 text-gray-500 border-gray-200'"
+                                class="shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border capitalize"
                             >
-                                Manage Exams
+                                <span class="w-1.5 h-1.5 rounded-full bg-current"></span>
+                                <span x-text="monthExam.status || 'closed'"></span>
+                            </span>
+                        </div>
+                        <!-- stats -->
+                        <div class="px-5 py-3 bg-gray-50 flex items-center justify-between text-sm text-gray-600">
+                            <span><i class="fas fa-clipboard-list text-indigo-400 mr-1.5"></i>Exams: <strong class="text-gray-800" x-text="monthExam.individual_exams_count || 0"></strong></span>
+                            <span x-show="monthExam.result_published_at" class="text-emerald-600 text-xs font-semibold"><i class="fas fa-check-circle mr-1"></i>Published</span>
+                        </div>
+                        <!-- actions -->
+                        <div class="px-5 py-3 flex items-center gap-2">
+                            <button
+                                x-on:click="selectMonthlyExam(monthExam)"
+                                class="flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-lg transition-colors shadow-sm"
+                            >
+                                <i class="fas fa-tasks"></i>Manage
                             </button>
-                            <button 
-                                x-on:click="deleteMonthlyExam(monthExam)" 
-                                class="px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm"
-                                title="Delete monthly exam period"
+                            <button
+                                x-on:click="deleteMonthlyExam(monthExam)"
+                                class="inline-flex items-center justify-center w-9 h-9 rounded-lg border border-red-200 text-red-500 hover:bg-red-50 hover:border-red-400 transition-colors"
+                                title="Delete exam period"
                             >
-                                <i class="fas fa-trash"></i>
+                                <i class="fas fa-trash-alt text-sm"></i>
                             </button>
                         </div>
                     </div>
@@ -162,49 +159,45 @@
                 </div>
 
                 <!-- Individual Exams List -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
                     <template x-for="exam in individualExams" :key="exam.id">
-                        <div class="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-                            <div class="flex justify-between items-start mb-3">
-                                <div>
-                                    <h4 class="font-medium text-gray-900" x-text="exam.title"></h4>
-                                    <p class="text-sm text-gray-600" x-text="exam.subject"></p>
+                        <div class="bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-all overflow-hidden">
+                            <!-- header stripe -->
+                            <div class="h-1.5 bg-gradient-to-r from-indigo-500 to-blue-600"></div>
+                            <div class="p-4">
+                                <div class="flex items-start justify-between gap-2 mb-3">
+                                    <div class="flex-1 min-w-0">
+                                        <h4 class="font-semibold text-gray-900 truncate" x-text="exam.title"></h4>
+                                        <p class="text-sm text-indigo-500 font-medium mt-0.5" x-text="exam.subject"></p>
+                                    </div>
+                                    <span class="shrink-0 text-sm font-bold text-indigo-600 bg-indigo-50 border border-indigo-200 px-2.5 py-0.5 rounded-lg" x-text="`${exam.marks} pts`"></span>
                                 </div>
-                                <span class="text-sm font-medium text-indigo-600" x-text="`${exam.marks} marks`"></span>
-                            </div>
-                            
-                            <div class="space-y-1 text-sm text-gray-600 mb-4">
-                                <div class="flex justify-between">
-                                    <span>Date:</span>
-                                    <span x-text="new Date(exam.exam_date).toLocaleDateString()"></span>
+                                <div class="grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-gray-500 mb-4">
+                                    <div class="flex items-center gap-1"><i class="far fa-calendar text-gray-400"></i><span x-text="new Date(exam.exam_date).toLocaleDateString()"></span></div>
+                                    <div class="flex items-center gap-1"><i class="far fa-clock text-gray-400"></i><span x-text="`${exam.duration} min`"></span></div>
+                                    <div class="flex items-center gap-1 col-span-2"><i class="fas fa-users text-gray-400"></i><span><strong class="text-gray-700" x-text="exam.marks_count || 0"></strong> students marked</span></div>
                                 </div>
-                                <div class="flex justify-between">
-                                    <span>Duration:</span>
-                                    <span x-text="`${exam.duration} min`"></span>
+                                <div class="flex items-center gap-2">
+                                    <button
+                                        x-on:click="openMarksEntry(exam)"
+                                        class="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 text-sm font-semibold rounded-lg transition-colors shadow-sm"
+                                        :class="exam.marks_count > 0 ? 'bg-amber-500 hover:bg-amber-600 text-white' : 'bg-indigo-600 hover:bg-indigo-700 text-white'"
+                                    >
+                                        <i :class="exam.marks_count > 0 ? 'fas fa-pen' : 'fas fa-plus'"></i>
+                                        <span x-text="exam.marks_count > 0 ? 'Edit Marks' : 'Enter Marks'"></span>
+                                    </button>
+                                    <button
+                                        x-on:click="deleteIndividualExam(exam)"
+                                        class="inline-flex items-center justify-center w-9 h-9 rounded-lg border border-red-200 text-red-400 hover:bg-red-50 hover:border-red-400 hover:text-red-600 transition-colors"
+                                        title="Delete exam"
+                                    >
+                                        <i class="fas fa-trash-alt text-sm"></i>
+                                    </button>
                                 </div>
-                                <div class="flex justify-between">
-                                    <span>Marks Entered:</span>
-                                    <span x-text="`${exam.marks_count || 0} students`"></span>
-                                </div>
-                            </div>
-                            
-                            <div class="flex gap-2">
-                                <button 
-                                    x-on:click="openMarksEntry(exam)" 
-                                    class="flex-1 btn-secondary text-sm flex items-center justify-center"
-                                >
-                                    <i class="fas fa-edit mr-2"></i>
-                                    <span x-text="exam.marks_count > 0 ? 'Edit Marks' : 'Enter Marks'"></span>
-                                </button>
-                                <button 
-                                    x-on:click="deleteIndividualExam(exam)" 
-                                    class="px-3 py-2 bg-red-50 text-red-600 rounded hover:bg-red-100 transition-colors"
-                                    title="Delete exam"
-                                >
-                                    <i class="fas fa-trash"></i>
-                                </button>
                             </div>
                         </div>
                     </template>
+                </div>
                 </div>
 
                 <div x-show="individualExams.length === 0" class="text-center py-8">

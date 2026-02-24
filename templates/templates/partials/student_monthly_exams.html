@@ -1,8 +1,5 @@
-<div id="monthlyExamsContent" class="space-y-6">
-    <div class="text-center py-8">
-        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
-        <p class="mt-4 text-gray-600">Loading monthly exams...</p>
-    </div>
+<div id="monthlyExamsContent" class="space-y-4">
+    <!-- Loaded lazily when section is first opened -->
 </div>
 
 <script>
@@ -10,368 +7,341 @@
     let examsData = [];
     let refreshInterval = null;
     let isExpanded = {};
-    
-    async function loadExams() {
-        const user = JSON.parse(localStorage.getItem('user') || '{}');
-        console.log('📚 Student Monthly Exams - User data:', user);
-        console.log('📚 user.allBatchIds:', user.allBatchIds);
-        console.log('📚 user.batches:', user.batches);
-        console.log('📚 user.batchId:', user.batchId);
-        
-        // Get ALL batch IDs from user session
-        let batchIds = user.allBatchIds || [];
-        
-        // Fallback to batches array if allBatchIds not available
-        if (!batchIds.length) {
-            let batches = user.batches || [];
-            console.log('📚 Fallback to batches array:', batches);
+    let initialized = false;
+
+    function getUser() { return JSON.parse(localStorage.getItem('user') || '{}'); }
+
+    function getAllBatchIds(user) {
+        let ids = user.allBatchIds || [];
+        if (!ids.length) {
+            const batches = user.batches || [];
             if (!batches.length && user.allStudents && user.allStudents.length > 0) {
-                console.log('📚 Fallback to allStudents:', user.allStudents);
-                const firstStudent = user.allStudents[0];
-                batches = firstStudent.batches || [];
+                ids = (user.allStudents[0].batches || []).map(b => b.id);
+            } else {
+                ids = batches.map(b => b.id);
             }
-            batchIds = batches.map(b => b.id);
         }
-        
-        const container = document.getElementById('monthlyExamsContent');
-        
+        return ids;
+    }
+
+    function showLoading() {
+        document.getElementById('monthlyExamsContent').innerHTML =
+            '<div class="flex flex-col items-center justify-center py-16">' +
+            '<div class="w-12 h-12 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>' +
+            '<p class="mt-4 text-sm text-gray-500">Loading your exams\u2026</p>' +
+            '</div>';
+    }
+
+    function escHtml(str) {
+        return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    async function loadExams() {
+        if (initialized) return;
+        initialized = true;
+        const user = getUser();
+        const batchIds = getAllBatchIds(user);
+
         if (!batchIds.length) {
-            console.error('❌ No batch IDs found! User object:', user);
-            container.innerHTML = '<div class="text-center py-12"><div class="bg-yellow-50 border border-yellow-200 rounded-lg p-6 max-w-md mx-auto"><p class="text-gray-700 font-medium mb-2">No batches assigned</p><p class="text-sm text-gray-600">Please contact your teacher to be assigned to a batch.</p><p class="text-xs text-gray-500 mt-2">Debug: Check console (F12) for user data</p></div></div>';
+            document.getElementById('monthlyExamsContent').innerHTML =
+                '<div class="rounded-xl border border-yellow-200 bg-yellow-50 p-8 text-center">' +
+                '<i class="fas fa-graduation-cap text-yellow-400 text-4xl mb-3"></i>' +
+                '<p class="font-semibold text-gray-700">No class assigned</p>' +
+                '<p class="text-sm text-gray-500 mt-1">Please contact your teacher to be added to a class.</p>' +
+                '</div>';
             return;
         }
-        
-        console.log('📚 Loading monthly exams from batches:', batchIds);
-        
+
+        showLoading();
+
         try {
-            // Load exams from ALL batches
-            const promises = batchIds.map(batchId => 
-                fetch('/api/monthly-exams?batch_id=' + batchId).then(r => r.json())
+            const results = await Promise.all(
+                batchIds.map(id => fetch('/api/monthly-exams?batch_id='+id).then(r=>r.json()))
             );
-            
-            const results = await Promise.all(promises);
-            
-            // Combine all exam data from all batches
-            let allExams = [];
-            results.forEach(data => {
-                if (data.success && data.data && data.data.length > 0) {
-                    allExams = allExams.concat(data.data);
-                }
-            });
-            
-            if (allExams.length > 0) {
-                // Sort by exam date (newest first)
-                examsData = allExams.sort((a, b) => new Date(b.exam_date) - new Date(a.exam_date));
-                console.log('✅ Loaded', examsData.length, 'exams from', batchIds.length, 'batch(es)');
-                renderExamCards(user);
-                
-                // Start auto-refresh every 30 seconds
-                if (!refreshInterval) {
-                    refreshInterval = setInterval(() => {
-                        console.log('🔄 Auto-refreshing exam data...');
-                        refreshExamData(user);
-                    }, 30000); // 30 seconds
-                }
-            } else {
-                container.innerHTML = '<div class="text-center py-12"><div class="bg-gray-50 border border-gray-200 rounded-lg p-8 max-w-md mx-auto"><i class="fas fa-inbox text-gray-400 text-4xl mb-4"></i><p class="text-gray-700 font-medium">No monthly exams available</p><p class="text-sm text-gray-500 mt-2">Your teacher hasn\'t created any monthly exams yet.</p></div></div>';
+            let all = [];
+            results.forEach(d => { if (d.success && d.data && d.data.length) all = all.concat(d.data); });
+
+            if (!all.length) {
+                document.getElementById('monthlyExamsContent').innerHTML =
+                    '<div class="rounded-xl border border-gray-200 bg-gray-50 p-10 text-center">' +
+                    '<i class="fas fa-folder-open text-gray-300 text-5xl mb-4"></i>' +
+                    '<p class="font-semibold text-gray-600">No exams yet</p>' +
+                    '<p class="text-sm text-gray-400 mt-1">Your teacher has not created any monthly exams yet.</p>' +
+                    '</div>';
+                return;
             }
-        } catch (err) {
-            console.error('Error loading exams:', err);
-            container.innerHTML = '<div class="text-center py-12"><div class="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md mx-auto"><i class="fas fa-exclamation-triangle text-red-500 text-3xl mb-3"></i><p class="text-red-700 font-medium">Error loading exams</p><p class="text-sm text-red-600 mt-2">' + err.message + '</p></div></div>';
+
+            examsData = all.sort((a,b) => new Date(b.exam_date) - new Date(a.exam_date));
+            renderExamCards(user);
+
+            if (!refreshInterval) {
+                refreshInterval = setInterval(() => refreshExamData(user), 60000);
+            }
+        } catch(err) {
+            initialized = false;
+            document.getElementById('monthlyExamsContent').innerHTML =
+                '<div class="rounded-xl border border-red-200 bg-red-50 p-6 text-center">' +
+                '<i class="fas fa-exclamation-circle text-red-400 text-3xl mb-2"></i>' +
+                '<p class="font-semibold text-red-700">Failed to load exams</p>' +
+                '<p class="text-sm text-red-500 mt-1">'+escHtml(err.message)+'</p>' +
+                '<button onclick="window.studentMonthlyExams.reload()" class="mt-4 inline-flex items-center px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 transition-colors shadow-sm">' +
+                '<i class="fas fa-redo mr-2"></i>Retry</button>' +
+                '</div>';
         }
     }
-    
+
     async function refreshExamData(user) {
-        // Get ALL batch IDs from user session
-        let batchIds = user.allBatchIds || [];
-        
-        // Fallback to batches array if allBatchIds not available
-        if (!batchIds.length) {
-            const batches = user.batches || [];
-            batchIds = batches.map(b => b.id);
-        }
-        
+        const batchIds = getAllBatchIds(user);
         if (!batchIds.length) return;
-        
         try {
-            // Load exams from ALL batches
-            const promises = batchIds.map(batchId => 
-                fetch('/api/monthly-exams?batch_id=' + batchId).then(r => r.json())
+            const results = await Promise.all(
+                batchIds.map(id => fetch('/api/monthly-exams?batch_id='+id).then(r=>r.json()))
             );
-            
-            const results = await Promise.all(promises);
-            
-            // Combine all exam data from all batches
-            let allExams = [];
-            results.forEach(data => {
-                if (data.success && data.data) {
-                    allExams = allExams.concat(data.data);
-                }
-            });
-            
-            // Sort by exam date
-            allExams = allExams.sort((a, b) => new Date(b.exam_date) - new Date(a.exam_date));
-            
-            const oldData = JSON.stringify(examsData);
-            const newData = JSON.stringify(allExams);
-            
-            if (oldData !== newData) {
-                console.log('✨ New data detected! Updating...');
-                examsData = allExams;
-                
-                // Re-render cards
+            let all = [];
+            results.forEach(d => { if (d.success && d.data) all = all.concat(d.data); });
+            all = all.sort((a,b) => new Date(b.exam_date) - new Date(a.exam_date));
+            if (JSON.stringify(examsData) !== JSON.stringify(all)) {
+                examsData = all;
                 renderExamCards(user);
-                
-                // Re-load expanded exam details
-                for (let index in isExpanded) {
-                    if (isExpanded[index]) {
-                        const examId = examsData[index].id;
-                        await loadExamDetails(parseInt(index), examId);
-                    }
+                for (let idx in isExpanded) {
+                    if (isExpanded[idx]) await loadExamDetails(parseInt(idx), examsData[idx].id);
                 }
-                
-                // Show update notification
-                showUpdateNotification();
+                showBadge('Results updated');
             }
-        } catch (err) {
-            console.error('Error refreshing data:', err);
-        }
+        } catch(_) {}
     }
-    
-    function showUpdateNotification() {
-        const notification = document.createElement('div');
-        notification.className = 'fixed top-20 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-bounce';
-        notification.innerHTML = '<i class="fas fa-sync-alt mr-2"></i>Results updated!';
-        document.body.appendChild(notification);
-        
-        setTimeout(() => {
-            notification.classList.remove('animate-bounce');
-            notification.classList.add('opacity-0', 'transition-opacity', 'duration-500');
-            setTimeout(() => notification.remove(), 500);
-        }, 3000);
+
+    function showBadge(text) {
+        const el = document.createElement('div');
+        el.className = 'fixed top-20 right-4 z-50 bg-indigo-600 text-white text-sm font-medium px-5 py-2.5 rounded-full shadow-lg';
+        el.innerHTML = '<i class="fas fa-check-circle mr-2"></i>'+text;
+        document.body.appendChild(el);
+        setTimeout(() => { el.style.transition='opacity .4s'; el.style.opacity='0'; setTimeout(()=>el.remove(),400); }, 2600);
     }
-    
+
     function renderExamCards(user) {
         const container = document.getElementById('monthlyExamsContent');
-        let html = '';
-        
-        examsData.forEach((exam, index) => {
-            html += '<div class="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow border border-gray-200">';
-            
-            // Clickable Card Header
-            html += '<div class="bg-gradient-to-r from-indigo-600 to-blue-600 text-white p-6 cursor-pointer" onclick="toggleExamDetails(' + index + ', ' + exam.id + ')">';
-            html += '<div class="flex justify-between items-start">';
-            html += '<div class="flex-1">';
-            html += '<h3 class="text-xl font-bold mb-2">' + exam.title + '</h3>';
-            html += '<p class="text-indigo-100 text-sm mb-3">' + exam.batch_name + '</p>';
-            html += '<div class="flex flex-wrap gap-2">';
-            html += '<span class="bg-white/20 px-3 py-1 rounded-full text-xs"><i class="far fa-calendar mr-1"></i>' + exam.month_name + ' ' + exam.year + '</span>';
-            html += '<span class="bg-white/20 px-3 py-1 rounded-full text-xs"><i class="fas fa-award mr-1"></i>' + exam.total_marks + ' marks</span>';
-            html += '<span class="bg-white/20 px-3 py-1 rounded-full text-xs"><i class="fas fa-check-circle mr-1"></i>' + exam.status + '</span>';
-            html += '</div></div>';
-            html += '<div class="ml-4">';
-            html += '<i id="arrow-' + index + '" class="fas fa-chevron-down text-2xl transition-transform' + (isExpanded[index] ? ' rotate-180' : '') + '"></i>';
-            html += '</div></div></div>';
-            
-            // Expandable Details Section
-            html += '<div id="exam-details-' + index + '" class="' + (isExpanded[index] ? '' : 'hidden') + '">';
-            if (!isExpanded[index]) {
-                html += '<div class="p-6 bg-gray-50">';
-                html += '<div class="text-center py-4"><i class="fas fa-spinner fa-spin text-indigo-600 text-2xl"></i><p class="mt-2 text-gray-600">Loading details...</p></div>';
-                html += '</div>';
-            }
-            html += '</div>';
-            
-            html += '</div>';
+        if (!examsData.length) { container.innerHTML = ''; return; }
+
+        let html = '<div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">';
+
+        examsData.forEach((exam, idx) => {
+            const isPublished = !!exam.result_published_at;
+            const statusColor = exam.status === 'active'
+                ? 'bg-emerald-100 text-emerald-700 border-emerald-200'
+                : 'bg-gray-100 text-gray-500 border-gray-200';
+            const statusLabel = exam.status === 'active' ? 'Active' : (exam.status || 'Closed');
+
+            html +=
+                '<div class="bg-white rounded-2xl shadow-sm hover:shadow-md border border-gray-100 overflow-hidden transition-all duration-200">' +
+
+                // header
+                '<div class="bg-gradient-to-br from-indigo-600 to-blue-700 px-5 py-4 cursor-pointer select-none" onclick="toggleExamDetails('+idx+','+exam.id+')">' +
+                '<div class="flex items-start justify-between">' +
+                '<div class="flex-1 min-w-0">' +
+                '<h3 class="text-white font-semibold text-base leading-tight truncate">'+escHtml(exam.title)+'</h3>' +
+                '<p class="text-indigo-200 text-xs mt-0.5 truncate">'+escHtml(exam.batch_name)+'</p>' +
+                '</div>' +
+                '<i id="arrow-'+idx+'" class="fas fa-chevron-down text-white/70 ml-3 mt-0.5 transition-transform duration-200'+(isExpanded[idx]?' rotate-180':'')+'"></i>' +
+                '</div>' +
+                '<div class="flex flex-wrap gap-1.5 mt-3">' +
+                '<span class="bg-white/20 text-white text-xs px-2.5 py-0.5 rounded-full"><i class="far fa-calendar mr-1"></i>'+escHtml(exam.month_name+' '+exam.year)+'</span>' +
+                '<span class="bg-white/20 text-white text-xs px-2.5 py-0.5 rounded-full"><i class="fas fa-star-half-alt mr-1"></i>'+exam.total_marks+' marks</span>' +
+                '</div>' +
+                '</div>' +
+
+                // footer bar
+                '<div class="px-5 py-3 flex items-center justify-between bg-gray-50 border-t border-gray-100">' +
+                '<span class="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full border '+statusColor+'">'+
+                '<span class="w-1.5 h-1.5 rounded-full bg-current"></span>'+statusLabel+'</span>' +
+                (isPublished
+                    ? '<span class="text-xs text-emerald-600 font-semibold"><i class="fas fa-check-circle mr-1"></i>Results published</span>'
+                    : '<span class="text-xs text-gray-400"><i class="far fa-clock mr-1"></i>Awaiting results</span>') +
+                '</div>' +
+
+                // expandable
+                '<div id="exam-details-'+idx+'" class="'+(isExpanded[idx]?'':'hidden')+'">' +
+                (isExpanded[idx] ? '' :
+                    '<div class="px-5 py-6 text-center">' +
+                    '<div class="w-8 h-8 border-2 border-indigo-200 border-t-indigo-600 rounded-full animate-spin mx-auto"></div>' +
+                    '<p class="text-xs text-gray-400 mt-2">Loading details\u2026</p></div>') +
+                '</div>' +
+
+                '</div>';
         });
-        
+
+        html += '</div>';
         container.innerHTML = html;
     }
-    
-    window.toggleExamDetails = async function(index, examId) {
-        const detailsDiv = document.getElementById('exam-details-' + index);
-        const arrow = document.getElementById('arrow-' + index);
-        
-        if (detailsDiv.classList.contains('hidden')) {
-            // Expand and load data
-            isExpanded[index] = true;
-            detailsDiv.classList.remove('hidden');
+
+    window.toggleExamDetails = async function(idx, examId) {
+        const div   = document.getElementById('exam-details-'+idx);
+        const arrow = document.getElementById('arrow-'+idx);
+        if (div.classList.contains('hidden')) {
+            isExpanded[idx] = true;
+            div.classList.remove('hidden');
             arrow.classList.add('rotate-180');
-            await loadExamDetails(index, examId);
+            await loadExamDetails(idx, examId);
         } else {
-            // Collapse
-            isExpanded[index] = false;
-            detailsDiv.classList.add('hidden');
+            isExpanded[idx] = false;
+            div.classList.add('hidden');
             arrow.classList.remove('rotate-180');
         }
     };
-    
-    async function loadExamDetails(index, examId) {
-        const user = JSON.parse(localStorage.getItem('user') || '{}');
-        const exam = examsData[index];
-        const detailsDiv = document.getElementById('exam-details-' + index);
-        
+
+    async function loadExamDetails(idx, examId) {
+        const user  = getUser();
+        const exam  = examsData[idx];
+        const div   = document.getElementById('exam-details-'+idx);
+        if (!div) return;
+
         try {
-            // Fetch individual exams
-            const indExamsResponse = await fetch('/api/monthly-exams/' + examId + '/individual-exams');
-            const indExamsData = await indExamsResponse.json();
-            
-            // Fetch rankings
-            const rankingsResponse = await fetch('/api/monthly-exams/' + examId + '/ranking');
-            const rankingsData = await rankingsResponse.json();
-            
-            let html = '<div class="p-6 space-y-6">';
-            
-            // Individual Exams Section
-            html += '<div>';
-            html += '<h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">';
-            html += '<i class="fas fa-clipboard-list text-indigo-600 mr-2"></i> Individual Exams';
-            html += '</h3>';
-            
-            const individualExams = indExamsData.data?.individual_exams || [];
-            const rankings = rankingsData.data?.nearby_rankings || [];
-            
-            // Get all student IDs for this user (handles multi-student accounts)
-            const allStudentIds = [];
-            if (user.id) allStudentIds.push(user.id);
-            if (user.allStudents && user.allStudents.length > 0) {
-                user.allStudents.forEach(student => {
-                    if (!allStudentIds.includes(student.id)) {
-                        allStudentIds.push(student.id);
-                    }
-                });
+            const [indRes, rankRes] = await Promise.all([
+                fetch('/api/monthly-exams/'+examId+'/individual-exams').then(r=>r.json()),
+                fetch('/api/monthly-exams/'+examId+'/ranking').then(r=>r.json())
+            ]);
+
+            const individualExams = indRes.data?.individual_exams || [];
+            const rankings        = rankRes.data?.nearby_rankings  || [];
+
+            const allIds = [user.id];
+            (user.allStudents||[]).forEach(s=>{ if(!allIds.includes(s.id)) allIds.push(s.id); });
+            const myRanks = rankings.filter(r => allIds.includes(r.user_id));
+
+            let html = '<div class="divide-y divide-gray-100">';
+
+            // action bar
+            html += '<div class="px-5 py-3 bg-gray-50 flex flex-wrap gap-2">';
+            html += '<a href="/api/monthly-exams/'+examId+'/ranking" target="_blank" '+
+                    'class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold transition-colors shadow-sm">' +
+                    '<i class="fas fa-trophy"></i>Full Rankings</a>';
+            if (exam.result_published_at) {
+                html += '<a href="/api/monthly-exams/'+examId+'/section-result" target="_blank" '+
+                        'class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold transition-colors shadow-sm">' +
+                        '<i class="fas fa-download"></i>Download Result</a>';
             }
-            
-            // Find ALL students' rank data (for multi-student accounts)
-            const myRankDataArray = rankings.filter(r => allStudentIds.includes(r.user_id));
-            const myRankData = myRankDataArray[0]; // For backward compatibility
-            
-            if (individualExams.length > 0) {
-                html += '<div class="grid md:grid-cols-2 gap-4 mb-6">';
-                individualExams.forEach(indExam => {
-                    // Get student's marks for this exam from myRankData
-                    const studentMark = myRankData?.individual_marks?.[indExam.id];
-                    const marksObtained = studentMark?.marks_obtained;
-                    const isAbsent = studentMark?.is_absent;
-                    const grade = studentMark?.grade;
-                    const percentage = studentMark?.percentage;
-                    
-                    html += '<div class="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">';
-                    html += '<div class="flex justify-between items-start">';
-                    html += '<div class="flex-1">';
-                    html += '<h4 class="font-semibold text-gray-800">' + (indExam.subject || indExam.title) + '</h4>';
-                    html += '<p class="text-sm text-gray-600 mt-1">' + (indExam.title || '') + '</p>';
-                    if (indExam.exam_date) {
-                        html += '<p class="text-xs text-gray-500 mt-2"><i class="far fa-calendar mr-1"></i>' + new Date(indExam.exam_date).toLocaleDateString() + '</p>';
-                    }
-                    
-                    // Show student's result if available
-                    if (studentMark) {
-                        if (isAbsent) {
-                            html += '<div class="mt-3 inline-flex items-center px-3 py-1 rounded-full bg-red-100 text-red-800 text-sm font-medium">';
-                            html += '<i class="fas fa-times-circle mr-1"></i> Absent';
-                            html += '</div>';
-                        } else {
-                            html += '<div class="mt-3 flex items-center gap-2">';
-                            html += '<span class="text-sm text-gray-600">Your Score:</span>';
-                            html += '<span class="font-bold text-green-600">' + marksObtained + '/' + indExam.marks + '</span>';
-                            html += '<span class="px-2 py-0.5 rounded bg-indigo-100 text-indigo-800 text-xs font-semibold">' + grade + '</span>';
-                            html += '</div>';
-                        }
-                    }
-                    html += '</div>';
-                    html += '<div class="text-right ml-4">';
-                    html += '<div class="text-3xl font-bold text-indigo-600">' + indExam.marks + '</div>';
-                    html += '<div class="text-xs text-gray-500">Total</div>';
-                    html += '</div></div></div>';
+            html += '</div>';
+
+            // my result
+            if (myRanks.length) {
+                html += '<div class="px-5 py-4">';
+                html += '<p class="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">My Result</p>';
+                html += '<div class="grid sm:grid-cols-2 gap-3">';
+                myRanks.forEach(r => {
+                    const gc = r.grade==='A+'||r.grade==='A'?'text-emerald-600':r.grade==='F'?'text-red-600':'text-indigo-600';
+                    html += '<div class="rounded-xl border border-indigo-100 bg-gradient-to-br from-indigo-50 to-white p-4 flex items-center gap-4">' +
+                            '<div class="w-14 h-14 rounded-full bg-indigo-600 text-white flex items-center justify-center shrink-0">' +
+                            '<span class="text-lg font-black">#'+r.position+'</span></div>' +
+                            '<div class="min-w-0">' +
+                            '<p class="font-semibold text-gray-800 truncate">'+escHtml(r.student_name)+'</p>' +
+                            '<p class="text-2xl font-black text-gray-900">'+r.total_exam_marks+'<span class="text-base font-normal text-gray-400">/'+exam.total_marks+'</span></p>' +
+                            '<p class="text-sm '+gc+' font-semibold">'+r.percentage.toFixed(1)+'% &nbsp;&middot;&nbsp; Grade '+r.grade+'</p>' +
+                            '</div></div>';
                 });
-                html += '</div>';
-                
-                // Total Summary
-                html += '<div class="bg-indigo-50 border-2 border-indigo-200 rounded-lg p-4">';
-                html += '<div class="flex justify-between items-center">';
-                html += '<span class="font-bold text-gray-800">Total Marks:</span>';
-                html += '<span class="text-3xl font-bold text-indigo-600">' + exam.total_marks + '</span>';
                 html += '</div></div>';
-            } else {
-                html += '<p class="text-gray-500 italic">No individual exams added yet</p>';
             }
-            html += '</div>';
-            
-            // Rankings Section
-            html += '<div>';
-            html += '<h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">';
-            html += '<i class="fas fa-trophy text-yellow-500 mr-2"></i> Rankings & Results';
-            html += '</h3>';
-            
-            if (rankings.length > 0) {
-                // Show results for ALL students in multi-student accounts
-                if (myRankDataArray.length > 0) {
-                    myRankDataArray.forEach((myRank, index) => {
-                        const borderColor = index === 0 ? 'border-green-400' : 'border-blue-400';
-                        const bgColor = index === 0 ? 'from-green-50 to-emerald-50' : 'from-blue-50 to-indigo-50';
-                        const badgeColor = index === 0 ? 'bg-green-500' : 'bg-blue-500';
-                        
-                        html += '<div class="bg-gradient-to-r ' + bgColor + ' border-2 ' + borderColor + ' rounded-lg p-5 mb-4">';
-                        html += '<div class="flex items-center justify-between">';
-                        html += '<div class="flex items-center gap-4">';
-                        html += '<div class="' + badgeColor + ' text-white rounded-full w-16 h-16 flex items-center justify-center">';
-                        html += '<span class="text-2xl font-bold">#' + myRank.position + '</span>';
-                        html += '</div>';
-                        html += '<div>';
-                        html += '<div class="text-sm text-gray-600">' + (myRankDataArray.length > 1 ? 'Student Rank' : 'Your Rank') + '</div>';
-                        html += '<div class="font-bold text-gray-800 text-lg">' + myRank.student_name + '</div>';
-                        html += '</div></div>';
-                        html += '<div class="text-right">';
-                        html += '<div class="text-3xl font-bold text-gray-800">' + myRank.total_exam_marks + '<span class="text-lg text-gray-500">/' + exam.total_marks + '</span></div>';
-                        html += '<div class="text-xl font-semibold text-green-600">' + myRank.percentage.toFixed(1) + '% · ' + myRank.grade + '</div>';
-                        html += '</div></div></div>';
-                    });
-                }
-                
-                // Rankings Table
-                html += '<div class="bg-white rounded-lg border border-gray-200 overflow-hidden">';
-                html += '<table class="min-w-full">';
-                html += '<thead class="bg-gray-100 border-b border-gray-200">';
-                html += '<tr>';
-                html += '<th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Rank</th>';
-                html += '<th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Student</th>';
-                html += '<th class="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Marks</th>';
-                html += '<th class="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase">%</th>';
-                html += '<th class="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Grade</th>';
-                html += '</tr></thead>';
-                html += '<tbody class="divide-y divide-gray-200">';
-                
-                rankings.forEach((rank, idx) => {
-                    // Highlight ALL students in multi-student accounts
-                    const isMyRank = allStudentIds.includes(rank.user_id);
-                    const rowClass = isMyRank ? 'bg-green-50 font-semibold' : 'hover:bg-gray-50';
-                    const medalIcon = idx === 0 ? '🥇 ' : idx === 1 ? '🥈 ' : idx === 2 ? '🥉 ' : '';
-                    
-                    html += '<tr class="' + rowClass + '">';
-                    html += '<td class="px-4 py-3 text-center"><span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-indigo-100 text-indigo-800 font-bold text-sm">' + medalIcon + rank.position + '</span></td>';
-                    html += '<td class="px-4 py-3 text-gray-800">' + rank.student_name + '</td>';
-                    html += '<td class="px-4 py-3 text-center font-semibold text-gray-900">' + rank.total_exam_marks + '<span class="text-gray-500">/' + exam.total_marks + '</span></td>';
-                    html += '<td class="px-4 py-3 text-center font-semibold text-indigo-600">' + rank.percentage.toFixed(1) + '%</td>';
-                    html += '<td class="px-4 py-3 text-center"><span class="px-3 py-1 rounded-full text-sm font-semibold bg-indigo-100 text-indigo-800">' + rank.grade + '</span></td>';
-                    html += '</tr>';
+
+            // individual subject marks table
+            if (individualExams.length) {
+                html += '<div class="px-5 py-4">';
+                html += '<p class="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">Subject Marks</p>';
+                html += '<div class="overflow-x-auto rounded-xl border border-gray-100">';
+                html += '<table class="min-w-full text-sm">';
+                html += '<thead><tr class="bg-gray-50 text-xs font-semibold text-gray-500 uppercase tracking-wide">' +
+                        '<th class="px-4 py-2.5 text-left">Subject</th>' +
+                        '<th class="px-4 py-2.5 text-center">Full</th>' +
+                        '<th class="px-4 py-2.5 text-center">Obtained</th>' +
+                        '<th class="px-4 py-2.5 text-center">Grade</th>' +
+                        '</tr></thead>';
+                html += '<tbody class="divide-y divide-gray-50">';
+
+                const myMark = myRanks[0];
+                individualExams.forEach(ie => {
+                    const sm     = myMark?.individual_marks?.[ie.id];
+                    const absent = sm?.is_absent;
+                    const obt    = sm ? (absent ? 'Absent' : sm.marks_obtained) : '\u2014';
+                    const grade  = sm && !absent ? sm.grade : '';
+                    const gc     = grade==='A+'||grade==='A'?'bg-emerald-100 text-emerald-700':grade==='F'?'bg-red-100 text-red-700':'bg-indigo-100 text-indigo-700';
+
+                    html += '<tr class="'+(absent?'bg-red-50':'')+' hover:bg-gray-50 transition-colors">' +
+                            '<td class="px-4 py-2.5 font-medium text-gray-800">'+escHtml(ie.subject||ie.title)+'</td>' +
+                            '<td class="px-4 py-2.5 text-center text-gray-500">'+ie.marks+'</td>' +
+                            '<td class="px-4 py-2.5 text-center font-semibold '+(absent?'text-red-500':'text-gray-900')+'">' +
+                            (absent ? '<span class="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded-full">Absent</span>' : obt) +
+                            '</td>' +
+                            '<td class="px-4 py-2.5 text-center">' +
+                            (grade ? '<span class="text-xs font-semibold px-2 py-0.5 rounded-full '+gc+'">'+grade+'</span>' : '<span class="text-gray-300">\u2014</span>') +
+                            '</td></tr>';
                 });
-                
+
                 html += '</tbody></table></div>';
-            } else {
-                html += '<p class="text-gray-500 italic text-center py-8">No results published yet</p>';
+                html += '<div class="mt-3 flex items-center justify-between rounded-xl bg-indigo-600 text-white px-4 py-2.5">' +
+                        '<span class="font-semibold text-sm">Total</span>' +
+                        '<span class="text-xl font-black">'+(myRanks[0]?myRanks[0].total_exam_marks:'\u2014')+'<span class="text-sm font-normal opacity-70">/'+exam.total_marks+'</span></span>' +
+                        '</div>';
+                html += '</div>';
             }
+
+            // class rankings table
+            if (rankings.length) {
+                html += '<div class="px-5 py-4">';
+                html += '<p class="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">Class Rankings</p>';
+                html += '<div class="overflow-x-auto rounded-xl border border-gray-100">';
+                html += '<table class="min-w-full text-sm"><thead>' +
+                        '<tr class="bg-gray-50 text-xs font-semibold text-gray-500 uppercase tracking-wide">' +
+                        '<th class="px-3 py-2.5 text-center w-12">Rank</th>' +
+                        '<th class="px-3 py-2.5 text-left">Student</th>' +
+                        '<th class="px-3 py-2.5 text-center">Marks</th>' +
+                        '<th class="px-3 py-2.5 text-center">%</th>' +
+                        '<th class="px-3 py-2.5 text-center">Grade</th>' +
+                        '</tr></thead><tbody class="divide-y divide-gray-50">';
+
+                rankings.forEach((r,i) => {
+                    const isMine = allIds.includes(r.user_id);
+                    const medal  = i===0?'🥇':i===1?'🥈':i===2?'🥉':'';
+                    const rc     = isMine ? 'bg-indigo-50 font-semibold ring-1 ring-inset ring-indigo-200' : 'hover:bg-gray-50';
+                    const gc     = r.grade==='A+'||r.grade==='A'?'bg-emerald-100 text-emerald-700':r.grade==='F'?'bg-red-100 text-red-700':'bg-indigo-100 text-indigo-700';
+
+                    html += '<tr class="'+rc+' transition-colors">' +
+                            '<td class="px-3 py-2.5 text-center">' +
+                            '<span class="inline-flex w-7 h-7 items-center justify-center rounded-full bg-gray-100 text-xs font-bold text-gray-600">'+
+                            (medal ? medal : r.position)+'</span></td>' +
+                            '<td class="px-3 py-2.5 text-gray-800">'+escHtml(r.student_name)+(isMine?' <span class="text-xs text-indigo-500">(you)</span>':'')+'</td>' +
+                            '<td class="px-3 py-2.5 text-center font-semibold text-gray-900">'+r.total_exam_marks+'<span class="text-gray-400 font-normal">/'+exam.total_marks+'</span></td>' +
+                            '<td class="px-3 py-2.5 text-center text-indigo-600 font-semibold">'+r.percentage.toFixed(1)+'%</td>' +
+                            '<td class="px-3 py-2.5 text-center"><span class="text-xs font-semibold px-2 py-0.5 rounded-full '+gc+'">'+r.grade+'</span></td>' +
+                            '</tr>';
+                });
+
+                html += '</tbody></table></div></div>';
+            } else {
+                html += '<div class="px-5 py-6 text-center">' +
+                        '<i class="fas fa-hourglass-half text-gray-300 text-3xl mb-2"></i>' +
+                        '<p class="text-sm text-gray-400">Rankings not published yet</p></div>';
+            }
+
             html += '</div>';
-            
-            html += '</div>';
-            
-            detailsDiv.innerHTML = html;
-        } catch (err) {
-            console.error('Error loading exam details:', err);
-            detailsDiv.innerHTML = '<div class="p-6 text-center text-red-600">Error loading details: ' + err.message + '</div>';
+            div.innerHTML = html;
+
+        } catch(err) {
+            div.innerHTML = '<div class="px-5 py-4 text-center text-red-500 text-sm">' +
+                '<i class="fas fa-exclamation-triangle mr-1"></i>Failed to load: '+escHtml(err.message)+'</div>';
         }
     }
-    
-    setTimeout(loadExams, 500);
+
+    // Expose to dashboard — lazy load on first section activation
+    window.studentMonthlyExams = {
+        initialized: false,
+        init: function() {
+            if (this.initialized) return;
+            this.initialized = true;
+            loadExams();
+        },
+        reload: function() {
+            initialized = false;
+            this.initialized = false;
+            loadExams();
+        }
+    };
 })();
 </script>

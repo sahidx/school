@@ -419,14 +419,6 @@ window.closeResults = function() {
     document.getElementById('resultsModal').classList.add('hidden');
 };
 
-// Auto-load when module loads (fallback if dashboard doesn't trigger)
-console.log('📝 Online Exams module ready - v3.1');
-
-// Auto-load exams when script loads (dashboard will show/hide section)
-setTimeout(function() {
-    console.log('📝 Auto-loading exams...');
-    if (typeof window.loadOnlineExams === 'function') {
-        loadOnlineExams();
-    }
-}, 500);
+// Online Exams module ready — loads only when section is activated by the dashboard
+window.onlineExamsReady = true;
 </script>

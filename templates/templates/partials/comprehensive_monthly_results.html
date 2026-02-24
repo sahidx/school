@@ -42,26 +42,16 @@
                     <i class="fas fa-sort-numeric-down"></i> Sequential order by current rank (Roll = Current Rank)
                 </p>
                 
-                <!-- Feature on Homepage Checkbox - NOW ALWAYS ENABLED -->
-                <div class="mt-3 p-3 bg-yellow-50 border-2 border-yellow-400 rounded-lg">
-                    <div class="flex items-center">
-                        <input type="checkbox" 
-                               id="showOnHomepage" 
-                               x-model="examData.show_on_homepage"
-                               @change="toggleHomepageFeature()"
-                               class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded cursor-pointer">
-                        <label for="showOnHomepage" class="ml-2 text-sm font-medium text-gray-700 cursor-pointer">
-                            <i class="fas fa-star text-yellow-500"></i>
-                            <strong>Feature top 3 students on homepage</strong>
-                        </label>
-                    </div>
-                    <!-- Debug info -->
-                    <div class="text-xs mt-1 text-gray-600">
-                        Teacher: <span x-text="isTeacher ? 'Yes' : 'No'"></span> | 
-                        Rankings: <span x-text="rankingsGenerated ? 'Generated' : 'Not Generated'"></span> |
-                        Featured: <span x-text="examData?.show_on_homepage ? 'Yes' : 'No'"></span> |
-                        UserRole: <span x-text="window.userRole"></span>
-                    </div>
+                <!-- Feature on Homepage -->
+                <div class="mt-3 flex items-center gap-2 p-2.5 bg-amber-50 border border-amber-200 rounded-lg">
+                    <input type="checkbox"
+                           id="showOnHomepage"
+                           x-model="examData.show_on_homepage"
+                           @change="toggleHomepageFeature()"
+                           class="h-4 w-4 text-amber-500 focus:ring-amber-400 border-gray-300 rounded cursor-pointer">
+                    <label for="showOnHomepage" class="text-sm font-medium text-gray-700 cursor-pointer select-none">
+                        <i class="fas fa-star text-amber-400 mr-1"></i>Feature top 3 on homepage
+                    </label>
                 </div>
             </div>
             

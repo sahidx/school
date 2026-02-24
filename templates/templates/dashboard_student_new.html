@@ -154,14 +154,13 @@
             </div>
             
             <script>
-            // Force load documents when section becomes visible
+            // Force-load documents when section becomes visible (fallback)
             document.addEventListener('DOMContentLoaded', function() {
-                const observer = new MutationObserver(function(mutations) {
+                const observer = new MutationObserver(function() {
                     const section = document.getElementById('online-resourcesSection');
                     if (section && !section.classList.contains('hidden')) {
-                        console.log('📚 Resources section visible, triggering load');
-                        if (typeof window.loadDocuments === 'function' && (!window.allDocuments || window.allDocuments.length === 0)) {
-                            setTimeout(function() { window.loadDocuments(); }, 100);
+                        if (typeof window.loadDocuments === 'function' && !window.documentsLoaded) {
+                            window.loadDocuments();
                         }
                     }
                 });
@@ -173,9 +172,7 @@
 </div>
 
 <script>
-// Student Dashboard v2.0.1 - Build: 2025-10-22-19:30
-// Fixed: window.loadDocuments reference, improved initialization logic
-console.log('📚 Student Dashboard Script Loading v2.0.1');
+// Student Dashboard — lazy section loading
 
 // Toggle sidebar for mobile
 function toggleSidebar() {
@@ -187,107 +184,43 @@ function toggleSidebar() {
 
 // Navigation
 function showSection(sectionName) {
-    console.log('========================================');
-    console.log('🔄 SWITCHING TO SECTION:', sectionName);
-    console.log('========================================');
-    
     // Hide all sections
-    document.querySelectorAll('.content-section').forEach(section => {
-        section.classList.add('hidden');
-    });
-    
+    document.querySelectorAll('.content-section').forEach(s => s.classList.add('hidden'));
+
     // Show target section
-    const targetSection = document.getElementById(sectionName + 'Section');
-    if (!targetSection) {
-        console.error('❌ Section not found:', sectionName + 'Section');
-        return;
-    }
-    
-    targetSection.classList.remove('hidden');
-    console.log('✅ Section visible:', sectionName + 'Section');
-    
-    // Trigger section-specific loading
+    const target = document.getElementById(sectionName + 'Section');
+    if (!target) return;
+    target.classList.remove('hidden');
+
+    // Lazy-load section content on first visit
     if (sectionName === 'monthly-exams') {
-        console.log('📊 Monthly Exams Section');
-        console.log('  - window.studentMonthlyExams exists?', !!window.studentMonthlyExams);
-        
-        if (window.studentMonthlyExams) {
-            console.log('  - userBatchId:', window.studentMonthlyExams.userBatchId);
-            console.log('  - currentUser:', window.studentMonthlyExams.currentUser);
-            
-            if (!window.studentMonthlyExams.userBatchId) {
-                console.log('  → Calling init()...');
-                try {
-                    window.studentMonthlyExams.init();
-                } catch (err) {
-                    console.error('❌ Error calling init():', err);
-                }
-            } else {
-                console.log('  ✓ Already initialized with batch:', window.studentMonthlyExams.userBatchId);
-            }
-        } else {
-            console.error('❌ window.studentMonthlyExams NOT FOUND!');
-            console.error('  → The partial may not have loaded');
-            console.error('  → Check: include partials/student_monthly_exams.html');
+        if (window.studentMonthlyExams && !window.studentMonthlyExams.initialized) {
+            window.studentMonthlyExams.init();
         }
-    } 
-    else if (sectionName === 'online-exams') {
-        console.log('📝 Online Exams Section');
-        console.log('  - window.loadOnlineExams type:', typeof window.loadOnlineExams);
-        if (typeof window.loadOnlineExams === 'function') {
-            if (!window.onlineExamsState || !window.onlineExamsState.allExams || window.onlineExamsState.allExams.length === 0) {
-                console.log('  → Calling loadOnlineExams()');
-                try { window.loadOnlineExams(); } catch (err) { console.error('❌ Error calling loadOnlineExams():', err); }
-            } else {
-                console.log('  ✓ Exams already loaded:', window.onlineExamsState.allExams.length);
-            }
-        } else {
-            console.error('❌ window.loadOnlineExams not found. Check if partial loaded.');
+    } else if (sectionName === 'online-exams') {
+        if (typeof window.loadOnlineExams === 'function' &&
+            (!window.onlineExamsState || !window.onlineExamsState.allExams || !window.onlineExamsState.allExams.length)) {
+            window.loadOnlineExams();
+        }
+    } else if (sectionName === 'online-resources') {
+        if (typeof window.loadDocuments === 'function' && !window.documentsLoaded) {
+            window.loadDocuments();
         }
     }
-    else if (sectionName === 'online-resources') {
-        console.log('📚 Online Resources Section');
-        console.log('  - window.loadDocuments type:', typeof window.loadDocuments);
-        console.log('  - window.allDocuments:', window.allDocuments);
-        console.log('  - window.documentsLoaded:', window.documentsLoaded);
-        
-        if (typeof window.loadDocuments === 'function') {
-            // Always try to load if not already loaded
-            if (!window.documentsLoaded) {
-                console.log('  → Calling loadDocuments()...');
-                try {
-                    window.loadDocuments();
-                } catch (err) {
-                    console.error('❌ Error calling loadDocuments():', err);
-                }
-            } else {
-                console.log('  ✓ Already loaded:', window.allDocuments.length, 'documents');
-            }
-        } else {
-            console.error('❌ window.loadDocuments NOT FOUND!');
-            console.error('  → The partial may not have loaded');
-            console.error('  → Check: include partials/student_documents.html');
-        }
-    }
-    
-    // Update navigation styling
+
+    // Update nav highlight
     document.querySelectorAll('.nav-item').forEach(item => {
         item.classList.remove('text-indigo-600', 'bg-indigo-100');
         item.classList.add('text-gray-600');
     });
-    
     const activeNav = document.querySelector('[data-section="' + sectionName + '"]');
     if (activeNav) {
         activeNav.classList.remove('text-gray-600');
         activeNav.classList.add('text-indigo-600', 'bg-indigo-100');
     }
-    
+
     // Close mobile sidebar
-    if (window.innerWidth < 768) {
-        toggleSidebar();
-    }
-    
-    console.log('========================================');
+    if (window.innerWidth < 768) toggleSidebar();
 }
 
 document.querySelectorAll('.nav-item').forEach(item => {
@@ -310,49 +243,18 @@ function loadDashboardStats() {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('=== STUDENT DASHBOARD LOADED ===');
-    
-    // Store user data from server session to localStorage for frontend components
-    // Jinja injects JSON for user; wrap in try/catch in case of escaping
-        const userDataElement = document.getElementById('userDataMeta');
-        let userData = null;
-        if (userDataElement) {
-            try {
-                userData = JSON.parse(userDataElement.getAttribute('data-json'));
-            } catch (e) {
-                console.error('Failed to parse user data JSON from meta tag', e);
+    // Store user data from server session into localStorage for partials
+    const metaEl = document.getElementById('userDataMeta');
+    if (metaEl) {
+        try {
+            const userData = JSON.parse(metaEl.getAttribute('data-json'));
+            if (userData && userData.id) {
+                localStorage.setItem('user', JSON.stringify(userData));
             }
-        } else {
-            console.warn('⚠️ userDataMeta meta tag not found');
+        } catch(e) {
+            console.error('Failed to parse user session data', e);
         }
-    if (userData && userData.id) {
-        console.log('💾 Storing user data in localStorage:', userData);
-        console.log('💾 User batches:', userData.batches);
-        console.log('💾 User allBatchIds:', userData.allBatchIds);
-        console.log('💾 User batchId:', userData.batchId);
-        localStorage.setItem('user', JSON.stringify(userData));
-    } else {
-        console.warn('⚠️ No user data from server session');
     }
-    
-    // Wait for all partials to load
-    setTimeout(function() {
-        console.log('window.studentMonthlyExams available?', !!window.studentMonthlyExams);
-        console.log('window.loadDocuments available?', typeof window.loadDocuments === 'function');
-        console.log('window.allDocuments available?', !!window.allDocuments);
-        
-        if (!window.studentMonthlyExams) {
-            console.error('❌ studentMonthlyExams not loaded! Check if partial is included.');
-        }
-        if (typeof window.loadDocuments !== 'function') {
-            console.error('❌ loadDocuments not loaded! Check if partial is included.');
-        }
-        
-        // Verify sections exist
-        console.log('monthly-examsSection exists?', !!document.getElementById('monthly-examsSection'));
-        console.log('online-resourcesSection exists?', !!document.getElementById('online-resourcesSection'));
-    }, 100);
-    
     loadDashboardStats();
 });
 </script>
