@@ -60,18 +60,30 @@ def index():
 
 @templates_bp.route('/results')
 def results_page():
-    """Class-wise / section-wise results page"""
-    return render_template('results.html')
+    """Class-wise / section-wise results page – teacher/admin only"""
+    if 'user' not in session:
+        return redirect(url_for('templates.login_page') + '?next=/results')
+    if session['user'].get('role') not in ('teacher', 'super_user', 'head_teacher'):
+        return redirect(url_for('templates.index'))
+    return render_template('results.html', user=session['user'])
 
 @templates_bp.route('/results/transcript')
 def transcript_page():
-    """Individual student transcript page"""
-    return render_template('transcript.html')
+    """Individual student transcript page – teacher/admin only"""
+    if 'user' not in session:
+        return redirect(url_for('templates.login_page') + '?next=/results/transcript')
+    if session['user'].get('role') not in ('teacher', 'super_user', 'head_teacher'):
+        return redirect(url_for('templates.index'))
+    return render_template('transcript.html', user=session['user'])
 
 @templates_bp.route('/results/marks-entry')
 def marks_entry_page():
     """Marks entry page for admin/teacher"""
-    return render_template('marks_entry.html')
+    if 'user' not in session:
+        return redirect(url_for('templates.login_page') + '?next=/results/marks-entry')
+    if session['user'].get('role') not in ('teacher', 'super_user', 'head_teacher'):
+        return redirect(url_for('templates.index'))
+    return render_template('marks_entry.html', user=session['user'])
 
 @templates_bp.route('/debug-fees')
 def debug_fees():
