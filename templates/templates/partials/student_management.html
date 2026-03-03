@@ -110,7 +110,7 @@
                                 <div class="flex items-center">
                                     <!-- Photo avatar -->
                                     <div class="w-10 h-10 flex-shrink-0 cursor-pointer"
-                                         @click="student.profile_image ? $dispatch('view-photo', {src: student.profile_image, name: student.firstName+' '+student.lastName, sid: student.id, code: student.student_code}) : openPhotoModal(student)"
+                                         @click="student.profile_image ? window.dispatchEvent(new CustomEvent('view-photo', {detail:{src: student.profile_image, name: student.firstName+' '+student.lastName, sid: student.id, code: student.student_code}})) : openPhotoModal(student)"
                                          :title="student.profile_image ? 'View / download photo' : 'Click to upload photo'">
                                         <template x-if="student.profile_image">
                                             <img :src="student.profile_image" class="w-10 h-10 rounded-full object-cover border-2 border-green-400 hover:border-blue-500 transition-colors" :alt="student.firstName" />
@@ -604,7 +604,7 @@
 <!-- ── Photo Upload Modal ── -->
 <!-- Photo View Modal — own x-data so it works outside the studentManagement scope -->
 <div x-data="{ open:false, src:'', name:'', sid:0, code:'' }"
-     @view-photo.window="open=true; src=$event.detail.src; name=$event.detail.name; sid=$event.detail.sid; code=$event.detail.code"
+     x-init="window.addEventListener('view-photo', e => { src=e.detail.src; name=e.detail.name; sid=e.detail.sid; code=e.detail.code; open=true; })"
      x-show="open"
      x-transition:enter="transition ease-out duration-200"
      x-transition:enter-start="opacity-0"
@@ -612,8 +612,7 @@
      x-transition:leave="transition ease-in duration-150"
      x-transition:leave-start="opacity-100"
      x-transition:leave-end="opacity-0"
-     class="fixed inset-0 z-50 overflow-y-auto"
-     style="display:none;">
+     class="fixed inset-0 z-50 overflow-y-auto">
     <div class="flex items-center justify-center min-h-screen px-4">
         <div class="fixed inset-0 bg-black opacity-70" @click="open=false"></div>
         <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm z-10 overflow-hidden">
