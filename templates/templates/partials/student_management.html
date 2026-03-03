@@ -74,6 +74,7 @@
                                    title="Select All">
                         </th>
                         <th class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Roll</th>
+                        <th class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
                         <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Student Name</th>
                         <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Parents Info</th>
                         <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
@@ -99,13 +100,18 @@
                                 <span x-show="student.roll_number" class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-indigo-100 text-indigo-800 font-semibold text-sm" x-text="student.roll_number"></span>
                                 <span x-show="!student.roll_number" class="text-gray-400 text-xs">-</span>
                             </td>
+                            <!-- Student Code (ID) -->
+                            <td class="px-3 py-4 text-center">
+                                <span x-show="student.student_code" class="inline-flex items-center px-2 py-0.5 rounded text-xs font-mono font-bold bg-purple-100 text-purple-800" x-text="student.student_code"></span>
+                                <span x-show="!student.student_code" class="text-gray-400 text-xs">—</span>
+                            </td>
                             <!-- Student Name -->
                             <td class="px-3 py-4 whitespace-nowrap">
                                 <div class="flex items-center">
                                     <!-- Photo avatar -->
-                                    <div class="w-10 h-10 flex-shrink-0 cursor-pointer" @click="openPhotoModal(student)" title="Click to upload photo">
+                                    <div class="w-10 h-10 flex-shrink-0 cursor-pointer" @click="student.profile_image ? openPhotoViewModal(student) : openPhotoModal(student)" :title="student.profile_image ? 'View / download photo' : 'Click to upload photo'">
                                         <template x-if="student.profile_image">
-                                            <img :src="student.profile_image" class="w-10 h-10 rounded-full object-cover border-2 border-green-400" :alt="student.firstName" />
+                                            <img :src="student.profile_image" class="w-10 h-10 rounded-full object-cover border-2 border-green-400 hover:border-blue-500 transition-colors" :alt="student.firstName" />
                                         </template>
                                         <template x-if="!student.profile_image">
                                             <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center border-2 border-dashed border-blue-300 hover:border-blue-500 transition-colors">
@@ -225,6 +231,16 @@
                 </div>
 
                 <form @submit.prevent="saveStudent()" class="p-6 space-y-4">
+
+                    <!-- Student ID badge -->
+                    <div class="flex items-center gap-2 bg-purple-50 border border-purple-200 rounded-lg px-4 py-2">
+                        <i class="fas fa-id-badge text-purple-600"></i>
+                        <span class="text-sm font-medium text-gray-700">Student ID:</span>
+                        <span x-show="showEditModal && studentForm.student_code"
+                              class="font-mono font-bold text-purple-700" x-text="studentForm.student_code"></span>
+                        <span x-show="showAddModal || !studentForm.student_code"
+                              class="text-gray-500 text-sm italic">Auto-assigned</span>
+                    </div>
 
                     <!-- Photo Upload -->
                     <div class="flex items-start gap-5 bg-gray-50 rounded-xl p-4 border border-gray-100">
@@ -584,6 +600,54 @@
 </div>
 
 <!-- ── Photo Upload Modal ── -->
+<!-- Photo View Modal (zoom + download for existing photo) -->
+<div x-show="showPhotoViewModal"
+     x-transition:enter="transition ease-out duration-200"
+     x-transition:enter-start="opacity-0"
+     x-transition:enter-end="opacity-100"
+     x-transition:leave="transition ease-in duration-150"
+     x-transition:leave-start="opacity-100"
+     x-transition:leave-end="opacity-0"
+     class="fixed inset-0 z-50 overflow-y-auto"
+     style="display:none;">
+    <div class="flex items-center justify-center min-h-screen px-4">
+        <div class="fixed inset-0 bg-black opacity-70" @click="showPhotoViewModal = false"></div>
+        <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm z-10 overflow-hidden">
+            <!-- Header -->
+            <div class="px-5 py-3 border-b border-gray-200 flex justify-between items-center bg-gray-50">
+                <div class="text-sm font-semibold text-gray-800" x-text="photoViewStudent ? (photoViewStudent.firstName + ' ' + photoViewStudent.lastName) : ''"></div>
+                <button @click="showPhotoViewModal = false" class="text-gray-400 hover:text-gray-600 p-1">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <!-- Large photo -->
+            <div class="flex justify-center bg-gray-900 p-4">
+                <img x-show="photoViewStudent && photoViewStudent.profile_image"
+                     :src="photoViewStudent ? photoViewStudent.profile_image : ''"
+                     class="max-h-80 max-w-full object-contain rounded shadow-lg" />
+            </div>
+            <!-- Actions -->
+            <div class="px-5 py-4 flex gap-3 justify-between items-center">
+                <div class="text-xs text-gray-500" x-show="photoViewStudent">
+                    <span class="font-mono font-bold text-purple-700" x-text="photoViewStudent ? photoViewStudent.student_code : ''"></span>
+                </div>
+                <div class="flex gap-2">
+                    <a x-show="photoViewStudent && photoViewStudent.id"
+                       :href="photoViewStudent ? '/api/students/' + photoViewStudent.id + '/photo?download=1' : '#'"
+                       class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-4 py-2 rounded-lg flex items-center gap-2"
+                       download>
+                        <i class="fas fa-download"></i> Download
+                    </a>
+                    <button @click="showPhotoViewModal = false; openPhotoModal(photoViewStudent)"
+                            class="bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-semibold px-4 py-2 rounded-lg flex items-center gap-2">
+                        <i class="fas fa-camera"></i> Change
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div x-show="showPhotoModal" 
      x-transition:enter="transition ease-out duration-200"
      x-transition:enter-start="opacity-0"
@@ -675,6 +739,8 @@ function studentManagement() {
         showPasswordModal: false,
         showResetPasswordModal: false,
         showPhotoModal: false,
+        showPhotoViewModal: false,
+        photoViewStudent: null,
         photoStudent: null,
         photoPreview: null,
         photoUploading: false,
@@ -686,6 +752,7 @@ function studentManagement() {
         newStudentCredentials: {},
         studentForm: {
             id: null,
+            student_code: '',
             firstName: '',
             lastName: '',
             guardianName: '',
@@ -1214,6 +1281,11 @@ function studentManagement() {
             const reader = new FileReader();
             reader.onload = (e) => { this.formPhotoPreview = e.target.result; };
             reader.readAsDataURL(file);
+        },
+
+        openPhotoViewModal(student) {
+            this.photoViewStudent = student;
+            this.showPhotoViewModal = true;
         },
 
         openPhotoModal(student) {
