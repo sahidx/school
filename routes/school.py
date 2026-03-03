@@ -140,6 +140,8 @@ def create_announcement():
         show_on_homepage = data.get('show_on_homepage', True),
         publish_date = datetime.strptime(data['publish_date'], '%Y-%m-%d').date() if data.get('publish_date') else date.today(),
         expire_date  = datetime.strptime(data['expire_date'],  '%Y-%m-%d').date() if data.get('expire_date')  else None,
+        attachment      = data.get('attachment') or None,
+        attachment_name = data.get('attachment_name') or None,
         created_by = user.id,
     )
     db.session.add(ann)
@@ -161,9 +163,39 @@ def update_announcement(ann_id):
         ann.publish_date = datetime.strptime(data['publish_date'], '%Y-%m-%d').date()
     if 'expire_date' in data:
         ann.expire_date = datetime.strptime(data['expire_date'], '%Y-%m-%d').date() if data['expire_date'] else None
+    if 'attachment' in data:
+        ann.attachment      = data['attachment'] or None
+        ann.attachment_name = data.get('attachment_name') or None
     ann.updated_at = datetime.utcnow()
     db.session.commit()
     return jsonify({'success': True})
+
+
+@school_bp.route('/api/school/announcements/<int:ann_id>/attachment', methods=['GET'])
+def download_announcement_attachment(ann_id):
+    """Serve the PDF attachment for an announcement."""
+    ann = Announcement.query.get_or_404(ann_id)
+    if not ann.attachment:
+        return jsonify({'error': 'No attachment'}), 404
+    import base64, mimetypes
+    try:
+        # data URI format: data:<mime>;base64,<data>
+        if ann.attachment.startswith('data:'):
+            header, b64data = ann.attachment.split(',', 1)
+            mime = header.split(':')[1].split(';')[0]
+        else:
+            b64data = ann.attachment
+            mime = 'application/pdf'
+        file_bytes = base64.b64decode(b64data)
+        ext = mimetypes.guess_extension(mime) or '.pdf'
+        filename = ann.attachment_name or f'notice_{ann_id}{ext}'
+        from flask import make_response
+        resp = make_response(file_bytes)
+        resp.headers['Content-Type'] = mime
+        resp.headers['Content-Disposition'] = f'attachment; filename="{filename}"'
+        return resp
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 
 @school_bp.route('/api/school/announcements/<int:ann_id>', methods=['DELETE'])

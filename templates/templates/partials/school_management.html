@@ -23,11 +23,37 @@
       </h3>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
         <template x-for="field in infoFields" :key="field.key">
-          <div>
-            <label class="block text-xs font-semibold text-gray-500 mb-1.5" x-text="field.label"></label>
-            <input :type="field.type||'text'" :placeholder="field.placeholder||''"
-              x-model="schoolInfo[field.key]"
-              class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:border-blue-400 focus:ring-2 focus:ring-blue-100 outline-none">
+          <div :class="field.type==='image'||field.type==='textarea'||field.type==='header'||field.wide ? 'md:col-span-2' : ''">
+            <label x-show="field.type!=='header'" class="block text-xs font-semibold text-gray-500 mb-1.5" x-text="field.label"></label>
+            <!-- section header divider -->
+            <template x-if="field.type==='header'">
+              <div class="border-t-2 border-dashed border-indigo-200 pt-2 text-xs font-bold text-indigo-500 tracking-widest uppercase" x-text="field.label"></div>
+            </template>
+            <!-- image upload -->
+            <template x-if="field.type==='image'">
+              <div class="flex items-start gap-4">
+                <div class="w-24 h-28 border-2 border-gray-200 rounded-lg overflow-hidden bg-gray-50 flex items-center justify-center flex-shrink-0">
+                  <img x-show="schoolInfo[field.key]" :src="schoolInfo[field.key]" class="w-full h-full object-cover">
+                  <i x-show="!schoolInfo[field.key]" class="fas fa-camera text-2xl text-gray-300"></i>
+                </div>
+                <div class="space-y-2">
+                  <input type="file" accept="image/*" @change="onInfoImageChange($event, field.key)"
+                    class="block w-full text-xs text-gray-500 file:mr-2 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer border border-gray-200 rounded-lg p-1">
+                  <button x-show="schoolInfo[field.key]" type="button" @click="schoolInfo[field.key]=''" class="text-xs text-red-500 hover:text-red-700"><i class="fas fa-times mr-1"></i>Remove photo</button>
+                </div>
+              </div>
+            </template>
+            <!-- textarea -->
+            <template x-if="field.type==='textarea'">
+              <textarea :placeholder="field.placeholder||''" x-model="schoolInfo[field.key]" rows="3"
+                class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:border-blue-400 focus:ring-2 focus:ring-blue-100 outline-none"></textarea>
+            </template>
+            <!-- text / email / number etc -->
+            <template x-if="!field.type || (field.type!=='image' && field.type!=='textarea' && field.type!=='header')">
+              <input :type="field.type||'text'" :placeholder="field.placeholder||''"
+                x-model="schoolInfo[field.key]"
+                class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:border-blue-400 focus:ring-2 focus:ring-blue-100 outline-none">
+            </template>
           </div>
         </template>
       </div>
@@ -61,6 +87,28 @@
           <div>
             <label class="block text-xs font-semibold text-gray-500 mb-1">Content</label>
             <textarea x-model="annForm.content" rows="3" placeholder="Announcement content…" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100"></textarea>
+          </div>
+          <!-- PDF / File Attachment -->
+          <div>
+            <label class="block text-xs font-semibold text-gray-500 mb-1"><i class="fas fa-paperclip mr-1"></i>Attach PDF / Notice</label>
+            <!-- existing attachment badge -->
+            <div x-show="annForm.attachment_name && !annNewAttachment" class="flex items-center gap-2 bg-red-50 border border-red-200 rounded-lg px-3 py-2 mb-2">
+              <i class="fas fa-file-pdf text-red-600"></i>
+              <span class="text-sm text-red-700 font-medium flex-1 truncate" x-text="annForm.attachment_name"></span>
+              <a :href="editingAnn ? '/api/school/announcements/'+editingAnn.id+'/attachment' : '#'"
+                 class="text-blue-600 hover:text-blue-800 text-xs" download title="Download"><i class="fas fa-download"></i></a>
+              <button type="button" @click="annForm.attachment=null; annForm.attachment_name=''; annNewAttachment=false; $refs.pdfInput.value=''" class="text-red-500 hover:text-red-700 text-xs"><i class="fas fa-times"></i></button>
+            </div>
+            <!-- new file selected preview -->
+            <div x-show="annNewAttachment" class="flex items-center gap-2 bg-green-50 border border-green-200 rounded-lg px-3 py-2 mb-2">
+              <i class="fas fa-file-pdf text-green-600"></i>
+              <span class="text-sm text-green-700 font-medium flex-1 truncate" x-text="annForm.attachment_name"></span>
+              <button type="button" @click="annForm.attachment=null; annForm.attachment_name=''; annNewAttachment=false; $refs.pdfInput.value=''" class="text-red-500 hover:text-red-700 text-xs"><i class="fas fa-times"></i></button>
+            </div>
+            <input type="file" accept=".pdf,.doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/*" x-ref="pdfInput"
+              @change="onAnnPdfChange($event)"
+              class="block w-full text-sm text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-red-50 file:text-red-700 hover:file:bg-red-100 cursor-pointer border border-gray-200 rounded-lg p-1">
+            <p class="text-xs text-gray-400 mt-1">PDF, Word, or image &bull; max 10 MB</p>
           </div>
           <div class="grid grid-cols-2 gap-4">
             <div>
@@ -135,6 +183,14 @@
                   </div>
                   <div class="text-sm font-semibold text-gray-800 truncate" x-text="ann.title"></div>
                   <div class="text-xs text-gray-400 mt-0.5" x-text="ann.publish_date||ann.created_at?.split('T')[0]"></div>
+                  <!-- PDF attachment badge -->
+                  <a x-show="ann.has_attachment"
+                     :href="'/api/school/announcements/'+ann.id+'/attachment'"
+                     class="inline-flex items-center gap-1 mt-1 text-xs bg-red-50 text-red-700 border border-red-200 px-2 py-0.5 rounded hover:bg-red-100 transition"
+                     download>
+                    <i class="fas fa-file-pdf"></i>
+                    <span x-text="ann.attachment_name||'Download PDF'"></span>
+                  </a>
                 </div>
                 <div class="flex gap-1 flex-shrink-0">
                   <button @click="editAnnouncement(ann)" class="w-7 h-7 bg-blue-50 text-blue-600 rounded flex items-center justify-center hover:bg-blue-100 transition text-xs"><i class="fas fa-edit"></i></button>
@@ -497,8 +553,15 @@ function schoolCMS(){
       {key:'youtube_url',label:'YouTube URL'},
       {key:'about_text',label:'About Text (for homepage)'},
       {key:'logo_url',label:'Logo Image URL'},
-      {key:'map_embed_url',label:'Google Map Embed URL'},
-    ],
+      {key:'map_embed_url',label:'Google Map Embed URL'},      // ─ Head Teacher section ─
+      {key:'_ht_header',label:'—— Head Teacher / Principal Info ——',type:'header'},
+      {key:'head_teacher_name',label:'Head Teacher Name',placeholder:'Md. Abdul Karim'},
+      {key:'head_teacher_name_bn',label:'Head Teacher Name (Bengali)',placeholder:'মো. আব্দুল করিম'},
+      {key:'head_teacher_designation',label:'Designation',placeholder:'Headmaster / Principal'},
+      {key:'head_teacher_phone',label:'Head Teacher Phone'},
+      {key:'head_teacher_bani',label:'Head Teacher Message (English)',type:'textarea',wide:true},
+      {key:'head_teacher_bani_bn',label:'Head Teacher Message (Bengali)',type:'textarea',wide:true},
+      {key:'head_teacher_photo',label:'Head Teacher Photo (Passport Size)',type:'image',wide:true},    ],
     schoolInfo:{},
     infoMsg:'',
     // Announcements
@@ -506,7 +569,8 @@ function schoolCMS(){
     loadingAnn:true,
     editingAnn:null,
     annMsg:'',
-    annForm:{title:'',title_bn:'',content:'',priority:'normal',category:'general',is_pinned:false,show_on_homepage:true,publish_date:'',expire_date:''},
+    annForm:{title:'',title_bn:'',content:'',priority:'normal',category:'general',is_pinned:false,show_on_homepage:true,publish_date:'',expire_date:'',attachment:null,attachment_name:''},
+    annNewAttachment: false,
     // Classes
     classes:[],
     selectedClass:null,
@@ -560,21 +624,29 @@ function schoolCMS(){
       this.loadingAnn=false;
     },
     async saveAnnouncement(){
+      const payload = {...this.annForm};
+      // If editing and no new file chosen, don't overwrite existing attachment
+      if(this.editingAnn && !this.annNewAttachment){
+        delete payload.attachment;
+        delete payload.attachment_name;
+      }
       const url=this.editingAnn?`/api/school/announcements/${this.editingAnn.id}`:'/api/school/announcements';
       const method=this.editingAnn?'PUT':'POST';
       try{
-        const r=await fetch(url,{method,headers:{'Content-Type':'application/json'},body:JSON.stringify(this.annForm)});
+        const r=await fetch(url,{method,headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
         const d=await r.json();
         if(d.success){ this.annMsg='✓ Saved!'; this.resetAnnForm(); this.loadAnnouncements(); setTimeout(()=>this.annMsg='',3000); }
       }catch(e){ this.annMsg='Error.'; }
     },
     editAnnouncement(ann){
       this.editingAnn=ann;
-      this.annForm={...ann};
+      this.annNewAttachment=false;
+      this.annForm={...ann, attachment:null}; // don't preload binary; attachment_name preserved for display
     },
     resetAnnForm(){
       this.editingAnn=null;
-      this.annForm={title:'',title_bn:'',content:'',priority:'normal',category:'general',is_pinned:false,show_on_homepage:true,publish_date:'',expire_date:''};
+      this.annNewAttachment=false;
+      this.annForm={title:'',title_bn:'',content:'',priority:'normal',category:'general',is_pinned:false,show_on_homepage:true,publish_date:'',expire_date:'',attachment:null,attachment_name:''};
     },
     async toggleAnnouncementStatus(ann){
       try{
@@ -711,6 +783,26 @@ function schoolCMS(){
       this.loadingTeachers=true;
       try{ const d=await fetch('/api/users?role=teacher&limit=30').then(r=>r.json()); this.teachers=Array.isArray(d)?d:(d.users||d.data||[]); }catch(e){}
       this.loadingTeachers=false;
+    },
+    onAnnPdfChange(event){
+      const file = event.target.files[0];
+      if (!file) return;
+      if (file.size > 10 * 1024 * 1024) { alert('File too large (max 10 MB)'); event.target.value=''; return; }
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        this.annForm.attachment = e.target.result;
+        this.annForm.attachment_name = file.name;
+        this.annNewAttachment = true;
+      };
+      reader.readAsDataURL(file);
+    },
+    onInfoImageChange(event, key){
+      const file = event.target.files[0];
+      if (!file) return;
+      if (file.size > 5 * 1024 * 1024) { alert('Image too large (max 5 MB)'); event.target.value=''; return; }
+      const reader = new FileReader();
+      reader.onload = (e) => { this.schoolInfo[key] = e.target.result; };
+      reader.readAsDataURL(file);
     },
   };
 }

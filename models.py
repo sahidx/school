@@ -997,6 +997,8 @@ class Announcement(db.Model):
     show_on_homepage = db.Column(db.Boolean, default=True)
     publish_date = db.Column(db.Date, default=date.today)
     expire_date = db.Column(db.Date, nullable=True)
+    attachment      = db.Column(db.Text,        nullable=True)   # base64 PDF/file data
+    attachment_name = db.Column(db.String(255), nullable=True)   # original filename
     created_by  = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     created_at  = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at  = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -1023,6 +1025,8 @@ class Announcement(db.Model):
             'expire_date': self.expire_date.isoformat() if self.expire_date else None,
             'created_at': self.created_at.isoformat() if self.created_at else None,
             'created_by_name': self.created_by_user.full_name if self.created_by_user else None,
+            'has_attachment': bool(self.attachment),
+            'attachment_name': self.attachment_name,
         }
 
 
