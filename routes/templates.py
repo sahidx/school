@@ -186,8 +186,7 @@ def student_list_print():
 
     from models import SchoolClass, StudentClassInfo
     class_id = request.args.get('class_id', type=int)
-    classes  = SchoolClass.query.order_by(SchoolClass.name).all()
-
+    classes  = SchoolClass.query.filter_by(is_active=True).order_by(SchoolClass.name).all()
     students       = []
     selected_class = None
     if class_id:
@@ -249,7 +248,7 @@ def admit_cards_print():
 
     class_id = request.args.get('class_id', type=int)
     exam_id  = request.args.get('exam_id',  type=int)
-    classes  = SchoolClass.query.order_by(SchoolClass.name).all()
+    classes  = SchoolClass.query.filter_by(is_active=True).order_by(SchoolClass.name).all()
 
     selected_class = None
     selected_exam  = None
