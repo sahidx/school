@@ -47,7 +47,7 @@ body{font-family:'Poppins',sans-serif;background:#f8fafc;color:var(--dark);overf
 .doc-dl{width:36px;height:36px;background:var(--primary-light);color:var(--primary);border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:15px;transition:.2s}
 .doc-card:hover .doc-dl{background:var(--primary);color:#fff}
 @keyframes ticker{from{transform:translateX(0)}to{transform:translateX(-50%)}}
-.hero{background:var(--gradient);min-height:420px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;padding:64px 20px}
+.hero{background:var(--gradient);min-height:360px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;padding:50px 20px}
 .hero-p span{position:absolute;border-radius:50%;animation:fp var(--d) ease-in-out infinite}
 .hero-p span:nth-child(1){width:180px;height:180px;background:rgba(255,255,255,.05);top:-50px;right:8%;--d:9s}
 .hero-p span:nth-child(2){width:120px;height:120px;background:rgba(255,255,255,.06);bottom:-30px;left:6%;--d:7s;animation-delay:2s}
@@ -72,8 +72,8 @@ body{font-family:'Poppins',sans-serif;background:#f8fafc;color:var(--dark);overf
 .stat-box{padding:22px 20px;text-align:center;border-right:1px solid #e2e8f0;transition:.3s}.stat-box:last-child{border-right:none}.stat-box:hover{background:var(--primary-light)}
 .stat-label{font-size:11.5px;color:#64748b;font-weight:500;display:flex;align-items:center;justify-content:center;gap:5px;margin-bottom:6px}.stat-label i{color:var(--primary)}
 .stat-value{font-size:clamp(20px,3vw,28px);font-weight:800;color:var(--primary)}
-.section{padding:60px 20px}.section-alt{background:#fff}.section-inner{max-width:1280px;margin:0 auto}
-.section-title{text-align:center;margin-bottom:44px}.section-title h2{font-size:clamp(22px,3.5vw,34px);font-weight:800;color:var(--dark)}
+.section{padding:48px 20px}.section-alt{background:#fff}.section-inner{max-width:1280px;margin:0 auto}
+.section-title{text-align:center;margin-bottom:32px}.section-title h2{font-size:clamp(22px,3.5vw,34px);font-weight:800;color:var(--dark)}
 .section-title p{font-size:15px;color:var(--gray);margin-top:6px}
 .section-title .line{width:60px;height:4px;background:linear-gradient(90deg,var(--gold),var(--primary));margin:12px auto 0;border-radius:2px}
 .features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:24px}
@@ -255,7 +255,7 @@ body{font-family:'Poppins',sans-serif;background:#f8fafc;color:var(--dark);overf
 </div>
 
 <!-- NOTICES + RESULTS -->
-<div class="section section-alt" id="notices">
+<div class="section section-alt" id="notices" style="padding:36px 20px">
   <div class="section-inner">
     <div class="nr-grid">
       <div class="board-card reveal">
@@ -273,9 +273,9 @@ body{font-family:'Poppins',sans-serif;background:#f8fafc;color:var(--dark);overf
 </div>
 
 <!-- RESULT SEARCH -->
-<div class="section" id="results" style="background:linear-gradient(135deg,#e8f0fe,#f1f5f9)">
+<div class="section" id="results" style="background:linear-gradient(135deg,#e8f0fe,#f1f5f9);padding:36px 20px">
   <div class="section-inner">
-    <div class="section-title">
+    <div class="section-title" style="margin-bottom:20px">
       <h2><i class="fas fa-search" style="color:var(--primary);margin-right:8px"></i>Find Your Result</h2>
       <p class="bn">আপনার ফলাফল খুঁজুন</p>
       <div class="line"></div>
