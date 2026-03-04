@@ -9,7 +9,7 @@ from models import (
     db, User, UserRole,
     SchoolClass, SchoolSection, SchoolSubject,
     TermExam, StudentTermResult, StudentClassInfo,
-    Announcement, SchoolInfo
+    Announcement, SchoolInfo, GalleryPhoto
 )
 
 school_bp = Blueprint('school', __name__)
@@ -1026,3 +1026,44 @@ def school_dashboard():
         'published_results': published_exams,
         'recent_announcements': [a.to_dict() for a in recent_ann],
     })
+
+
+# ---------------------------------------------------------------------------
+# Gallery
+# ---------------------------------------------------------------------------
+
+@school_bp.route('/api/school/gallery', methods=['GET'])
+def get_gallery():
+    photos = GalleryPhoto.query.filter_by(is_active=True)\
+        .order_by(GalleryPhoto.sort_order.asc(), GalleryPhoto.created_at.desc()).all()
+    return jsonify([p.to_dict() for p in photos])
+
+
+@school_bp.route('/api/school/gallery', methods=['POST'])
+def add_gallery_photo():
+    user, err, code = _require_admin()
+    if err:
+        return err, code
+    data = request.get_json() or {}
+    if not data.get('image_data'):
+        return jsonify({'error': 'image_data required'}), 400
+    photo = GalleryPhoto(
+        title       = data.get('title', '').strip() or None,
+        image_data  = data['image_data'],
+        sort_order  = int(data.get('sort_order', 0)),
+        uploaded_by = user.id,
+    )
+    db.session.add(photo)
+    db.session.commit()
+    return jsonify(photo.to_dict()), 201
+
+
+@school_bp.route('/api/school/gallery/<int:photo_id>', methods=['DELETE'])
+def delete_gallery_photo(photo_id):
+    user, err, code = _require_admin()
+    if err:
+        return err, code
+    photo = GalleryPhoto.query.get_or_404(photo_id)
+    db.session.delete(photo)
+    db.session.commit()
+    return jsonify({'success': True})

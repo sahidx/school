@@ -9,29 +9,42 @@
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Poppins',sans-serif;background:#f8fafc;color:var(--dark);overflow-x:hidden}
 .bn{font-family:'Hind Siliguri','Poppins',sans-serif}
-.top-bar{background:#0f172a;color:#cbd5e1;font-size:12.5px;padding:7px 0;border-bottom:2px solid var(--gold)}
+.top-bar{background:#0f172a;color:#cbd5e1;font-size:13px;padding:8px 0;border-bottom:2px solid var(--gold)}
 .top-bar .wrap{max-width:1280px;margin:0 auto;padding:0 20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px}
 .top-bar i{margin-right:5px;color:var(--gold)}.top-bar a{color:#cbd5e1;text-decoration:none;transition:.2s}.top-bar a:hover{color:#fff}
-.login-btn{background:var(--gold);color:#1e293b!important;padding:4px 16px;border-radius:20px;font-weight:700;font-size:12px;margin-left:12px}
-.school-header{background:#fff;box-shadow:0 3px 20px rgba(0,0,0,.1);padding:16px 0;position:sticky;top:0;z-index:1000}
-.school-header .wrap{max-width:1280px;margin:0 auto;padding:0 24px;display:flex;align-items:center;gap:18px}
-.logo-circle{width:72px;height:72px;background:var(--gradient);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 4px 16px rgba(26,86,219,.4);animation:pulse-logo 3s ease-in-out infinite}
+.school-header{background:#fff;box-shadow:0 3px 20px rgba(0,0,0,.1);padding:18px 0;position:sticky;top:0;z-index:1000}
+.school-header .wrap{max-width:1280px;margin:0 auto;padding:0 24px;display:flex;align-items:center;gap:20px}
+.logo-circle{width:82px;height:82px;background:var(--gradient);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 4px 16px rgba(26,86,219,.4);animation:pulse-logo 3s ease-in-out infinite}
 @keyframes pulse-logo{0%,100%{box-shadow:0 4px 16px rgba(26,86,219,.4)}50%{box-shadow:0 4px 28px rgba(26,86,219,.7)}}
-.logo-circle img{width:52px;height:52px;border-radius:50%;object-fit:cover}
-.school-info-head h1{font-size:clamp(14px,2.2vw,21px);font-weight:800;color:var(--primary);line-height:1.2}
-.school-info-head .estd-line{font-size:11px;color:#94a3b8;font-weight:500;letter-spacing:.5px}
-.school-info-head .tagline{font-size:12px;color:var(--gray);margin-top:2px}
+.logo-circle img{width:60px;height:60px;border-radius:50%;object-fit:cover}
+.school-info-head h1{font-size:clamp(18px,2.5vw,28px);font-weight:800;color:var(--primary);line-height:1.2}
+.school-info-head .estd-line{font-size:13px;color:#94a3b8;font-weight:600;letter-spacing:.5px}
+.school-info-head .tagline{font-size:13.5px;color:var(--gray);margin-top:3px}
 .school-nav{background:var(--primary)}.school-nav .wrap{max-width:1280px;margin:0 auto;padding:0 20px;display:flex;align-items:center;flex-wrap:wrap}
-.school-nav a{color:rgba(255,255,255,.85);text-decoration:none;padding:13px 14px;font-size:13.5px;font-weight:500;display:inline-flex;align-items:center;gap:6px;transition:.2s}
+.school-nav a{color:rgba(255,255,255,.9);text-decoration:none;padding:14px 15px;font-size:14px;font-weight:500;display:inline-flex;align-items:center;gap:6px;transition:.2s}
 .school-nav a:hover,.school-nav a.active{color:#fff;background:rgba(255,255,255,.18)}
-.dropdown{position:relative}.dropdown-menu{display:none;position:absolute;top:100%;left:0;background:#fff;min-width:210px;border-radius:0 0 10px 10px;box-shadow:0 10px 30px rgba(0,0,0,.15);z-index:2000}
-.dropdown-menu a{color:var(--dark)!important;padding:11px 20px!important;background:transparent!important;display:block;font-size:13px;transition:.2s}
+.dropdown{position:relative}.dropdown-menu{display:none;position:absolute;top:100%;left:0;background:#fff;min-width:220px;border-radius:0 0 10px 10px;box-shadow:0 10px 30px rgba(0,0,0,.15);z-index:2000}
+.dropdown-menu a{color:var(--dark)!important;padding:12px 20px!important;background:transparent!important;display:block;font-size:14px;transition:.2s}
 .dropdown-menu a:hover{background:var(--primary-light)!important;color:var(--primary)!important}
 .dropdown:hover .dropdown-menu{display:block}
 .ticker-wrap{background:#1e3a5f;overflow:hidden;white-space:nowrap;border-bottom:3px solid var(--gold)}
-.ticker-inner{display:inline-flex;animation:ticker 50s linear infinite}.ticker-inner:hover{animation-play-state:paused}
-.ticker-item{display:inline-block;padding:9px 48px;color:#e2e8f0;font-size:13px;font-weight:500}
-.ticker-item i{color:var(--gold);margin-right:8px}.ticker-sep{color:var(--gold);margin:0 20px;padding:9px 0}
+.ticker-inner{display:inline-flex;animation:ticker 45s linear infinite}
+.ticker-item{display:inline-block;padding:10px 48px;color:#e2e8f0;font-size:14px;font-weight:500}
+.ticker-item i{color:var(--gold);margin-right:8px}.ticker-sep{color:var(--gold);margin:0 20px;padding:10px 0}
+.doc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:18px}
+.doc-card{background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:20px;display:flex;align-items:center;gap:16px;box-shadow:0 2px 12px rgba(0,0,0,.06);transition:.3s;text-decoration:none;color:inherit;cursor:pointer}
+.doc-card:hover{transform:translateY(-4px);box-shadow:0 10px 28px rgba(26,86,219,.14);border-color:var(--primary)}
+.doc-icon{width:54px;height:54px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0}
+.doc-icon.pdf{background:#fef2f2;color:#dc2626}
+.doc-icon.doc{background:#eff6ff;color:#2563eb}
+.doc-icon.img{background:#f0fdf4;color:#16a34a}
+.doc-icon.other{background:#f5f3ff;color:#7c3aed}
+.doc-meta{flex:1;min-width:0}
+.doc-meta h5{font-size:14.5px;font-weight:700;color:var(--dark);margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.doc-meta span{font-size:12px;color:var(--gray);display:block}
+.doc-meta small{font-size:11px;color:#94a3b8}
+.doc-dl{width:36px;height:36px;background:var(--primary-light);color:var(--primary);border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:15px;transition:.2s}
+.doc-card:hover .doc-dl{background:var(--primary);color:#fff}
 @keyframes ticker{from{transform:translateX(0)}to{transform:translateX(-50%)}}
 .hero{background:var(--gradient);min-height:420px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;padding:64px 20px}
 .hero-p span{position:absolute;border-radius:50%;animation:fp var(--d) ease-in-out infinite}
@@ -59,27 +72,27 @@ body{font-family:'Poppins',sans-serif;background:#f8fafc;color:var(--dark);overf
 .stat-label{font-size:11.5px;color:#64748b;font-weight:500;display:flex;align-items:center;justify-content:center;gap:5px;margin-bottom:6px}.stat-label i{color:var(--primary)}
 .stat-value{font-size:clamp(20px,3vw,28px);font-weight:800;color:var(--primary)}
 .section{padding:60px 20px}.section-alt{background:#fff}.section-inner{max-width:1280px;margin:0 auto}
-.section-title{text-align:center;margin-bottom:44px}.section-title h2{font-size:clamp(20px,3.5vw,30px);font-weight:700;color:var(--dark)}
-.section-title p{font-size:14px;color:var(--gray);margin-top:6px}
+.section-title{text-align:center;margin-bottom:44px}.section-title h2{font-size:clamp(22px,3.5vw,34px);font-weight:800;color:var(--dark)}
+.section-title p{font-size:15px;color:var(--gray);margin-top:6px}
 .section-title .line{width:60px;height:4px;background:linear-gradient(90deg,var(--gold),var(--primary));margin:12px auto 0;border-radius:2px}
 .features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:24px}
 .feature-card{background:#fff;border-radius:16px;padding:32px 24px;text-align:center;box-shadow:0 2px 20px rgba(0,0,0,.07);border:1px solid #e2e8f0;transition:all .35s}
 .feature-card:hover{transform:translateY(-8px);box-shadow:0 16px 40px rgba(26,86,219,.18);border-color:var(--primary)}
 .feature-icon{width:76px;height:76px;background:var(--gradient);border-radius:20px;display:flex;align-items:center;justify-content:center;margin:0 auto 18px;transition:.3s}
 .feature-card:hover .feature-icon{transform:rotate(8deg) scale(1.1)}.feature-icon i{color:#fff;font-size:28px}
-.feature-card h3{font-size:16px;font-weight:700;color:var(--primary);margin-bottom:10px}.feature-card p{font-size:13.5px;color:#64748b;line-height:1.7}
+.feature-card h3{font-size:17px;font-weight:700;color:var(--primary);margin-bottom:10px}.feature-card p{font-size:14px;color:#64748b;line-height:1.7}
 .nr-grid{display:grid;grid-template-columns:1fr 1fr;gap:28px}
 @media(max-width:768px){.nr-grid{grid-template-columns:1fr}}
 .board-card{background:#fff;border-radius:16px;padding:28px;box-shadow:0 2px 20px rgba(0,0,0,.07);border:1px solid #e2e8f0}
-.board-title{font-size:17px;font-weight:700;color:var(--dark);margin-bottom:18px;display:flex;align-items:center;gap:10px}
+.board-title{font-size:19px;font-weight:700;color:var(--dark);margin-bottom:18px;display:flex;align-items:center;gap:10px}
 .board-title i{color:var(--primary);font-size:20px}
 .board-title::after{content:'';flex:1;height:3px;background:linear-gradient(90deg,var(--gold),transparent);border-radius:2px;margin-left:10px}
-.n-item{padding:12px 0;border-bottom:1px solid #f1f5f9;display:flex;align-items:flex-start;gap:12px}
+.n-item{padding:13px 0;border-bottom:1px solid #f1f5f9;display:flex;align-items:flex-start;gap:12px}
 .n-item:last-child{border-bottom:none}
-.n-badge{font-size:10.5px;font-weight:700;padding:3px 10px;border-radius:4px;white-space:nowrap;flex-shrink:0;color:#fff}
+.n-badge{font-size:11px;font-weight:700;padding:4px 11px;border-radius:5px;white-space:nowrap;flex-shrink:0;color:#fff}
 .badge-urgent{background:#dc2626}.badge-high{background:#d97706}.badge-normal{background:var(--primary)}.badge-low{background:#64748b}
-.n-text{font-size:13.5px;color:var(--dark);line-height:1.5}
-.n-date{font-size:11px;color:#94a3b8;margin-top:2px}
+.n-text{font-size:14.5px;color:var(--dark);line-height:1.55}
+.n-date{font-size:12px;color:#94a3b8;margin-top:3px}
 .view-all{display:block;text-align:right;color:var(--primary);font-size:13px;font-weight:600;text-decoration:none;margin-top:14px;transition:.2s}.view-all:hover{color:var(--primary-dark)}
 .result-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px}
 .r-card{background:var(--gradient);border-radius:16px;padding:28px 20px;color:#fff;text-align:center;transition:all .3s;cursor:pointer;text-decoration:none;display:block}
@@ -92,9 +105,9 @@ body{font-family:'Poppins',sans-serif;background:#f8fafc;color:var(--dark);overf
 .t-card:hover{transform:translateY(-6px);box-shadow:0 12px 32px rgba(26,86,219,.15)}
 .t-avatar{width:86px;height:86px;border-radius:50%;background:var(--gradient);display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:32px;color:#fff;overflow:hidden;border:4px solid var(--gold-light)}
 .t-avatar img{width:100%;height:100%;object-fit:cover}
-.t-card h4{font-size:15px;font-weight:700;color:var(--dark);margin-bottom:4px}
-.t-role{font-size:12px;color:var(--primary);font-weight:600;background:var(--primary-light);padding:3px 10px;border-radius:20px;display:inline-block;margin-bottom:6px}
-.t-sub{font-size:12.5px;color:var(--gray)}
+.t-card h4{font-size:16px;font-weight:700;color:var(--dark);margin-bottom:4px}
+.t-role{font-size:12.5px;color:var(--primary);font-weight:600;background:var(--primary-light);padding:3px 12px;border-radius:20px;display:inline-block;margin-bottom:6px}
+.t-sub{font-size:13px;color:var(--gray)}
 .ct-class-badge{font-size:11px;font-weight:700;background:linear-gradient(135deg,#e0e7ff,#c7d2fe);color:#3730a3;padding:3px 12px;border-radius:20px;display:inline-block;margin-bottom:6px}
 .gallery-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
 @media(max-width:600px){.gallery-grid{grid-template-columns:repeat(2,1fr)}}
@@ -141,7 +154,6 @@ body{font-family:'Poppins',sans-serif;background:#f8fafc;color:var(--dark);overf
     <div style="display:flex;align-items:center;gap:10px">
       <a id="fb-link" href="#"><i class="fab fa-facebook-f"></i></a>
       <a id="yt-link" href="#"><i class="fab fa-youtube"></i></a>
-      <a href="{{ url_for('templates.login_page') }}" class="login-btn"><i class="fas fa-user"></i> Login</a>
     </div>
   </div>
 </div>
@@ -362,6 +374,7 @@ body{font-family:'Poppins',sans-serif;background:#f8fafc;color:var(--dark);overf
         <li><a href="#academic"><i class="fas fa-chevron-right"></i>Academic</a></li>
         <li><a href="/results"><i class="fas fa-chevron-right"></i>Results</a></li>
         <li><a href="#notices"><i class="fas fa-chevron-right"></i>Notice Board</a></li>
+        <li><a href="#documents"><i class="fas fa-chevron-right"></i>Documents</a></li>
         <li><a href="#gallery"><i class="fas fa-chevron-right"></i>Gallery</a></li>
         <li><a href="{{ url_for('templates.login_page') }}"><i class="fas fa-chevron-right"></i>Student Login</a></li>
       </ul>
@@ -444,14 +457,21 @@ async function loadAnnouncements(){
     const nl=$('notice-list');
     if(!items.length){nl.innerHTML='<p style="color:#94a3b8;font-size:13px;padding:8px 0">No notices available.</p>';return;}
     const bc={urgent:'badge-urgent',high:'badge-high',normal:'badge-normal',low:'badge-low'};
-    nl.innerHTML=items.slice(0,6).map(a=>`<div class="n-item">
-      <span class="n-badge ${bc[a.priority]||'badge-normal'}">${a.category||'Notice'}</span>
-      <div style="flex:1">
-        <div class="n-text">${a.title}${a.title_bn?'<br><span class="bn" style="font-size:11.5px;color:#64748b">'+a.title_bn+'</span>':''}</div>
-        ${a.has_attachment?`<a href="/api/school/announcements/${a.id}/attachment" target="_blank" style="display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-weight:600;color:#1a56db;margin-top:4px;text-decoration:none;background:#e8f0fe;padding:2px 8px;border-radius:4px"><i class="fas fa-paperclip"></i>${a.attachment_name||'Download'}</a>`:''}
-        <div class="n-date"><i class="fas fa-calendar-alt" style="margin-right:3px"></i>${(a.publish_date||a.created_at||'').split('T')[0]}</div>
-      </div>
-    </div>`).join('');
+    nl.innerHTML=items.slice(0,6).map(a=>{
+      const url=a.has_attachment?`/api/school/announcements/${a.id}/attachment`:'#';
+      const clickable=a.has_attachment;
+      return `<div class="n-item" style="${clickable?'cursor:pointer':''}"
+        ${clickable?`onclick="window.open('${url}','_blank')"`:''}>\n        <span class="n-badge ${bc[a.priority]||'badge-normal'}">${a.category||'Notice'}</span>
+        <div style="flex:1">
+          <div class="n-text" style="${clickable?'color:var(--primary);font-weight:600':''}">
+            ${a.title}
+            ${clickable?'<i class="fas fa-file-pdf" style="margin-left:6px;font-size:11px;opacity:.7"></i>':''}
+            ${a.title_bn?`<br><span class="bn" style="font-size:11.5px;color:#64748b;font-weight:400">${a.title_bn}</span>`:''}
+          </div>
+          <div class="n-date"><i class="fas fa-calendar-alt" style="margin-right:3px"></i>${(a.publish_date||a.created_at||'').split('T')[0]}${clickable?'&nbsp;·&nbsp;<span style="color:var(--primary);font-size:11px"><i class="fas fa-download"></i> Click to download</span>':''}</div>
+        </div>
+      </div>`;
+    }).join('');
   }catch(e){$('notice-list').innerHTML='<p style="color:#94a3b8;font-size:13px">Could not load notices.</p>';}
 }
 
@@ -559,9 +579,23 @@ async function loadClassTeachers(){
   }catch(e){document.getElementById('class-teachers').style.display='none';}
 }
 
+// Gallery photos
+async function loadGalleryPhotos(){
+  try{
+    const photos=await fetch('/api/school/gallery').then(r=>r.json());
+    const g=$('gallery-grid');
+    if(!photos||!photos.length) return;
+    g.innerHTML=photos.map(p=>`<div class="g-item reveal">
+      <img src="${p.image_data}" alt="${p.title||'Gallery photo'}" loading="lazy" style="width:100%;height:100%;object-fit:cover">
+      ${p.title?`<div class="g-overlay"><span>${p.title}</span></div>`:''}
+    </div>`).join('');
+    g.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+  }catch(e){}
+}
+
 $('fy').textContent=new Date().getFullYear();
 document.addEventListener('DOMContentLoaded',()=>{
-  loadSchoolInfo();loadStats();loadAnnouncements();loadPublishedResults();loadSClasses();loadTeachers();loadClassTeachers();
+  loadSchoolInfo();loadStats();loadAnnouncements();loadPublishedResults();loadSClasses();loadTeachers();loadClassTeachers();loadGalleryPhotos();
 });
 </script>
 {% endblock %}
