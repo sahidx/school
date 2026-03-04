@@ -434,6 +434,18 @@ async function loadSchoolInfo(){
     if(d.youtube_url&&d.youtube_url!='#'){$('yt-link').href=d.youtube_url;$('f-yt').href=d.youtube_url;}
     if(d.logo_url){const l=$('sch-logo');l.src=d.logo_url;l.style.display='block';$('logo-icon').style.display='none';}
     if(d.map_embed_url) $('map-wrap').innerHTML=`<iframe src="${d.map_embed_url}" width="100%" height="240" style="border:0;border-radius:16px" allowfullscreen loading="lazy"></iframe>`;
+    if(d.hero_image){
+      const hero=document.querySelector('.hero');
+      hero.style.backgroundImage=`url('${d.hero_image}')`;
+      hero.style.backgroundSize='cover';
+      hero.style.backgroundPosition='center';
+      hero.style.backgroundRepeat='no-repeat';
+      // darken overlay so text stays readable
+      let ov=document.getElementById('hero-overlay');
+      if(!ov){ov=document.createElement('div');ov.id='hero-overlay';
+        ov.style.cssText='position:absolute;inset:0;background:linear-gradient(135deg,rgba(10,36,114,.78),rgba(26,86,219,.6));z-index:0;';
+        hero.insertBefore(ov,hero.firstChild);}
+    }
   }catch(e){}
 }
 
