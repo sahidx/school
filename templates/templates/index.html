@@ -30,7 +30,7 @@ h1,h2,h3,h4,h5,h6,.font-heading{font-family:'Poppins','Hind Siliguri',sans-serif
 .dropdown-menu a:hover{background:var(--primary-light)!important;color:var(--primary)!important}
 .dropdown:hover .dropdown-menu{display:block}
 .ticker-wrap{background:#2F5D8A;overflow:hidden;white-space:nowrap;border-bottom:3px solid var(--gold)}
-.ticker-inner{display:inline-flex;animation:ticker 40s linear infinite;will-change:transform}
+.ticker-inner{display:inline-flex;animation:ticker 35s linear infinite}
 .ticker-item{display:inline-block;padding:10px 40px;color:#e8f4f8;font-size:13.5px;font-weight:500;text-decoration:none}
 .ticker-wrap:hover .ticker-inner{animation-play-state:paused}
 .ticker-item i{color:var(--gold);margin-right:8px}.ticker-sep{color:var(--gold);margin:0 20px;padding:10px 0}
@@ -49,7 +49,7 @@ h1,h2,h3,h4,h5,h6,.font-heading{font-family:'Poppins','Hind Siliguri',sans-serif
 .doc-meta small{font-size:11px;color:#6FA8BF}
 .doc-dl{width:36px;height:36px;background:var(--primary-light);color:var(--primary-dark);border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:15px;transition:.2s}
 .doc-card:hover .doc-dl{background:var(--primary);color:#fff}
-@keyframes ticker{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+@keyframes ticker{from{transform:translateX(100vw)}to{transform:translateX(-100%)}}
 .hero{background:var(--gradient);min-height:420px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;padding:64px 20px}
 .hero-p span{position:absolute;border-radius:50%;animation:fp var(--d) ease-in-out infinite}
 .hero-p span:nth-child(1){width:180px;height:180px;background:rgba(255,255,255,.05);top:-50px;right:8%;--d:9s}
@@ -226,8 +226,6 @@ h1,h2,h3,h4,h5,h6,.font-heading{font-family:'Poppins','Hind Siliguri',sans-serif
 <!-- TICKER -->
 <div class="ticker-wrap" id="ticker-wrap">
   <div class="ticker-inner" id="ticker-inner">
-    <span class="ticker-item"><i class="fas fa-star"></i>মডার্ণ আইডিয়াল বেসরকারি প্রাথমিক বিদ্যালয়-তে আপনাকে স্বাগতম | Admissions Open 2026 | Play, Baby, Nursery, KG – Class 5</span>
-    <span class="ticker-sep">◆</span>
     <span class="ticker-item"><i class="fas fa-star"></i>মডার্ণ আইডিয়াল বেসরকারি প্রাথমিক বিদ্যালয়-তে আপনাকে স্বাগতম | Admissions Open 2026 | Play, Baby, Nursery, KG – Class 5</span>
   </div>
 </div>
@@ -487,7 +485,7 @@ async function loadAnnouncements(){
           ? `<a class="ticker-item ticker-pdf" href="${url}" target="_blank" title="Click to download PDF" style="cursor:pointer"><i class="fas fa-file-pdf" style="color:#fbbf24"></i>${a.title}<span class="ticker-pdf-badge"><i class="fas fa-download"></i> PDF</span></a><span class="ticker-sep">◆</span>`
           : `<span class="ticker-item"><i class="fas fa-bullhorn"></i>${a.title}</span><span class="ticker-sep">◆</span>`;
       }).join('');
-      $('ticker-inner').innerHTML=h+h;
+      $('ticker-inner').innerHTML=h;
     }
     const nl=$('notice-list');
     if(!items.length){nl.innerHTML='<p style="color:#6FA8BF;font-size:13px;padding:8px 0">No notices available.</p>';return;}
