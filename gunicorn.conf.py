@@ -1,4 +1,4 @@
-# Gunicorn Configuration for SmartGardenHub Production
+# Gunicorn Configuration for School Production
 # Save as gunicorn.conf.py
 
 import os
@@ -26,11 +26,11 @@ accesslog = os.getenv('ACCESS_LOG', '-')  # stdout
 access_log_format = '%(h)s %(l)s %(u)s %(t)s "%(r)s" %(s)s %(b)s "%(f)s" "%(a)s"'
 
 # Process naming
-proc_name = 'smartgarden-hub'
+proc_name = 'school'
 
 # Server mechanics
 daemon = False
-pidfile = '/tmp/smartgarden-hub.pid'
+pidfile = '/tmp/school.pid'
 user = os.getenv('USER')
 group = os.getenv('GROUP')
 tmp_upload_dir = None

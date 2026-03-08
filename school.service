@@ -6,14 +6,12 @@ After=network.target
 Type=simple
 User=root
 WorkingDirectory=/var/www/school
-Environment="PATH=/usr/local/bin:/usr/bin:/bin"
+Environment="PATH=/var/www/school/venv/bin:/usr/local/bin:/usr/bin:/bin"
 Environment="FLASK_ENV=production"
-Environment="PORT=8001"
-Environment="SECRET_KEY=change-this-to-a-secure-random-string-in-production"
-Environment="DATABASE_URL=sqlite:////var/www/school/school.db"
-
-# Using gunicorn with port 8001 and SQLite
-ExecStart=/usr/bin/python3 -m gunicorn --config gunicorn.conf.py app:app
+Environment="PORT=11000"
+Environment="SECRET_KEY=3840567e0b897177054785797b895fb84cef6b64ac89ae68688045a10cdbb0e1"
+Environment="DATABASE_URL=postgresql+psycopg2://school_user:your_db_password@localhost:5432/school_db"
+ExecStart=/var/www/school/venv/bin/gunicorn --config gunicorn.conf.py wsgi:app
 
 # Restart policy
 Restart=always
