@@ -98,6 +98,14 @@ h1,h2,h3,h4,h5,h6,.font-heading{font-family:'Poppins','Hind Siliguri',sans-serif
 .badge-urgent{background:#dc2626}.badge-high{background:#d97706}.badge-normal{background:var(--primary)}.badge-low{background:#555555}
 .n-text{font-size:14.5px;color:var(--dark);line-height:1.55}
 .n-date{font-size:12px;color:#6FA8BF;margin-top:3px}
+.pdf-dl-btn{display:inline-flex;align-items:center;gap:5px;background:#dc2626;color:#fff;border-radius:7px;padding:6px 12px;font-size:12px;font-weight:700;text-decoration:none;flex-shrink:0;margin-left:auto;transition:.2s;white-space:nowrap}
+.pdf-dl-btn:hover{background:#b91c1c;color:#fff;transform:scale(1.05)}
+.pdf-dl-btn i{font-size:13px}
+.ticker-pdf-badge{display:inline-flex;align-items:center;gap:3px;background:#dc2626;color:#fff;border-radius:4px;padding:2px 7px;font-size:10px;font-weight:800;margin-left:6px;vertical-align:middle}
+.pdf-dl-btn{display:inline-flex;align-items:center;gap:5px;background:#dc2626;color:#fff;border-radius:7px;padding:6px 12px;font-size:12px;font-weight:700;text-decoration:none;flex-shrink:0;margin-left:auto;transition:.2s;white-space:nowrap}
+.pdf-dl-btn:hover{background:#b91c1c;color:#fff;transform:scale(1.05)}
+.pdf-dl-btn i{font-size:13px}
+.ticker-pdf-badge{display:inline-flex;align-items:center;gap:3px;background:#dc2626;color:#fff;border-radius:4px;padding:2px 7px;font-size:10px;font-weight:800;margin-left:6px;vertical-align:middle}
 .view-all{display:block;text-align:right;color:var(--primary-dark);font-size:13px;font-weight:600;font-family:'Poppins',sans-serif;text-decoration:none;margin-top:14px;transition:.2s}.view-all:hover{color:var(--primary)}
 .result-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px}
 .r-card{background:var(--gradient);border-radius:16px;padding:28px 20px;color:#fff;text-align:center;transition:all .3s;cursor:pointer;text-decoration:none;display:block}
@@ -487,7 +495,7 @@ async function loadAnnouncements(){
         const url=hasPdf?`/api/school/announcements/${a.id}/attachment`:'';
         return `<span class="ticker-item${hasPdf?' ticker-pdf':''}"
           ${hasPdf?`onclick="window.open('${url}','_blank')" title="Click to download PDF" style="cursor:pointer"`:''}
-        ><i class="fas ${hasPdf?'fa-file-pdf':'fa-bullhorn'}" style="${hasPdf?'color:#fbbf24':''}"></i>${a.title}${hasPdf?' <i class="fas fa-download" style="font-size:9px;opacity:.75;margin-left:3px"></i>':''}</span><span class="ticker-sep">◆</span>`;
+        ><i class="fas ${hasPdf?'fa-file-pdf':'fa-bullhorn'}" style="${hasPdf?'color:#fbbf24':''}"></i>${a.title}${hasPdf?'<span class="ticker-pdf-badge"><i class="fas fa-download"></i> PDF</span>':''}</span><span class="ticker-sep">◆</span>`;
       }).join('');
       $('ticker-inner').innerHTML=h+h;
     }
@@ -497,16 +505,13 @@ async function loadAnnouncements(){
     nl.innerHTML=items.slice(0,6).map(a=>{
       const url=a.has_attachment?`/api/school/announcements/${a.id}/attachment`:'#';
       const clickable=a.has_attachment;
-      return `<div class="n-item" style="${clickable?'cursor:pointer':''}"
-        ${clickable?`onclick="window.open('${url}','_blank')"`:''}>\n        <span class="n-badge ${bc[a.priority]||'badge-normal'}">${a.category||'Notice'}</span>
+      return `<div class="n-item">
+        <span class="n-badge ${bc[a.priority]||'badge-normal'}">${a.category||'Notice'}</span>
         <div style="flex:1">
-          <div class="n-text" style="${clickable?'color:var(--primary);font-weight:600':''}">
-            ${a.title}
-            ${clickable?'<i class="fas fa-file-pdf" style="margin-left:6px;font-size:11px;opacity:.7"></i>':''}
-            ${a.title_bn?`<br><span class="bn" style="font-size:11.5px;color:#555555;font-weight:400">${a.title_bn}</span>`:''}
-          </div>
-          <div class="n-date"><i class="fas fa-calendar-alt" style="margin-right:3px"></i>${(a.publish_date||a.created_at||'').split('T')[0]}${clickable?'&nbsp;·&nbsp;<span style="color:var(--primary);font-size:11px"><i class="fas fa-download"></i> Click to download</span>':''}</div>
+          <div class="n-text">${a.title}${a.title_bn?`<br><span class="bn" style="font-size:11.5px;color:#555555;font-weight:400">${a.title_bn}</span>`:''}</div>
+          <div class="n-date"><i class="fas fa-calendar-alt" style="margin-right:3px"></i>${(a.publish_date||a.created_at||'').split('T')[0]}</div>
         </div>
+        ${clickable?`<a href="${url}" target="_blank" class="pdf-dl-btn" onclick="event.stopPropagation()"><i class="fas fa-file-pdf"></i> Download PDF</a>`:''}
       </div>`;
     }).join('');
   }catch(e){$('notice-list').innerHTML='<p style="color:#6FA8BF;font-size:13px">Could not load notices.</p>';}
