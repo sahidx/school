@@ -227,20 +227,8 @@ h1,h2,h3,h4,h5,h6,.font-heading{font-family:'Poppins','Hind Siliguri',sans-serif
 </div>
 
 <!-- TICKER -->
-<div class="ticker-wrap">
-  <div class="ticker-inner" id="ticker-inner">
-    <span class="ticker-item"><i class="fas fa-star"></i>মডার্ণ আইডিয়াল বেসরকারি প্রাথমিক বিদ্যালয়-তে আপনাকে স্বাগতম</span>
-    <span class="ticker-sep">◆</span>
-    <span class="ticker-item"><i class="fas fa-bell"></i>ভর্তি চলছে – ২০২৬ শিক্ষাবর্ষ | Admissions Open 2026</span>
-    <span class="ticker-sep">◆</span>
-    <span class="ticker-item"><i class="fas fa-trophy"></i>প্লে, বেবি, নার্সারি, কেজি থেকে পঞ্চম শ্রেণি | Excellence in Primary Education</span>
-    <span class="ticker-sep">◆</span>
-    <span class="ticker-item"><i class="fas fa-star"></i>মডার্ণ আইডিয়াল বেসরকারি প্রাথমিক বিদ্যালয়-তে আপনাকে স্বাগতম</span>
-    <span class="ticker-sep">◆</span>
-    <span class="ticker-item"><i class="fas fa-bell"></i>ভর্তি চলছে – ২০২৬ শিক্ষাবর্ষ | Admissions Open 2026</span>
-    <span class="ticker-sep">◆</span>
-    <span class="ticker-item"><i class="fas fa-trophy"></i>প্লে, বেবি, নার্সারি, কেজি থেকে পঞ্চম শ্রেণি | Excellence in Primary Education</span>
-  </div>
+<div class="ticker-wrap" id="ticker-wrap" style="display:none">
+  <div class="ticker-inner" id="ticker-inner"></div>
 </div>
 
 <!-- HERO -->
@@ -499,6 +487,7 @@ async function loadAnnouncements(){
           : `<span class="ticker-item"><i class="fas fa-bullhorn"></i>${a.title}</span><span class="ticker-sep">◆</span>`;
       }).join('');
       $('ticker-inner').innerHTML=h+h;
+      document.getElementById('ticker-wrap').style.display='block';
     }
     const nl=$('notice-list');
     if(!items.length){nl.innerHTML='<p style="color:#6FA8BF;font-size:13px;padding:8px 0">No notices available.</p>';return;}
