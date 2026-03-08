@@ -229,17 +229,9 @@ h1,h2,h3,h4,h5,h6,.font-heading{font-family:'Poppins','Hind Siliguri',sans-serif
 <!-- TICKER -->
 <div class="ticker-wrap" id="ticker-wrap">
   <div class="ticker-inner" id="ticker-inner">
-    <span class="ticker-item"><i class="fas fa-star"></i>মডার্ণ আইডিয়াল বেসরকারি প্রাথমিক বিদ্যালয়-তে আপনাকে স্বাগতম</span>
+    <span class="ticker-item"><i class="fas fa-star"></i>মডার্ণ আইডিয়াল বেসরকারি প্রাথমিক বিদ্যালয়-তে আপনাকে স্বাগতম | Admissions Open 2026 | Play, Baby, Nursery, KG – Class 5</span>
     <span class="ticker-sep">◆</span>
-    <span class="ticker-item"><i class="fas fa-bell"></i>ভর্তি চলছে – ২০২৬ শিক্ষাবর্ষ | Admissions Open 2026</span>
-    <span class="ticker-sep">◆</span>
-    <span class="ticker-item"><i class="fas fa-trophy"></i>প্লে, বেবি, নার্সারি, কেজি থেকে পঞ্চম শ্রেণি | Excellence in Primary Education</span>
-    <span class="ticker-sep">◆</span>
-    <span class="ticker-item"><i class="fas fa-star"></i>মডার্ণ আইডিয়াল বেসরকারি প্রাথমিক বিদ্যালয়-তে আপনাকে স্বাগতম</span>
-    <span class="ticker-sep">◆</span>
-    <span class="ticker-item"><i class="fas fa-bell"></i>ভর্তি চলছে – ২০২৬ শিক্ষাবর্ষ | Admissions Open 2026</span>
-    <span class="ticker-sep">◆</span>
-    <span class="ticker-item"><i class="fas fa-trophy"></i>প্লে, বেবি, নার্সারি, কেজি থেকে পঞ্চম শ্রেণি | Excellence in Primary Education</span>
+    <span class="ticker-item"><i class="fas fa-star"></i>মডার্ণ আইডিয়াল বেসরকারি প্রাথমিক বিদ্যালয়-তে আপনাকে স্বাগতম | Admissions Open 2026 | Play, Baby, Nursery, KG – Class 5</span>
   </div>
 </div>
 
@@ -490,20 +482,16 @@ async function loadStats(){
 async function loadAnnouncements(){
   try{
     const items=await fetch('/api/school/announcements').then(r=>r.json());
-    const welcome=[
-      `<span class="ticker-item"><i class="fas fa-star"></i>মডার্ণ আইডিয়াল বেসরকারি প্রাথমিক বিদ্যালয়-তে আপনাকে স্বাগতম</span><span class="ticker-sep">◆</span>`,
-      `<span class="ticker-item"><i class="fas fa-bell"></i>ভর্তি চলছে – ২০২৬ শিক্ষাবর্ষ | Admissions Open 2026</span><span class="ticker-sep">◆</span>`,
-      `<span class="ticker-item"><i class="fas fa-trophy"></i>প্লে, বেবি, নার্সারি, কেজি থেকে পঞ্চম শ্রেণি | Excellence in Primary Education</span><span class="ticker-sep">◆</span>`
-    ].join('');
-    const notices=items.map(a=>{
-      const hasPdf=a.has_attachment;
-      const url=hasPdf?`/api/school/announcements/${a.id}/attachment`:'';
-      return hasPdf
-        ? `<a class="ticker-item ticker-pdf" href="${url}" target="_blank" title="Click to download PDF" style="cursor:pointer"><i class="fas fa-file-pdf" style="color:#fbbf24"></i>${a.title}<span class="ticker-pdf-badge"><i class="fas fa-download"></i> PDF</span></a><span class="ticker-sep">◆</span>`
-        : `<span class="ticker-item"><i class="fas fa-bullhorn"></i>${a.title}</span><span class="ticker-sep">◆</span>`;
-    }).join('');
-    const all=notices+welcome;
-    $('ticker-inner').innerHTML=all+all;
+    if(items.length){
+      const h=items.map(a=>{
+        const hasPdf=a.has_attachment;
+        const url=hasPdf?`/api/school/announcements/${a.id}/attachment`:'';
+        return hasPdf
+          ? `<a class="ticker-item ticker-pdf" href="${url}" target="_blank" title="Click to download PDF" style="cursor:pointer"><i class="fas fa-file-pdf" style="color:#fbbf24"></i>${a.title}<span class="ticker-pdf-badge"><i class="fas fa-download"></i> PDF</span></a><span class="ticker-sep">◆</span>`
+          : `<span class="ticker-item"><i class="fas fa-bullhorn"></i>${a.title}</span><span class="ticker-sep">◆</span>`;
+      }).join('');
+      $('ticker-inner').innerHTML=h+h;
+    }
     const nl=$('notice-list');
     if(!items.length){nl.innerHTML='<p style="color:#6FA8BF;font-size:13px;padding:8px 0">No notices available.</p>';return;}
     const bc={urgent:'badge-urgent',high:'badge-high',normal:'badge-normal',low:'badge-low'};
