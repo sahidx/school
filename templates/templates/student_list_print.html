@@ -175,10 +175,15 @@
   <div class="page-inner">
 
     <!-- Header -->
-    <div class="school-header">
-      <div class="school-name">{{ school.name }}</div>
-      {% if school.address %}<div class="school-address">{{ school.address }}</div>{% endif %}
-      {% if school.phone %}<div class="school-phone">Phone: {{ school.phone }}</div>{% endif %}
+    <div class="school-header" style="display:flex;align-items:center;gap:14px;justify-content:center;">
+      {% if school.logo %}
+      <img src="{{ school.logo }}" alt="logo" style="width:56px;height:56px;object-fit:contain;border-radius:50%;border:1.5px solid #999;flex-shrink:0;">
+      {% endif %}
+      <div style="text-align:center;">
+        <div class="school-name">{{ school.name }}</div>
+        {% if school.address %}<div class="school-address">{{ school.address }}</div>{% endif %}
+        {% if school.phone %}<div class="school-phone">Phone: {{ school.phone }}</div>{% endif %}
+      </div>
     </div>
     <div style="text-align:center;">
       <span class="doc-title">Student List</span>

@@ -28,6 +28,9 @@ body{font-family:'Poppins',sans-serif;background:#f0f4f8;color:var(--dark)}
 /* ── TRANSCRIPT CARD ── */
 .transcript-card{background:#fff;border-radius:16px;box-shadow:0 4px 24px rgba(47,93,138,0.15);overflow:hidden;margin-bottom:32px}
 .tc-header{background:var(--gradient);padding:28px;text-align:center;color:#fff;position:relative}
+.tc-header-inner{display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:6px}
+.tc-logo{width:56px;height:56px;border-radius:50%;overflow:hidden;border:2.5px solid rgba(255,255,255,.6);background:rgba(255,255,255,.1);flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+.tc-logo img{width:100%;height:100%;object-fit:contain;border-radius:50%;}
 .tc-school-name{font-size:clamp(16px,2.5vw,22px);font-weight:800;margin-bottom:4px}
 .tc-school-bn{font-family:'Hind Siliguri',sans-serif;font-size:clamp(13px,2vw,16px);color:rgba(255,255,255,.85);margin-bottom:10px}
 .tc-exam-title{font-size:16px;font-weight:700;background:rgba(255,255,255,.15);padding:8px 24px;border-radius:30px;display:inline-block;margin-top:6px}
@@ -274,8 +277,13 @@ function renderTranscript(d){
   <div class="transcript-card">
     <!-- HEADER -->
     <div class="tc-header">
-      <div class="tc-school-name" id="tc-sname">মডার্ণ আইডিয়াল বেসরকারি প্রাথমিক বিদ্যালয়</div>
-      <div class="tc-school-bn bn">মডার্ন আইডিয়াল নন-গভর্নমেন্ট প্রাইমারি স্কুল</div>
+      <div class="tc-header-inner">
+        <div class="tc-logo" id="tc-logo-wrap"></div>
+        <div>
+          <div class="tc-school-name" id="tc-sname">মডার্ণ আইডিয়াল বেসরকারি প্রাথমিক বিদ্যালয়</div>
+          <div class="tc-school-bn bn" id="tc-sbn">মডার্ন আইডিয়াল নন-গভর্নমেন্ট প্রাইমারি স্কুল</div>
+        </div>
+      </div>
       <div class="tc-exam-title">${e.title}</div>
     </div>
 
@@ -360,9 +368,14 @@ function renderTranscript(d){
     </div>
   </div>`;
 
-  // Load school name dynamically
+  // Load school branding dynamically
   fetch('/api/school/info').then(r=>r.json()).then(info=>{
-    if(info.school_name) document.getElementById('tc-sname').textContent=info.school_name;
+    if(info.school_name){ var el=document.getElementById('tc-sname'); if(el) el.textContent=info.school_name; }
+    if(info.school_name_bn){ var el=document.getElementById('tc-sbn'); if(el) el.textContent=info.school_name_bn; }
+    if(info.school_logo){
+      var wrap=document.getElementById('tc-logo-wrap');
+      if(wrap){ wrap.innerHTML='<img src="'+info.school_logo+'" alt="logo">'; }
+    }
   }).catch(()=>{});
 }
 

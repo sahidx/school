@@ -119,7 +119,9 @@
       display: flex; align-items: center; justify-content: center;
       font-size: 24px; font-weight: 900; color: #000;
       letter-spacing: -1px;
+      overflow: hidden;
     }
+    .sch-logo img { width: 100%; height: 100%; object-fit: contain; border-radius: 50%; }
 
     /* centre text */
     .head-text { flex: 1; text-align: center; }
@@ -342,7 +344,11 @@
       <div class="card-head">
         <!-- Logo -->
         <div class="sch-logo">
+          {% if school.logo %}
+          <img src="{{ school.logo }}" alt="logo">
+          {% else %}
           {{ school.name[:2] | upper }}
+          {% endif %}
         </div>
         <!-- Text -->
         <div class="head-text">

@@ -120,13 +120,16 @@ class User(db.Model):
     
     @property
     def student_id(self):
-        """Generate student ID if not set"""
+        """Return student_code if set, otherwise generate a fallback ID."""
         if hasattr(self, '_student_id') and self._student_id:
             return self._student_id
-        # Generate based on ID and year
+        # Use the stored student_code (e.g. 100221) as the primary ID
+        if self.student_code:
+            return self.student_code
+        # Fallback: generate based on DB id and year
         if self.id and self.role == UserRole.STUDENT:
             year = self.created_at.year if self.created_at else datetime.now().year
-            return f"STU{year}{self.id:04d}"
+            return f"STU{year}{self.id:05d}"
         return None
     
     @student_id.setter

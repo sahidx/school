@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>School Logo Setup</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Poppins',sans-serif;background:linear-gradient(135deg,#0b1f4a 0%,#155c2a 100%);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;}
+.card{background:#fff;border-radius:20px;box-shadow:0 24px 64px rgba(0,0,0,.3);padding:40px;width:100%;max-width:520px;}
+.head{text-align:center;margin-bottom:28px;}
+.head h1{font-size:22px;font-weight:800;color:#0a1830;margin-bottom:6px;}
+.head p{font-size:13px;color:#64748b;line-height:1.6;}
+
+/* Current logo banner */
+.cur{display:none;align-items:center;gap:14px;padding:14px 16px;background:#f0fdf4;border-radius:12px;border:2px solid #86efac;margin-bottom:22px;}
+.cur-img{width:60px;height:60px;border-radius:50%;object-fit:contain;border:2px solid #4ade80;background:#fff;flex-shrink:0;}
+.cur-txt{font-size:12.5px;font-weight:700;color:#166534;line-height:1.5;}
+.cur-txt span{display:block;font-weight:400;color:#4ade80;font-size:11px;margin-top:2px;}
+
+/* Drop zone */
+.drop{border:3px dashed #93c5fd;border-radius:14px;padding:32px 20px;text-align:center;cursor:pointer;transition:.2s;position:relative;margin-bottom:20px;}
+.drop.over{border-color:#3b82f6;background:#eff6ff;}
+.drop input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;}
+.drop-ico{font-size:40px;margin-bottom:10px;}
+.drop-title{font-size:14px;font-weight:700;color:#1e40af;}
+.drop-sub{font-size:11.5px;color:#94a3b8;margin-top:4px;}
+
+/* Preview */
+.preview{display:none;align-items:center;gap:16px;padding:14px;background:#f8fafc;border-radius:12px;border:1.5px solid #e2e8f0;margin-bottom:20px;}
+.preview img{width:70px;height:70px;border-radius:50%;object-fit:contain;border:2px solid #e2e8f0;background:#fff;}
+.preview-info{flex:1;min-width:0;}
+.preview-name{font-size:13px;font-weight:700;color:#0f172a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.preview-size{font-size:11px;color:#64748b;margin-top:2px;}
+.preview-change{font-size:11px;color:#3b82f6;font-weight:600;cursor:pointer;margin-top:4px;display:inline-block;}
+
+/* Fields */
+.fields{display:flex;flex-direction:column;gap:14px;margin-bottom:22px;}
+.fl label{font-size:11.5px;font-weight:700;color:#475569;margin-bottom:5px;display:flex;align-items:center;gap:6px;}
+.fl input{width:100%;border:1.5px solid #e2e8f0;border-radius:8px;padding:10px 13px;font-size:13px;outline:none;font-family:'Poppins',sans-serif;transition:.15s;}
+.fl input:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,246,.1);}
+
+/* Button */
+.btn{width:100%;background:linear-gradient(135deg,#155c2a,#1f8840);color:#fff;border:none;border-radius:12px;padding:15px;font-size:15px;font-weight:800;cursor:pointer;font-family:'Poppins',sans-serif;transition:.2s;letter-spacing:.3px;}
+.btn:hover:not(:disabled){background:linear-gradient(135deg,#0e4020,#155c2a);transform:translateY(-1px);}
+.btn:disabled{background:#94a3b8;cursor:not-allowed;transform:none;}
+
+/* Message */
+.msg{margin-top:14px;padding:13px 16px;border-radius:10px;font-size:13px;font-weight:600;text-align:center;display:none;}
+.msg.ok{background:#dcfce7;color:#166534;border:1.5px solid #86efac;}
+.msg.err{background:#fee2e2;color:#991b1b;border:1.5px solid #fca5a5;}
+
+/* Links */
+.links{margin-top:22px;text-align:center;display:flex;justify-content:center;gap:16px;flex-wrap:wrap;}
+.links a{font-size:12px;color:#3b82f6;font-weight:600;text-decoration:none;}
+.links a:hover{text-decoration:underline;}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="head">
+    <div style="font-size:44px;margin-bottom:8px;">🏫</div>
+    <h1>School Logo Setup</h1>
+    <p>Upload your school's official logo. It will appear on the <strong>navbar, homepage, ID cards, admit cards, result sheets, transcripts</strong> — everywhere.</p>
+  </div>
+
+  <!-- Current logo -->
+  <div class="cur" id="curBanner">
+    <img class="cur-img" id="curImg" src="" alt="current logo">
+    <div class="cur-txt">✅ Logo is currently set and active!<span>Upload a new image below to replace it.</span></div>
+  </div>
+
+  <!-- Drop zone -->
+  <div class="drop" id="dropZone">
+    <input type="file" id="logoFile" accept="image/*" onchange="onFile(this.files[0])">
+    <div class="drop-ico">📁</div>
+    <div class="drop-title">Click to browse or drag & drop your logo</div>
+    <div class="drop-sub">PNG, JPG, SVG, WEBP — up to 5 MB</div>
+  </div>
+
+  <!-- Preview (hidden until file chosen) -->
+  <div class="preview" id="previewBox">
+    <img id="previewImg" src="" alt="preview">
+    <div class="preview-info">
+      <div class="preview-name" id="previewName"></div>
+      <div class="preview-size" id="previewSize"></div>
+      <span class="preview-change" onclick="document.getElementById('logoFile').click()">Choose different file →</span>
+    </div>
+  </div>
+
+  <!-- Optional fields -->
+  <div class="fields">
+    <div class="fl">
+      <label>🌐 Website URL <span style="font-weight:400;color:#94a3b8">(optional)</span></label>
+      <input type="url" id="website" placeholder="https://www.school.edu.bd">
+    </div>
+    <div class="fl">
+      <label><span style="color:#1877f2;font-weight:900">f</span> Facebook Page URL <span style="font-weight:400;color:#94a3b8">(optional)</span></label>
+      <input type="url" id="facebook" placeholder="https://facebook.com/yourschool">
+    </div>
+  </div>
+
+  <button class="btn" id="saveBtn" onclick="doSave()">⬆ Upload & Save Logo</button>
+  <div class="msg" id="msg"></div>
+
+  <div class="links">
+    <a href="/">← Home</a>
+    <a href="/students/id-cards">ID Cards →</a>
+    <a href="/api/school/info" target="_blank">View Current DB →</a>
+  </div>
+</div>
+
+<script>
+var selectedFile = null;
+
+// Load existing data
+fetch('/api/school/info').then(r=>r.json()).then(function(d){
+  if(d.school_logo){
+    document.getElementById('curImg').src = d.school_logo;
+    document.getElementById('curBanner').style.display = 'flex';
+  }
+  if(d.school_website) document.getElementById('website').value = d.school_website;
+  if(d.school_facebook) document.getElementById('facebook').value = d.school_facebook;
+}).catch(function(){});
+
+// Drag & drop
+var dz = document.getElementById('dropZone');
+dz.addEventListener('dragover', function(e){ e.preventDefault(); dz.classList.add('over'); });
+dz.addEventListener('dragleave', function(){ dz.classList.remove('over'); });
+dz.addEventListener('drop', function(e){
+  e.preventDefault(); dz.classList.remove('over');
+  var f = e.dataTransfer.files[0];
+  if(f) onFile(f);
+});
+
+function onFile(file){
+  if(!file) return;
+  if(!file.type.startsWith('image/')){
+    showMsg('Please choose an image file (PNG, JPG, SVG, WEBP).', 'err'); return;
+  }
+  if(file.size > 5*1024*1024){
+    showMsg('File is too large. Please use an image under 5 MB.', 'err'); return;
+  }
+  selectedFile = file;
+  var reader = new FileReader();
+  reader.onload = function(e){
+    document.getElementById('previewImg').src = e.target.result;
+    document.getElementById('previewName').textContent = file.name;
+    document.getElementById('previewSize').textContent = (file.size/1024).toFixed(1) + ' KB';
+    document.getElementById('previewBox').style.display = 'flex';
+    document.getElementById('dropZone').style.display = 'none';
+  };
+  reader.readAsDataURL(file);
+}
+
+async function doSave(){
+  var btn = document.getElementById('saveBtn');
+  if(!selectedFile){
+    showMsg('Please choose a logo image first!', 'err'); return;
+  }
+  btn.disabled = true;
+  btn.textContent = '⏳ Saving logo…';
+  try{
+    // Read as base64 and send as JSON (avoids multipart proxy issues)
+    var reader = new FileReader();
+    reader.onload = async function(ev){
+      try{
+        var r = await fetch('/api/school/save-logo-b64', {
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({logo: ev.target.result})
+        });
+        var d = await r.json();
+        if(!d.success){ showMsg('Save failed: '+(d.error||'Unknown error'), 'err'); btn.disabled=false; btn.textContent='⬆ Upload & Save Logo'; return; }
+
+        // Save website & facebook if filled
+        var extras = {};
+        var ws = document.getElementById('website').value.trim();
+        var fb = document.getElementById('facebook').value.trim();
+        if(ws) extras['school_website'] = ws;
+        if(fb) extras['school_facebook'] = fb;
+        if(Object.keys(extras).length){
+          await fetch('/api/school/info',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(extras)});
+        }
+
+        showMsg('✅ Logo saved! Reload any page to see it everywhere.', 'ok');
+        document.getElementById('curImg').src = ev.target.result;
+        document.getElementById('curBanner').style.display = 'flex';
+      }catch(e2){ showMsg('Error: '+e2.message, 'err'); }
+      btn.disabled = false;
+      btn.textContent = '⬆ Upload & Save Logo';
+    };
+    reader.readAsDataURL(selectedFile);
+  }catch(e){
+    showMsg('Error: '+e.message, 'err');
+    btn.disabled = false;
+    btn.textContent = '⬆ Upload & Save Logo';
+  }
+}
+
+function showMsg(txt, type){
+  var el = document.getElementById('msg');
+  el.textContent = txt;
+  el.className = 'msg '+type;
+  el.style.display = 'block';
+}
+</script>
+</body>
+</html>

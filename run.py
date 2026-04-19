@@ -38,7 +38,7 @@ def main():
     debug = os.getenv('DEBUG', 'true').lower() == 'true'
     host = os.getenv('HOST', '0.0.0.0')
     
-    print("🏫 Modern Ideal Non Government Primary School - Management System")
+    print("🏫 Modern Ideal Kindergarten - Management System")
     print("=" * 50)
     print(f"Environment: {env}")
     print(f"Host: {host}")

@@ -748,11 +748,13 @@ function schoolCMS(){
       {key:'school_eiin',label:'EIIN Number'},
       {key:'institution_code',label:'Institution Code'},
       {key:'office_hours',label:'Office Hours',placeholder:'Sat – Thu: 8:00 AM – 2:00 PM'},
-      {key:'facebook_url',label:'Facebook URL'},
+      {key:'school_website',label:'Website URL',placeholder:'https://www.school.edu.bd'},
+      {key:'school_facebook',label:'Facebook Page URL',placeholder:'https://facebook.com/schoolname'},
       {key:'youtube_url',label:'YouTube URL'},
-      {key:'about_text',label:'About Text (for homepage)'},
-      {key:'logo_url',label:'Logo Image URL'},
-      {key:'map_embed_url',label:'Google Map Embed URL'},      // ─ Head Teacher section ─
+      {key:'about_text',label:'About Text (for homepage)',type:'textarea',wide:true},
+      {key:'map_embed_url',label:'Google Map Embed URL'},
+      {key:'_logo_header',label:'—— School Logo ——',type:'header'},
+      {key:'school_logo',label:'School Logo (shown everywhere — navbar, ID cards, reports)',type:'image',wide:true},      // ─ Head Teacher section ─
       {key:'_ht_header',label:'—— Head Teacher / Principal Info ——',type:'header'},
       {key:'head_teacher_name',label:'Head Teacher Name',placeholder:'Md. Abdul Karim'},
       {key:'head_teacher_name_bn',label:'Head Teacher Name (Bengali)',placeholder:'মো. আব্দুল করিম'},
@@ -827,7 +829,13 @@ function schoolCMS(){
     },
     async saveSchoolInfo(){
       try{
-        const r=await fetch('/api/school/info',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(this.schoolInfo)});
+        // Strip large base64 image fields from bulk save (they are saved immediately on upload)
+        const payload = {};
+        for(const [k,v] of Object.entries(this.schoolInfo)){
+          if(typeof v === 'string' && v.startsWith('data:image')) continue;
+          payload[k] = v;
+        }
+        const r=await fetch('/api/school/info',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
         const d=await r.json();
         this.infoMsg=d.success?'✓ Saved successfully!':'Error saving.';
         setTimeout(()=>this.infoMsg='',3000);
@@ -1016,7 +1024,28 @@ function schoolCMS(){
       if (!file) return;
       if (file.size > 5 * 1024 * 1024) { alert('Image too large (max 5 MB)'); event.target.value=''; return; }
       const reader = new FileReader();
-      reader.onload = (e) => { this.schoolInfo[key] = e.target.result; };
+      reader.onload = async (e) => {
+        const dataUri = e.target.result;
+        this.schoolInfo[key] = dataUri;
+        // For school_logo: save immediately via dedicated endpoint (avoids large JSON body issues)
+        if(key === 'school_logo'){
+          try{
+            const r = await fetch('/api/school/save-logo-b64', {
+              method:'POST',
+              headers:{'Content-Type':'application/json'},
+              body: JSON.stringify({logo: dataUri})
+            });
+            const d = await r.json();
+            if(d.success){
+              this.infoMsg = '✓ Logo saved!';
+              setTimeout(()=>this.infoMsg='',3000);
+            } else {
+              this.infoMsg = 'Logo save failed: ' + (d.error||'');
+              setTimeout(()=>this.infoMsg='',4000);
+            }
+          }catch(ex){ this.infoMsg='Logo upload error.'; setTimeout(()=>this.infoMsg='',4000); }
+        }
+      };
       reader.readAsDataURL(file);
     },
     async loadGallery(){

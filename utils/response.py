@@ -104,6 +104,26 @@ def serialize_user(user, include_sensitive=False):
         user_data['admissionDate'] = user.admission_date.isoformat()
     if getattr(user, 'role', None) and getattr(user.role, 'value', '') == 'student':
         user_data['batches'] = [serialize_batch(batch) for batch in getattr(user, 'batches', []) if getattr(batch, 'is_active', False)]
+        # Include guardian phone
+        user_data['guardianPhone'] = getattr(user, 'guardian_phone', None) or getattr(user, 'phoneNumber', None) or ''
+        # Include class/section/roll from student_class_info
+        try:
+            from models import StudentClassInfo
+            sci = StudentClassInfo.query.filter_by(student_id=user.id).first()
+            if sci:
+                user_data['roll'] = sci.roll_number
+                sc = getattr(sci, 'school_class', None)
+                user_data['schoolClass'] = (getattr(sc, 'name_bn', None) or getattr(sc, 'name', None)) if sc else None
+                sec = getattr(sci, 'section', None)
+                user_data['section'] = (getattr(sec, 'name_bn', None) or getattr(sec, 'name', None)) if sec else None
+            else:
+                user_data['roll'] = None
+                user_data['schoolClass'] = None
+                user_data['section'] = None
+        except Exception:
+            user_data['roll'] = None
+            user_data['schoolClass'] = None
+            user_data['section'] = None
     return user_data
 
 def serialize_batch(batch):

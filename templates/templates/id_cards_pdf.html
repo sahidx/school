@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<style>
+/* No external font imports — WeasyPrint uses system fonts */
+
+/* ── one page = one card (CR80: 54 × 85.6 mm) ── */
+@page { size: 54mm 85.6mm; margin: 0; }
+
+*, *::before, *::after { box-sizing: border-box; }
+
+body { margin: 0; padding: 0; background: #fff; font-family: Arial, 'Noto Sans Bengali', 'DejaVu Sans', sans-serif; }
+
+/* ── front card ── */
+.card-front {
+  width: 54mm; height: 85.6mm;
+  display: flex; flex-direction: column;
+  overflow: hidden; position: relative;
+  page-break-after: always; break-after: page;
+}
+
+.cf-top {
+  height: 37mm; flex-shrink: 0; position: relative;
+  padding: 2.5mm 2.8mm 0 2.8mm;
+  display: flex; flex-direction: column; align-items: flex-start; gap: 1mm;
+  background: linear-gradient(145deg, #155c2a 0%, #1f8840 50%, #28aa52 100%);
+  border-radius: 0 0 12mm 12mm / 0 0 8mm 8mm;
+}
+.cf-top-line {
+  position: absolute; bottom: 13mm; left: 2.8mm; right: 2.8mm;
+  height: 0.4mm; background: linear-gradient(90deg, transparent, rgba(255,220,50,.45), transparent);
+}
+.cf-logo-row { display: flex; align-items: center; gap: 1.5mm; width: 100%; }
+.cf-logo {
+  width: 8.5mm; height: 8.5mm; border-radius: 50%; flex-shrink: 0;
+  background: rgba(255,255,255,.1); border: 0.4mm solid rgba(255,255,255,.4);
+  display: flex; align-items: center; justify-content: center; overflow: hidden;
+}
+.cf-logo img { width: 100%; height: 100%; object-fit: cover; }
+.cf-logo .li { color: #fff; font-size: 3mm; font-weight: 900; }
+.cf-top-txt { flex: 1; min-width: 0; }
+.cf-sn { color: #fff; font-size: 2.2mm; font-weight: 800; line-height: 1.3; text-transform: uppercase; letter-spacing: .05mm; }
+.cf-sb { color: rgba(255,255,255,.6); font-size: 1.7mm; line-height: 1.3; margin-top: .3mm; }
+.cf-addr { color: rgba(255,255,255,.75); font-size: 1.9mm; }
+
+/* photo */
+.cf-photo {
+  position: absolute; top: 27mm; left: 50%; transform: translateX(-50%);
+  z-index: 6; width: 18mm; height: 22mm;
+  border: 0.9mm solid #fff; border-radius: 1.8mm; overflow: hidden;
+  background: #d8e4f0;
+  display: flex; align-items: center; justify-content: center;
+}
+.cf-photo img { width: 100%; height: 100%; object-fit: cover; }
+.cf-nophoto {
+  display: flex; flex-direction: column; align-items: center; gap: 0.8mm; color: #8aabcc;
+}
+.cf-nophoto span { font-size: 1.6mm; font-weight: 700; letter-spacing: .2mm; text-transform: uppercase; }
+
+/* body */
+.cf-body { flex: 1; padding: 14mm 3mm 2.5mm; display: flex; flex-direction: column; }
+.cf-stname {
+  font-size: 3.2mm; font-weight: 800; color: #0a1830; text-align: center;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  padding-bottom: 1.2mm; margin-bottom: 1.2mm;
+  border-bottom: 0.4mm solid #e0e8f4;
+}
+.cf-id-row {
+  display: flex; align-items: baseline; gap: 0.8mm;
+  background: linear-gradient(90deg, rgba(11,31,74,.055), transparent);
+  border-left: 0.6mm solid #1f8840; padding: 0.2mm 1.2mm; border-radius: 0 0.8mm 0.8mm 0;
+  margin: 0.3mm 0 0.5mm;
+}
+.cf-row { display: flex; align-items: baseline; gap: 0.8mm; line-height: 1.75; }
+.cf-lbl { color: #556080; font-size: 1.9mm; font-weight: 700; width: 11mm; flex-shrink: 0; }
+.cf-sep { color: #556080; font-size: 1.9mm; font-weight: 700; }
+.cf-val { color: #0a1830; font-size: 2mm; font-weight: 600; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cf-val.ic-id { font-weight: 800; font-size: 2.2mm; }
+.cf-principal { margin-top: auto; display: flex; flex-direction: column; align-items: flex-end; gap: 0.5mm; }
+.cf-sig-line { width: 17mm; height: 0.25mm; background: linear-gradient(90deg, transparent, #4a5e80); }
+.cf-sig-txt { font-size: 1.9mm; font-weight: 700; color: #4a5e80; letter-spacing: .12mm; }
+
+/* ── back card ── */
+.card-back {
+  width: 54mm; height: 85.6mm;
+  display: flex; flex-direction: column; overflow: hidden;
+  page-break-after: always; break-after: page;
+}
+/* last card: no trailing blank page */
+.last-card { page-break-after: avoid; break-after: avoid; }
+
+.cb-hdr {
+  height: 16mm; flex-shrink: 0;
+  background: linear-gradient(130deg, #060e22, #0b1f4a, #1540a0, #0b1f4a);
+  border-bottom: 0.5mm solid #c8a020;
+  display: flex; align-items: center; padding: 0 2.5mm; gap: 2mm;
+}
+.cb-logo {
+  width: 8.5mm; height: 8.5mm; border-radius: 50%; flex-shrink: 0;
+  background: rgba(255,255,255,.07); border: 0.4mm solid rgba(200,160,32,.45);
+  display: flex; align-items: center; justify-content: center; overflow: hidden;
+}
+.cb-logo img { width: 100%; height: 100%; object-fit: cover; }
+.cb-logo .li { color: #eecc40; font-size: 3mm; font-weight: 900; }
+.cb-hdr-txt { flex: 1; min-width: 0; }
+.cb-sn { color: #fff; font-size: 2.2mm; font-weight: 700; line-height: 1.3; overflow: hidden; }
+.cb-sa { color: rgba(255,255,255,.5); font-size: 1.8mm; line-height: 1.3; margin-top: .3mm; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.cb-mid { flex: 1; display: flex; flex-direction: row; padding: 2.5mm; gap: 2mm; min-height: 0; }
+.cb-info { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; gap: 2.3mm; }
+.cb-row { display: flex; gap: 2mm; align-items: flex-start; }
+.cb-ico {
+  width: 4mm; height: 4mm; border-radius: 50%; background: #0b1f4a;
+  flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+}
+.cb-txt { color: #14244a; font-size: 2mm; font-weight: 500; line-height: 1.4; word-break: break-word; }
+
+.cb-qr-col { flex-shrink: 0; width: 22mm; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.2mm; }
+.cb-qr {
+  width: 20mm; height: 20mm;
+  border: 0.5mm solid #c8a020; border-radius: 1.8mm; padding: 0.8mm;
+  background: #fff; display: flex; align-items: center; justify-content: center;
+}
+/* WeasyPrint QR: rendered as SVG inline */
+.cb-qr svg { width: 100%; height: 100%; }
+.cb-qr-lbl { font-size: 1.6mm; font-weight: 800; color: #4a6080; letter-spacing: .2mm; text-transform: uppercase; }
+
+.cb-bar {
+  padding: 1.2mm 2mm 1mm; border-top: 0.25mm solid #dde4f0;
+  background: #f4f7fc; display: flex; flex-direction: column; align-items: center; flex-shrink: 0;
+}
+.cb-bar svg { display: block; }
+.cb-bar-id { font-size: 1.8mm; font-weight: 700; letter-spacing: .6mm; color: #0b1f4a; margin-top: .3mm; }
+.cb-ftr {
+  height: 6mm; flex-shrink: 0;
+  background: linear-gradient(90deg, #060e22, #1540a0, #060e22);
+  display: flex; align-items: center; justify-content: center; padding: 0 2mm;
+}
+.cb-ftr span { color: rgba(255,255,255,.65); font-size: 1.6mm; text-align: center; }
+</style>
+</head>
+<body>
+
+{% for c in cards %}
+
+  {% if side in ('both', 'front') %}
+  <!-- FRONT: {{ c.full_name }} -->
+  <div class="card-front">
+    <div class="cf-top">
+      <div class="cf-top-line"></div>
+      <div class="cf-logo-row">
+        <div class="cf-logo">
+          {% if school.logo %}
+            <img src="{{ school.logo }}" alt="logo">
+          {% else %}
+            <span class="li">{{ (school.name or 'S')[:2]|upper }}</span>
+          {% endif %}
+        </div>
+        <div class="cf-top-txt">
+          <div class="cf-sn">{{ school.name }}</div>
+          {% if school.name_bn %}<div class="cf-sb">{{ school.name_bn }}</div>{% endif %}
+        </div>
+      </div>
+      <div class="cf-addr">{{ school.address }}</div>
+    </div>
+
+    <div class="cf-photo">
+      {% if c.profile_image %}
+        <img src="{{ c.profile_image }}" alt="photo">
+      {% else %}
+        <div class="cf-nophoto">
+          <svg width="10mm" height="10mm" viewBox="0 0 24 24" fill="#90aac8">
+            <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/>
+          </svg>
+          <span>Photo</span>
+        </div>
+      {% endif %}
+    </div>
+
+    <div class="cf-body">
+      <div class="cf-stname">{{ c.full_name }}</div>
+      <div class="cf-row cf-id-row">
+        <span class="cf-lbl">ID No.</span><span class="cf-sep">:</span><span class="cf-val ic-id">{{ c.student_id }}</span>
+      </div>
+      <div class="cf-row"><span class="cf-lbl">Father</span><span class="cf-sep">:</span><span class="cf-val">{{ c.guardian_name or '—' }}</span></div>
+      <div class="cf-row"><span class="cf-lbl">Mother</span><span class="cf-sep">:</span><span class="cf-val">{{ c.mother_name or '—' }}</span></div>
+      <div class="cf-row"><span class="cf-lbl">Contact</span><span class="cf-sep">:</span><span class="cf-val">{{ c.guardian_phone or c.phone or '—' }}</span></div>
+      <div class="cf-principal">
+        <div class="cf-sig-line"></div>
+        <span class="cf-sig-txt">Principal</span>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  {% if side in ('both', 'back') %}
+  <!-- BACK: {{ c.full_name }} -->
+  <div class="card-back{% if loop.last and side != 'both' %} last-card{% elif loop.last and side == 'both' %} last-card{% endif %}">
+    <div class="cb-hdr">
+      <div class="cb-logo">
+        {% if school.logo %}<img src="{{ school.logo }}" alt="logo">
+        {% else %}<span class="li">{{ (school.name or 'S')[:2]|upper }}</span>{% endif %}
+      </div>
+      <div class="cb-hdr-txt">
+        <div class="cb-sn">{{ school.name }}</div>
+        <div class="cb-sa">{{ school.address }}</div>
+      </div>
+    </div>
+
+    <div class="cb-mid">
+      <div class="cb-info">
+        {% if school.address %}
+        <div class="cb-row">
+          <div class="cb-ico">
+            <svg viewBox="0 0 12 12" width="7" height="7" fill="white">
+              <path d="M6 1C4.07 1 2.5 2.57 2.5 4.5c0 2.83 3.5 6.5 3.5 6.5s3.5-3.67 3.5-6.5C9.5 2.57 7.93 1 6 1zm0 4.75a1.25 1.25 0 1 1 0-2.5 1.25 1.25 0 0 1 0 2.5z"/>
+            </svg>
+          </div>
+          <span class="cb-txt">{{ school.address }}</span>
+        </div>
+        {% endif %}
+        {% if school.phone %}
+        <div class="cb-row">
+          <div class="cb-ico">
+            <svg viewBox="0 0 12 12" width="7" height="7" fill="white">
+              <path d="M2.5 2.5C2.5 7.8 4.5 10 9.5 10.5l.5-2-1.5-1L7 8.5C6 8 4 6 3.5 5L5 3.5 3.5 2 2.5 2.5z"/>
+            </svg>
+          </div>
+          <span class="cb-txt">{{ school.phone }}</span>
+        </div>
+        {% endif %}
+        {% if school.website %}
+        <div class="cb-row">
+          <div class="cb-ico">
+            <svg viewBox="0 0 12 12" width="7" height="7" fill="none" stroke="white" stroke-width="1.3">
+              <circle cx="6" cy="6" r="4.5"/><ellipse cx="6" cy="6" rx="2" ry="4.5"/><line x1="1.5" y1="6" x2="10.5" y2="6"/>
+            </svg>
+          </div>
+          <span class="cb-txt">{{ school.website }}</span>
+        </div>
+        {% endif %}
+        <div class="cb-row">
+          <div class="cb-ico">
+            <svg viewBox="0 0 12 12" width="7" height="7" fill="white">
+              <path d="M6 1C4.07 1 2.5 2.57 2.5 4.5c0 2.83 3.5 6.5 3.5 6.5s3.5-3.67 3.5-6.5C9.5 2.57 7.93 1 6 1z"/>
+            </svg>
+          </div>
+          <span class="cb-txt">{{ c.full_name }}<br>Roll: {{ c.roll or '—' }} &nbsp;|&nbsp; {{ c.class_name }}</span>
+        </div>
+      </div>
+      <div class="cb-qr-col">
+        <!-- QR placeholder box (WeasyPrint doesn't execute JS; use student ID text) -->
+        <div class="cb-qr" style="flex-direction:column;gap:1mm;">
+          <span style="font-size:2.2mm;font-weight:800;color:#0b1f4a;letter-spacing:.3mm;">{{ c.student_id }}</span>
+          <span style="font-size:1.5mm;color:#4a6080;">STUDENT ID</span>
+        </div>
+        <div class="cb-qr-lbl">ID Card</div>
+      </div>
+    </div>
+
+    <!-- Barcode-style visual using CSS stripes -->
+    <div class="cb-bar">
+      <div style="width:48mm;height:7mm;background:repeating-linear-gradient(90deg,#0b1f4a 0,#0b1f4a 0.6mm,#fff 0.6mm,#fff 1.1mm,#0b1f4a 1.1mm,#0b1f4a 1.5mm,#fff 1.5mm,#fff 2.3mm,#0b1f4a 2.3mm,#0b1f4a 2.6mm,#fff 2.6mm,#fff 3.5mm,#0b1f4a 3.5mm,#0b1f4a 3.9mm,#fff 3.9mm,#fff 4.8mm,#0b1f4a 4.8mm,#0b1f4a 5mm,#fff 5mm,#fff 5.8mm);border-radius:.5mm;"></div>
+      <div class="cb-bar-id">{{ c.student_id }}</div>
+    </div>
+
+    <div class="cb-ftr">
+      <span>If found, please return to school &nbsp;|&nbsp; {{ school.phone }}</span>
+    </div>
+  </div>
+  {% endif %}
+
+{% endfor %}
+
+</body>
+</html>

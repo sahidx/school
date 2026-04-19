@@ -1,0 +1,387 @@
+{% extends "base.html" %}
+{% block title %}Student ID Cards{% endblock %}
+
+{% block extra_head %}
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+/* ── ID card namespace so base styles don't bleed in */
+:root{
+  --ic-navy:#0b1f4a; --ic-navy-m:#1540a0;
+  --ic-gold:#c8a020; --ic-gold-hi:#eecc40;
+  --ic-g1:#155c2a; --ic-g2:#1f8840; --ic-g3:#28aa52;
+}
+.ic-wrap *,
+.ic-wrap *::before,
+.ic-wrap *::after{box-sizing:border-box;}
+
+/* ── control bar */
+.ic-ctrl{display:flex;flex-wrap:wrap;gap:10px;align-items:center;background:#fff;border:1px solid #dde4f0;border-radius:10px;padding:14px 18px;margin-bottom:22px;box-shadow:0 2px 8px rgba(0,0,0,.06);}
+.ic-ctrl label{font-size:12px;font-weight:700;color:#2c3a56;margin-right:4px;}
+.ic-ctrl select{font-size:12px;padding:5px 10px;border:1px solid #c8d4e8;border-radius:6px;background:#f5f7fb;color:#14244a;outline:none;}
+.ic-ctrl select:focus{border-color:var(--ic-g2);box-shadow:0 0 0 2px rgba(31,136,64,.15);}
+.ic-ctrl-sep{height:24px;width:1px;background:#dde4f0;}
+.ic-stat{font-size:12px;color:#4a6080;}
+.ic-stat strong{color:var(--ic-navy);font-weight:800;}
+.ic-print-btns{display:flex;gap:8px;margin-left:auto;}
+.ic-print-btn{display:inline-flex;align-items:center;gap:6px;padding:7px 16px;border:none;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Poppins',sans-serif;}
+.ic-print-btn.front{background:linear-gradient(135deg,var(--ic-g1),var(--ic-g2));color:#fff;}
+.ic-print-btn.back{background:linear-gradient(135deg,var(--ic-navy),var(--ic-navy-m));color:#fff;}
+.ic-print-btn.both{background:linear-gradient(135deg,#5f2080,#8a30b8);color:#fff;}
+
+/* ── section header */
+.ic-section-hdr{display:flex;align-items:center;gap:12px;margin:24px 0 14px;}
+.ic-section-line{flex:1;height:1px;background:rgba(11,31,74,.12);}
+.ic-section-txt{font-size:11px;font-weight:800;color:var(--ic-navy);letter-spacing:2px;text-transform:uppercase;white-space:nowrap;}
+
+/* ── card grid (screen) */
+.ic-grid{display:flex;flex-wrap:wrap;gap:22px;justify-content:flex-start;}
+
+/* ══════════════════════════════════════════════
+   FRONT CARD  214 × 340 px  (portrait CR80)
+══════════════════════════════════════════════ */
+.ic-card-front{
+  width:214px;height:340px;border-radius:12px;overflow:hidden;
+  position:relative;background:#fff;flex-shrink:0;
+  box-shadow:0 12px 36px rgba(0,0,0,.28),0 2px 8px rgba(0,0,0,.12);
+  display:flex;flex-direction:column;font-family:'Poppins',Arial,sans-serif;
+}
+.ic-cf-top{
+  height:130px;flex-shrink:0;position:relative;z-index:2;
+  padding:11px 11px 0 11px;
+  display:flex;flex-direction:column;align-items:flex-start;gap:5px;
+  background:linear-gradient(145deg,var(--ic-g1) 0%,var(--ic-g2) 50%,var(--ic-g3) 100%);
+  border-radius:0 0 50% 50% / 0 0 50px 50px;
+}
+.ic-cf-top-line{position:absolute;bottom:44px;left:11px;right:11px;height:1.5px;background:linear-gradient(90deg,transparent,rgba(255,220,50,.45),transparent);}
+.ic-cf-badge{width:100%;text-align:center;color:#ffd84a;font-size:7px;font-weight:900;letter-spacing:2px;text-transform:uppercase;border-top:1px solid rgba(255,220,50,.35);padding-top:4px;margin-top:2px;}
+.ic-cf-year{display:none;}
+.ic-cf-logo-row{display:flex;align-items:center;gap:8px;width:100%;min-width:0;}
+.ic-cf-logo{width:40px;height:40px;border-radius:50%;flex-shrink:0;background:rgba(255,255,255,.15);border:2px solid rgba(255,255,255,.55);display:flex;align-items:center;justify-content:center;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.22);}
+.ic-cf-logo img{width:100%;height:100%;object-fit:contain;}
+.ic-cf-logo .ic-li{color:#fff;font-size:13px;font-weight:900;letter-spacing:-1px;}
+.ic-cf-top-txt{flex:1;min-width:0;}
+.ic-cf-sn{color:#fff;font-size:9px;font-weight:900;line-height:1.25;text-transform:uppercase;letter-spacing:.3px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;}
+.ic-cf-sb{color:rgba(255,255,255,.85);font-size:7.5px;line-height:1.3;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;margin-top:1px;font-family:'Hind Siliguri','Noto Sans Bengali',Arial,sans-serif;}
+.ic-cf-addr{color:rgba(255,255,255,.72);font-size:7px;}
+
+/* photo */
+.ic-cf-photo{
+  position:absolute;top:100px;left:50%;transform:translateX(-50%);
+  z-index:6;width:72px;height:88px;
+  border:3.5px solid #fff;border-radius:7px;overflow:hidden;
+  background:#d8e4f0;
+  box-shadow:0 5px 18px rgba(0,0,0,.25),0 1px 4px rgba(0,0,0,.12);
+  display:flex;align-items:center;justify-content:center;
+}
+.ic-cf-photo img{width:100%;height:100%;object-fit:cover;}
+.ic-cf-nophoto{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:#8aabcc;width:100%;height:100%;}
+.ic-cf-nophoto span{font-size:6.5px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;}
+/* Photo placeholder using real HTML elements (no pseudo-elements) */
+.ic-photo-head{width:20px;height:20px;border-radius:50%;background:#b0c8e0;margin:0 auto 2px;}
+.ic-photo-body{width:34px;height:18px;border-radius:17px 17px 0 0;background:#b0c8e0;margin:0 auto;}
+
+/* body */
+.ic-cf-body{flex:1;padding:58px 12px 10px;display:flex;flex-direction:column;z-index:1;}
+.ic-cf-stname{font-size:11.5px;font-weight:800;color:#0a1830;text-align:center;letter-spacing:.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-bottom:5px;margin-bottom:5px;border-bottom:1.5px solid #e0e8f4;}
+.ic-cf-id-row{display:flex;align-items:baseline;gap:3px;background:linear-gradient(90deg,rgba(11,31,74,.055),transparent);border-left:2.5px solid var(--ic-g2);padding:1px 5px;border-radius:0 3px 3px 0;margin:1px 0 2px;}
+.ic-cf-row{display:flex;align-items:baseline;gap:3px;min-width:0;line-height:1.75;}
+.ic-cf-lbl{color:#556080;font-size:7.5px;font-weight:700;width:44px;flex-shrink:0;}
+.ic-cf-sep{color:#556080;font-size:7.5px;font-weight:700;}
+.ic-cf-val{color:#0a1830;font-size:8px;font-weight:600;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ic-cf-val.ic-id{font-weight:800;font-size:8.5px;letter-spacing:.3px;}
+.ic-cf-principal{margin-top:auto;display:flex;flex-direction:column;align-items:flex-end;gap:2px;}
+.ic-cf-sig-line{width:68px;height:1px;background:linear-gradient(90deg,transparent,#4a5e80);}
+.ic-cf-sig-txt{font-size:7.5px;font-weight:700;color:#4a5e80;letter-spacing:.5px;}
+
+/* ══════════════════════════════════════════════
+   BACK CARD  214 × 340 px
+══════════════════════════════════════════════ */
+.ic-card-back{
+  width:214px;height:340px;border-radius:12px;overflow:hidden;
+  box-shadow:0 12px 36px rgba(0,0,0,.28),0 2px 8px rgba(0,0,0,.12);
+  display:flex;flex-direction:column;background:#fff;flex-shrink:0;
+  font-family:'Poppins',Arial,sans-serif;
+}
+.ic-cb-hdr{height:68px;flex-shrink:0;background:linear-gradient(130deg,#060e22,var(--ic-navy),var(--ic-navy-m),var(--ic-navy));border-bottom:2px solid var(--ic-gold);display:flex;align-items:center;padding:0 10px;gap:8px;}
+.ic-cb-logo{width:34px;height:34px;border-radius:50%;flex-shrink:0;background:rgba(255,255,255,.07);border:1.5px solid rgba(200,160,32,.45);display:flex;align-items:center;justify-content:center;overflow:hidden;}
+.ic-cb-logo img{width:100%;height:100%;object-fit:contain;}
+.ic-cb-logo .ic-li{color:var(--ic-gold-hi);font-size:11px;font-weight:900;}
+.ic-cb-hdr-txt{flex:1;min-width:0;}
+.ic-cb-sn{color:#fff;font-size:8px;font-weight:700;line-height:1.3;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;}
+.ic-cb-sa{color:rgba(255,255,255,.5);font-size:7px;line-height:1.3;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ic-cb-mid{flex:1;display:flex;flex-direction:row;padding:10px;gap:8px;min-height:0;}
+.ic-cb-info{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;gap:9px;}
+.ic-cb-row{display:flex;gap:8px;align-items:flex-start;}
+.ic-cb-ico{width:16px;height:16px;border-radius:50%;background:var(--ic-navy);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;color:#fff;font-weight:900;line-height:1;}
+.ic-cb-txt{color:#14244a;font-size:8px;font-weight:500;line-height:1.4;word-break:break-word;}
+.ic-cb-qr-col{flex-shrink:0;width:90px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;}
+.ic-cb-qr{width:84px;height:84px;border:2px solid var(--ic-gold);border-radius:7px;padding:3px;background:#fff;display:flex;align-items:center;justify-content:center;overflow:hidden;}
+.ic-cb-qr canvas{max-width:100%!important;max-height:100%!important;display:block!important;}
+.ic-cb-qr img{display:none!important;}
+.ic-cb-qr-lbl{font-size:6.5px;font-weight:800;color:#4a6080;letter-spacing:.8px;text-transform:uppercase;}
+.ic-cb-bar{padding:5px 8px 4px;border-top:1px solid #dde4f0;background:#f4f7fc;display:flex;flex-direction:column;align-items:center;flex-shrink:0;}
+.ic-cb-bar svg{width:182px;height:30px;}
+.ic-cb-bar-id{font-size:7.5px;font-weight:700;letter-spacing:2.5px;color:var(--ic-navy);margin-top:1px;}
+.ic-cb-ftr{height:24px;flex-shrink:0;background:linear-gradient(90deg,#060e22,var(--ic-navy-m),#060e22);display:flex;align-items:center;justify-content:center;padding:0 8px;}
+.ic-cb-ftr span{color:rgba(255,255,255,.65);font-size:6.5px;text-align:center;}
+
+/* empty state */
+.ic-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:60px 20px;text-align:center;color:#6a7a9a;}
+.ic-empty i{font-size:48px;opacity:.35;}
+.ic-empty p{font-size:14px;font-weight:500;}
+
+/* ── screen pair layout ── */
+.ic-pairs-container{display:flex;flex-direction:column;gap:30px;}
+.ic-pair-label{font-size:12px;font-weight:700;color:#2c3a56;margin-bottom:8px;padding:4px 10px;background:#f0f4fa;border-left:3px solid var(--ic-g2);border-radius:0 4px 4px 0;display:inline-block;}
+.ic-pair-row{display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap;}
+
+/* ── print: one card per page at exact CR80 size ── */
+@page{size:54mm 85.6mm;margin:0;}
+@media print{
+  *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}
+  body,html{background:#fff!important;margin:0!important;padding:0!important;}
+  .ic-ctrl,.ic-pair-label,.navbar,.sidebar,
+  header,footer,.ic-section-hdr,[class*="no-print"]{display:none!important;}
+  .ic-wrap,.ic-pairs-container,.ic-student-pair,.ic-pair-row{display:block!important;margin:0!important;padding:0!important;}
+  .ic-card-front,.ic-card-back{
+    width:54mm!important;height:85.6mm!important;
+    box-shadow:none!important;border:none!important;
+    border-radius:2mm!important;
+    page-break-inside:avoid;break-inside:avoid;
+    page-break-after:always;break-after:page;
+    margin:0!important;display:flex!important;
+  }
+  .ic-cf-top{height:37mm!important;}
+  .ic-cf-photo{width:18mm!important;height:22mm!important;top:27mm!important;}
+  .ic-cf-body{padding-top:14mm!important;}
+  .ic-cf-year{width:5.5mm!important;font-size:4.5pt!important;}
+  .ic-cf-sn{font-size:4.5pt!important;}
+  .ic-cf-stname{font-size:6.5pt!important;}
+  .ic-cf-lbl,.ic-cf-sep,.ic-cf-val{font-size:5pt!important;}
+  .ic-cf-val.ic-id{font-size:5.5pt!important;}
+  .ic-cf-sig-txt{font-size:5pt!important;}
+  .ic-cf-logo{width:8.5mm!important;height:8.5mm!important;}
+  .ic-cb-hdr{height:16mm!important;}
+  .ic-cb-sn{font-size:5.5pt!important;}
+  .ic-cb-txt{font-size:5pt!important;}
+  .ic-cb-bar svg{width:44mm!important;height:8mm!important;}
+  .ic-cb-qr{width:22mm!important;height:22mm!important;}
+  .ic-cb-bar-id{font-size:4pt!important;}
+  /* front/back only: hide & remove page break from hidden cards */
+  .print-front-only .ic-card-back{display:none!important;page-break-after:avoid!important;break-after:avoid!important;}
+  .print-back-only  .ic-card-front{display:none!important;page-break-after:avoid!important;break-after:avoid!important;}
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="ic-wrap{% if autoprint and print_side == 'front' %} print-front-only{% elif autoprint and print_side == 'back' %} print-back-only{% endif %}">
+  {% if not autoprint %}
+  <div class="flex items-center justify-between mb-5">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-800">Student ID Cards</h1>
+      <p class="text-sm text-gray-500 mt-1">Portrait format · 54 × 85.6 mm · CR80</p>
+    </div>
+  </div>
+
+  <!-- ── filter / control bar ── -->
+  <div class="ic-ctrl no-print">
+    <form method="get" action="/students/id-cards" style="display:contents;">
+      <label for="cls">Class:</label>
+      <select name="class_id" id="cls" onchange="this.form.submit()">
+        <option value="">— All Classes —</option>
+        {% for cls in classes %}
+        <option value="{{ cls.id }}" {% if class_id == cls.id|string %}selected{% endif %}>{{ cls.name }}</option>
+        {% endfor %}
+      </select>
+      <div class="ic-ctrl-sep"></div>
+      <label for="bat">Batch:</label>
+      <select name="batch_id" id="bat" onchange="this.form.submit()">
+        <option value="">— All Batches —</option>
+        {% for b in batches %}
+        <option value="{{ b.id }}" {% if batch_id == b.id|string %}selected{% endif %}>{{ b.name }}</option>
+        {% endfor %}
+      </select>
+    </form>
+    <div class="ic-ctrl-sep"></div>
+    <span class="ic-stat">Total: <strong>{{ total }}</strong> student{{ 's' if total != 1 }}</span>
+    {% if cards %}
+    <div class="ic-print-btns">
+      <button class="ic-print-btn front" onclick="openPrintWindow('front')">
+        <i class="fas fa-download mr-1"></i>Front PDF
+      </button>
+      <button class="ic-print-btn back" onclick="openPrintWindow('back')">
+        <i class="fas fa-download mr-1"></i>Back PDF
+      </button>
+      <button class="ic-print-btn both" onclick="openPrintWindow('both')">
+        <i class="fas fa-file-pdf mr-1"></i>Download PDF
+      </button>
+    </div>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  {% if cards %}
+
+  <!-- ══════ PAIRED: front + back per student ══════ -->
+  <div class="ic-pairs-container">
+    {% for c in cards %}
+    <div class="ic-student-pair">
+      <div class="ic-pair-label no-print">{{ loop.index }}. {{ c.full_name }} &nbsp;·&nbsp; Roll {{ c.roll or '—' }}</div>
+      <div class="ic-pair-row">
+
+        <!-- FRONT -->
+        <div class="ic-card-front">
+          <div class="ic-cf-top">
+            <div class="ic-cf-year">{{ session_year or '2025-26' }}</div>
+            <div class="ic-cf-top-line"></div>
+            <div class="ic-cf-logo-row">
+              <div class="ic-cf-logo">
+                {% if school.logo %}
+                <img src="{{ school.logo }}" alt="logo">
+                {% else %}
+                <span class="ic-li">{{ (school.name or 'S')[:2]|upper }}</span>
+                {% endif %}
+              </div>
+              <div class="ic-cf-top-txt">
+                <div class="ic-cf-sn">{{ school.name }}</div>
+                {% if school.name_bn %}<div class="ic-cf-sb">{{ school.name_bn }}</div>{% endif %}
+                {% if school.address %}<div class="ic-cf-addr">{{ school.address }}</div>{% endif %}
+              </div>
+            </div>
+            <div class="ic-cf-badge">&#9733; Student ID Card &#9733;</div>
+          </div>
+          <div class="ic-cf-photo">
+            {% if c.profile_image %}
+            <img src="{{ c.profile_image }}" alt="photo">
+            {% else %}
+            <div class="ic-cf-nophoto">
+              <div class="ic-photo-head"></div>
+              <div class="ic-photo-body"></div>
+              <span>Photo</span>
+            </div>
+            {% endif %}
+          </div>
+          <div class="ic-cf-body">
+            <div class="ic-cf-stname">{{ c.full_name }}</div>
+            <div class="ic-cf-row ic-cf-id-row"><span class="ic-cf-lbl">ID No.</span><span class="ic-cf-sep">:</span><span class="ic-cf-val ic-id">{{ c.student_id }}</span></div>
+            <div class="ic-cf-row"><span class="ic-cf-lbl">Father</span><span class="ic-cf-sep">:</span><span class="ic-cf-val">{{ c.guardian_name or '—' }}</span></div>
+            <div class="ic-cf-row"><span class="ic-cf-lbl">Mother</span><span class="ic-cf-sep">:</span><span class="ic-cf-val">{{ c.mother_name or '—' }}</span></div>
+            <div class="ic-cf-row"><span class="ic-cf-lbl">Contact</span><span class="ic-cf-sep">:</span><span class="ic-cf-val">{{ c.guardian_phone or c.phone or '—' }}</span></div>
+            <div class="ic-cf-principal">
+              <div class="ic-cf-sig-line"></div>
+              <span class="ic-cf-sig-txt">Principal</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- BACK -->
+        <div class="ic-card-back">
+          <div class="ic-cb-hdr">
+            <div class="ic-cb-logo">
+              {% if school.logo %}<img src="{{ school.logo }}" alt="logo">
+              {% else %}<span class="ic-li">{{ (school.name or 'S')[:2]|upper }}</span>{% endif %}
+            </div>
+            <div class="ic-cb-hdr-txt">
+              <div class="ic-cb-sn">{{ school.name }}</div>
+              <div class="ic-cb-sa">{{ school.address }}</div>
+            </div>
+          </div>
+          <div class="ic-cb-mid">
+            <div class="ic-cb-info">
+              {% if school.address %}
+              <div class="ic-cb-row">
+                <div class="ic-cb-ico">&#9679;</div>
+                <span class="ic-cb-txt">{{ school.address }}</span>
+              </div>
+              {% endif %}
+              {% if school.phone %}
+              <div class="ic-cb-row">
+                <div class="ic-cb-ico">&#9990;</div>
+                <span class="ic-cb-txt">{{ school.phone }}</span>
+              </div>
+              {% endif %}
+              {% if school.website %}
+              <div class="ic-cb-row">
+                <div class="ic-cb-ico">&#9733;</div>
+                <span class="ic-cb-txt">{{ school.website }}</span>
+              </div>
+              {% endif %}
+              {% if school.facebook %}
+              <div class="ic-cb-row">
+                <div class="ic-cb-ico">f</div>
+                <span class="ic-cb-txt">{{ school.facebook }}</span>
+              </div>
+              {% endif %}
+            </div>
+            <div class="ic-cb-qr-col">
+              <div class="ic-cb-qr"><div id="qr_{{ c.id }}"></div></div>
+              <div class="ic-cb-qr-lbl">Scan QR</div>
+            </div>
+          </div>
+          <div class="ic-cb-bar">
+            <svg id="bc_{{ c.id }}"></svg>
+            <span class="ic-cb-bar-id">{{ c.student_id }}</span>
+          </div>
+          <div class="ic-cb-ftr"><span>If found, please return to school &nbsp;|&nbsp; {{ school.phone }}</span></div>
+        </div>
+
+      </div><!-- /ic-pair-row -->
+    </div><!-- /ic-student-pair -->
+    {% endfor %}
+  </div><!-- /ic-pairs-container -->
+
+  {% else %}
+  <div class="ic-empty">
+    <i class="fas fa-id-badge"></i>
+    <p>No students found. Select a class or batch above to generate ID cards.</p>
+  </div>
+  {% endif %}
+
+</div><!-- /ic-wrap -->
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
+<script>
+(function(){
+  var qUrl = {{ (school.website or school.facebook or '')|tojson }};
+  var qo = {colorDark:'#0b1f4a',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M,width:76,height:76};
+  var cards = {{ cards|tojson if cards else '[]' }};
+
+  cards.forEach(function(c){
+    var qEl = document.getElementById('qr_'+c.id);
+    if(qEl){ try{ new QRCode(qEl, Object.assign({text: qUrl||c.student_id}, qo)); }catch(e){} }
+  });
+  setTimeout(function(){
+    document.querySelectorAll('.ic-cb-qr img').forEach(function(i){i.style.display='none';});
+    document.querySelectorAll('.ic-cb-qr canvas').forEach(function(c){
+      c.style.cssText='display:block!important;max-width:100%!important;max-height:100%!important;';
+    });
+  }, 300);
+  var bo = {format:'CODE128',width:1.8,height:28,displayValue:false,background:'transparent',lineColor:'#0b1f4a',margin:2};
+  cards.forEach(function(c){
+    var bEl = document.getElementById('bc_'+c.id);
+    if(bEl){ try{ JsBarcode(bEl, c.student_id, bo); }catch(e){} }
+  });
+
+  {% if autoprint %}
+  // Auto-print mode: trigger print after fonts + QR/barcode are ready
+  window.addEventListener('load', function(){
+    setTimeout(function(){
+      window.print();
+    }, 1200);
+  });
+  {% endif %}
+})();
+
+function openPrintWindow(side) {
+  var base = '/students/id-cards/print?';
+  {% if class_id %}base += 'class_id={{ class_id }}&';{% endif %}
+  {% if batch_id %}base += 'batch_id={{ batch_id }}&';{% endif %}
+  base += 'session_year={{ session_year }}&side=' + side;
+  window.open(base, '_blank', 'width=960,height=760,scrollbars=yes');
+}
+</script>
+{% endblock %}

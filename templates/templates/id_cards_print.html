@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ID Cards – Print</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ── CR80 page size ── */
+@page{size:54mm 85.6mm;margin:0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{background:#e8ecf4;font-family:'Poppins',Arial,sans-serif;}
+
+/* ── Design tokens ── */
+:root{
+  --g1:#155c2a;--g2:#1f8840;--g3:#28aa52;
+  --navy:#0b1f4a;--navy-m:#1540a0;
+  --gold:#c8a020;--gold-hi:#eecc40;
+}
+
+/* ─── Instruction Banner (screen only) ─── */
+.pb{
+  position:fixed;top:0;left:0;right:0;z-index:9999;
+  background:var(--navy);color:#fff;
+  padding:10px 20px;display:flex;align-items:center;gap:14px;
+  font-size:12px;border-bottom:3px solid var(--g2);
+}
+.pb-steps{flex:1;display:flex;flex-wrap:wrap;gap:6px;align-items:center;}
+.pb-step{background:rgba(31,136,64,.25);border:1px solid rgba(31,136,64,.5);border-radius:4px;padding:2px 8px;font-size:11px;color:#86efac;}
+.pb-step strong{color:#fff;}
+.pb button{background:var(--g2);color:#fff;border:none;border-radius:6px;padding:7px 18px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Poppins',sans-serif;white-space:nowrap;}
+.pb button:hover{background:var(--g1);}
+@media print{.pb,.ic-pair-label{display:none!important;}}
+
+/* ─── Page wrapper ─── */
+.ic-page{padding:66px 28px 28px;display:flex;flex-wrap:wrap;gap:22px;}
+.ic-student-pair{margin-bottom:20px;}
+.ic-pair-label{font-size:11px;font-weight:700;color:#2c3a56;margin-bottom:8px;padding:3px 10px;background:#f1f5f9;border-left:3px solid var(--g2);border-radius:0 4px 4px 0;display:inline-block;}
+.ic-pair-row{display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap;}
+
+/* ═══════════════════════════════════════
+   FRONT CARD  214 × 340 px (screen)
+═══════════════════════════════════════ */
+.ic-cf{
+  width:214px;height:340px;border-radius:12px;overflow:hidden;
+  position:relative;background:#fff;flex-shrink:0;
+  box-shadow:0 12px 36px rgba(0,0,0,.28),0 2px 8px rgba(0,0,0,.12);
+  display:flex;flex-direction:column;
+}
+
+/* Green curved header */
+.cf-top{
+  height:138px;flex-shrink:0;position:relative;z-index:2;
+  padding:12px 12px 6px;
+  display:flex;flex-direction:column;align-items:flex-start;gap:4px;
+  background:linear-gradient(145deg,var(--g1) 0%,var(--g2) 50%,var(--g3) 100%);
+  border-radius:0 0 50% 50% / 0 0 52px 52px;
+}
+.cf-top-line{position:absolute;bottom:44px;left:11px;right:11px;height:1.5px;background:linear-gradient(90deg,transparent,rgba(255,220,50,.45),transparent);}
+.cf-logo-row{display:flex;align-items:center;gap:8px;width:100%;min-width:0;}
+.cf-logo{width:42px;height:42px;border-radius:50%;flex-shrink:0;background:rgba(255,255,255,.15);border:2px solid rgba(255,255,255,.55);display:flex;align-items:center;justify-content:center;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.22);}
+.cf-logo img{width:100%;height:100%;object-fit:contain;}
+.cf-logo-init{color:#fff;font-size:13px;font-weight:900;letter-spacing:-1px;}
+.cf-top-txt{flex:1;min-width:0;}
+.cf-sn{color:#fff;font-size:9.5px;font-weight:900;line-height:1.25;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;text-transform:uppercase;letter-spacing:.3px;text-shadow:0 1px 3px rgba(0,0,0,.25);}
+.cf-sb{color:rgba(255,255,255,.85);font-size:8px;line-height:1.3;margin-top:2px;font-family:'Hind Siliguri',Arial,sans-serif;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;text-shadow:0 1px 2px rgba(0,0,0,.2);}
+.cf-addr{color:rgba(255,255,255,.75);font-size:7px;line-height:1.3;margin-top:1px;}
+.cf-badge{
+  width:100%;text-align:center;
+  color:var(--gold-hi);font-size:7px;font-weight:900;
+  letter-spacing:2px;text-transform:uppercase;
+  border-top:1px solid rgba(255,220,50,.35);padding-top:4px;margin-top:3px;
+  text-shadow:0 1px 3px rgba(0,0,0,.3);
+}
+
+/* Photo — centred over the header/body boundary */
+.cf-photo{
+  position:absolute;top:104px;left:50%;transform:translateX(-50%);
+  z-index:6;width:72px;height:88px;
+  border:3.5px solid #fff;border-radius:7px;overflow:hidden;
+  background:#d8e8f3;
+  box-shadow:0 5px 18px rgba(0,0,0,.25),0 1px 4px rgba(0,0,0,.12);
+  display:flex;align-items:center;justify-content:center;
+}
+.cf-photo img{width:100%;height:100%;object-fit:cover;}
+.cf-nophoto{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:#8aabcc;width:100%;height:100%;}
+.cf-ph-head{width:22px;height:22px;border-radius:50%;background:#b0c8e0;}
+.cf-ph-body{width:36px;height:18px;border-radius:18px 18px 0 0;background:#b0c8e0;margin:0 auto;}
+.cf-ph-lbl{font-size:6.5px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#7a9dbf;}
+
+/* Body */
+.cf-body{flex:1;padding:52px 12px 10px;display:flex;flex-direction:column;z-index:1;}
+.cf-name{font-size:11.5px;font-weight:800;color:#0a1830;text-align:center;letter-spacing:.1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-bottom:5px;margin-bottom:5px;border-bottom:1.5px solid #e0e8f4;}
+.cf-rows{display:flex;flex-direction:column;flex:1;}
+.cf-row{display:flex;align-items:baseline;gap:3px;min-width:0;line-height:1.85;border-bottom:1px dotted #eef2f8;}
+.cf-row:last-child{border-bottom:none;}
+.cf-id-row{background:linear-gradient(90deg,rgba(11,31,74,.05),transparent);border-left:2.5px solid var(--g2);padding-left:5px;border-radius:0 3px 3px 0;margin-bottom:1px;}
+.cf-lbl{color:#556080;font-size:7px;font-weight:700;width:44px;flex-shrink:0;text-transform:uppercase;letter-spacing:.3px;}
+.cf-colon{color:#7a8faa;font-size:7px;font-weight:500;flex-shrink:0;}
+.cf-val{color:#0a1830;font-size:7.5px;font-weight:600;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.cf-val.cf-id{font-weight:800;font-size:8.5px;color:#1a3a8a;letter-spacing:.3px;}
+
+/* Signature */
+.cf-sig{margin-top:auto;display:flex;flex-direction:column;align-items:flex-end;gap:2px;padding-top:4px;}
+.cf-sig-line{width:64px;height:1px;background:linear-gradient(90deg,transparent,#6a7e9a);}
+.cf-sig-txt{font-size:7px;font-weight:700;color:#4a5e80;letter-spacing:.5px;text-transform:uppercase;}
+
+/* ═══════════════════════════════════════
+   BACK CARD  214 × 340 px (screen)
+═══════════════════════════════════════ */
+.ic-cb{
+  width:214px;height:340px;border-radius:12px;overflow:hidden;
+  box-shadow:0 12px 36px rgba(0,0,0,.28),0 2px 8px rgba(0,0,0,.12);
+  display:flex;flex-direction:column;background:#fff;flex-shrink:0;
+}
+.cb-hdr{
+  height:68px;flex-shrink:0;
+  background:linear-gradient(130deg,#050d1c,var(--navy),var(--navy-m),var(--navy));
+  border-bottom:2px solid var(--gold);
+  display:flex;align-items:center;padding:0 10px;gap:8px;
+}
+.cb-logo{width:42px;height:42px;border-radius:50%;flex-shrink:0;background:rgba(255,255,255,.08);border:2px solid rgba(200,160,32,.5);display:flex;align-items:center;justify-content:center;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.3);}
+.cb-logo img{width:100%;height:100%;object-fit:contain;}
+.cb-logo-init{color:var(--gold-hi);font-size:13px;font-weight:900;}
+.cb-hdr-txt{flex:1;min-width:0;}
+.cb-sn{color:#fff;font-size:9px;font-weight:800;line-height:1.25;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;text-shadow:0 1px 2px rgba(0,0,0,.3);}
+.cb-sa{color:rgba(255,255,255,.65);font-size:7.5px;margin-top:2px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font-family:'Hind Siliguri',Arial,sans-serif;}
+
+/* Info + QR */
+.cb-mid{flex:1;display:flex;padding:10px;gap:8px;min-height:0;align-items:center;}
+.cb-info{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;gap:9px;}
+.cb-row{display:flex;gap:7px;align-items:flex-start;}
+.cb-ico{width:16px;height:16px;border-radius:4px;background:var(--navy);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;color:#a0b8d8;line-height:1;}
+.cb-ico.fb{background:#1877f2;color:#fff;font-size:9px;font-weight:900;}
+.cb-info-inner{min-width:0;}
+.cb-info-lbl{font-size:6px;font-weight:700;color:#94a3b8;letter-spacing:.6px;text-transform:uppercase;line-height:1;margin-bottom:1px;}
+.cb-info-val{font-size:7.5px;font-weight:600;color:#14244a;line-height:1.4;word-break:break-word;}
+/* QR column */
+.cb-qr-col{flex-shrink:0;width:90px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;}
+.cb-qr-box{width:84px;height:84px;border:2px solid var(--gold);border-radius:7px;padding:3px;background:#fff;display:flex;align-items:center;justify-content:center;overflow:hidden;}
+.cb-qr-box canvas{display:block!important;max-width:100%!important;max-height:100%!important;}
+.cb-qr-box img{display:none!important;}
+.cb-qr-lbl{font-size:6.5px;font-weight:800;color:#4a6080;letter-spacing:.8px;text-transform:uppercase;}
+.cb-qr-url{font-size:6px;color:#1a56db;font-weight:500;max-width:88px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+
+/* Barcode */
+.cb-bar{padding:5px 8px 4px;border-top:1px solid #dde4f0;background:#f4f7fc;display:flex;flex-direction:column;align-items:center;flex-shrink:0;}
+.cb-bar svg{width:182px;height:30px;}
+.cb-bar-id{font-size:7.5px;font-weight:700;letter-spacing:2.5px;color:var(--navy);margin-top:1px;}
+
+/* Footer */
+.cb-ftr{height:24px;flex-shrink:0;background:linear-gradient(90deg,#050d1c,var(--navy-m),#050d1c);display:flex;align-items:center;justify-content:center;padding:0 8px;}
+.cb-ftr span{color:rgba(255,255,255,.6);font-size:6.5px;text-align:center;}
+
+/* ═══════════ PRINT ═══════════ */
+@media print{
+  *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}
+  html,body{background:#fff!important;margin:0!important;padding:0!important;}
+  .ic-page{padding:0!important;display:block!important;}
+  .ic-student-pair{display:block!important;margin:0!important;padding:0!important;}
+  .ic-pair-row{display:block!important;margin:0!important;padding:0!important;}
+
+  /* Each card = exactly one CR80 page */
+  .ic-cf,.ic-cb{
+    width:54mm!important;height:85.6mm!important;
+    border-radius:0!important;box-shadow:none!important;
+    page-break-inside:avoid;break-inside:avoid;
+    page-break-after:always;break-after:page;
+    margin:0!important;display:flex!important;
+    overflow:hidden!important;
+  }
+
+  /* Front print sizes */
+  .cf-top{height:33mm!important;}
+  .cf-logo{width:10mm!important;height:10mm!important;}
+  .cf-sn{font-size:5pt!important;-webkit-line-clamp:2!important;}
+  .cf-sb{font-size:4pt!important;}
+  .cf-addr{font-size:3.5pt!important;}
+  .cf-badge{font-size:3.5pt!important;letter-spacing:1.2px!important;padding-top:3px!important;}
+  .cf-photo{width:18mm!important;height:22mm!important;top:24mm!important;}
+  .cf-body{padding:13mm 7px 7px!important;}
+  .cf-name{font-size:6pt!important;margin-bottom:3px!important;padding-bottom:3px!important;}
+  .cf-lbl{font-size:3.8pt!important;width:30px!important;}
+  .cf-colon{font-size:3.8pt!important;}
+  .cf-val{font-size:4.2pt!important;}
+  .cf-val.cf-id{font-size:5pt!important;}
+  .cf-sig-txt{font-size:3.8pt!important;}
+
+  /* Back print sizes */
+  .cb-hdr{height:18mm!important;}
+  .cb-logo{width:11mm!important;height:11mm!important;}
+  .cb-sn{font-size:5pt!important;}
+  .cb-sa{font-size:4pt!important;}
+  .cb-mid{padding:5px!important;gap:5px!important;}
+  .cb-ico{width:11px!important;height:11px!important;font-size:6.5px!important;}
+  .cb-info-lbl{font-size:3.2pt!important;}
+  .cb-info-val{font-size:4.2pt!important;}
+  .cb-qr-col{width:22mm!important;}
+  .cb-qr-box{width:20mm!important;height:20mm!important;padding:2px!important;}
+  .cb-qr-lbl{font-size:3.5pt!important;}
+  .cb-qr-url{font-size:3pt!important;max-width:22mm!important;}
+  .cb-bar svg{width:43mm!important;height:7mm!important;}
+  .cb-bar-id{font-size:3.8pt!important;}
+  .cb-ftr{height:13px!important;}
+  .cb-ftr span{font-size:3pt!important;}
+
+  /* Side filters */
+  .print-front-only .ic-cb{display:none!important;page-break-after:avoid!important;break-after:avoid!important;}
+  .print-back-only  .ic-cf{display:none!important;page-break-after:avoid!important;break-after:avoid!important;}
+}
+</style>
+</head>
+<body>
+
+<!-- ── Instruction Banner ── -->
+<div class="pb">
+  <div class="pb-steps">
+    <strong>Before saving PDF:</strong>
+    <span class="pb-step"><strong>1</strong> Margins → None</span>
+    <span class="pb-step"><strong>2</strong> ✅ Background graphics</span>
+    <span class="pb-step"><strong>3</strong> Paper size → 54 × 85.6 mm</span>
+  </div>
+  <button onclick="window.print()" id="printBtn">🖨 Print / Save PDF</button>
+</div>
+
+<!-- ── Cards ── -->
+<div class="ic-page{% if side == 'front' %} print-front-only{% elif side == 'back' %} print-back-only{% endif %}">
+{% for c in cards %}
+<div class="ic-student-pair">
+  <div class="ic-pair-label">{{ loop.index }}. {{ c.full_name }}</div>
+  <div class="ic-pair-row">
+
+    <!-- ══ FRONT ══ -->
+    <div class="ic-cf">
+      <!-- Green curved header -->
+      <div class="cf-top">
+        <div class="cf-top-line"></div>
+        <div class="cf-logo-row">
+          <div class="cf-logo">
+            {% if school.logo %}<img src="{{ school.logo }}" alt="">
+            {% else %}<span class="cf-logo-init">{{ (school.name or 'S')[:2]|upper }}</span>{% endif %}
+          </div>
+          <div class="cf-top-txt">
+            <div class="cf-sn">{{ school.name }}</div>
+            {% if school.name_bn %}<div class="cf-sb">{{ school.name_bn }}</div>{% endif %}
+            {% if school.address %}<div class="cf-addr">{{ school.address }}</div>{% endif %}
+          </div>
+        </div>
+        <div class="cf-badge">&#9733; Student ID Card &#9733;</div>
+      </div>
+
+      <!-- Photo -->
+      <div class="cf-photo">
+        {% if c.profile_image %}
+        <img src="{{ c.profile_image }}" alt="photo">
+        {% else %}
+        <div class="cf-nophoto">
+          <div class="cf-ph-head"></div>
+          <div class="cf-ph-body"></div>
+          <span class="cf-ph-lbl">Photo</span>
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Body -->
+      <div class="cf-body">
+        <div class="cf-name">{{ c.full_name }}</div>
+        <div class="cf-rows">
+          <div class="cf-row cf-id-row">
+            <span class="cf-lbl">ID No.</span>
+            <span class="cf-colon">:</span>
+            <span class="cf-val cf-id">{{ c.student_id }}</span>
+          </div>
+          <div class="cf-row">
+            <span class="cf-lbl">Father</span>
+            <span class="cf-colon">:</span>
+            <span class="cf-val">{{ c.guardian_name or '—' }}</span>
+          </div>
+          <div class="cf-row">
+            <span class="cf-lbl">Mother</span>
+            <span class="cf-colon">:</span>
+            <span class="cf-val">{{ c.mother_name or '—' }}</span>
+          </div>
+          <div class="cf-row">
+            <span class="cf-lbl">Contact</span>
+            <span class="cf-colon">:</span>
+            <span class="cf-val">{{ c.guardian_phone or c.phone or '—' }}</span>
+          </div>
+        </div>
+        <div class="cf-sig">
+          <div class="cf-sig-line"></div>
+          <span class="cf-sig-txt">Principal</span>
+        </div>
+      </div>
+    </div><!-- /ic-cf -->
+
+    <!-- ══ BACK ══ -->
+    <div class="ic-cb">
+      <!-- Dark navy header -->
+      <div class="cb-hdr">
+        <div class="cb-logo">
+          {% if school.logo %}<img src="{{ school.logo }}" alt="">
+          {% else %}<span class="cb-logo-init">{{ (school.name or 'S')[:2]|upper }}</span>{% endif %}
+        </div>
+        <div class="cb-hdr-txt">
+          <div class="cb-sn">{{ school.name }}</div>
+          {% if school.name_bn %}<div class="cb-sa">{{ school.name_bn }}</div>{% endif %}
+        </div>
+      </div>
+
+      <!-- Info + QR -->
+      <div class="cb-mid">
+        <div class="cb-info">
+          {% if school.address %}
+          <div class="cb-row">
+            <div class="cb-ico">&#128205;</div>
+            <div class="cb-info-inner">
+              <div class="cb-info-lbl">Address</div>
+              <div class="cb-info-val">{{ school.address }}</div>
+            </div>
+          </div>
+          {% endif %}
+          {% if school.phone %}
+          <div class="cb-row">
+            <div class="cb-ico">&#128222;</div>
+            <div class="cb-info-inner">
+              <div class="cb-info-lbl">Phone</div>
+              <div class="cb-info-val">{{ school.phone }}</div>
+            </div>
+          </div>
+          {% endif %}
+          {% if school.website %}
+          <div class="cb-row">
+            <div class="cb-ico">&#127760;</div>
+            <div class="cb-info-inner">
+              <div class="cb-info-lbl">Website</div>
+              <div class="cb-info-val">{{ school.website }}</div>
+            </div>
+          </div>
+          {% endif %}
+          {% if school.facebook %}
+          <div class="cb-row">
+            <div class="cb-ico fb">f</div>
+            <div class="cb-info-inner">
+              <div class="cb-info-lbl">Facebook</div>
+              <div class="cb-info-val">{{ school.facebook }}</div>
+            </div>
+          </div>
+          {% endif %}
+        </div>
+        <div class="cb-qr-col">
+          <div class="cb-qr-box"><div id="qr_{{ c.id }}"></div></div>
+          <div class="cb-qr-lbl">Scan QR</div>
+          {% if school.website %}<div class="cb-qr-url">{{ school.website }}</div>{% endif %}
+        </div>
+      </div>
+
+      <!-- Barcode -->
+      <div class="cb-bar">
+        <svg id="bc_{{ c.id }}"></svg>
+        <span class="cb-bar-id">{{ c.student_id }}</span>
+      </div>
+
+      <!-- Footer -->
+      <div class="cb-ftr">
+        <span>If found, please return to school &nbsp;·&nbsp; {{ school.phone }}</span>
+      </div>
+    </div><!-- /ic-cb -->
+
+  </div><!-- /ic-pair-row -->
+</div><!-- /ic-student-pair -->
+{% endfor %}
+</div><!-- /ic-page -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
+<script>
+(function(){
+  var school = {{ school|tojson }};
+  var cards  = {{ cards|tojson }};
+  var qUrl   = school.website || school.facebook || '';
+
+  /* QR codes */
+  cards.forEach(function(c){
+    var el = document.getElementById('qr_'+c.id);
+    if(!el) return;
+    try{
+      new QRCode(el,{text:qUrl||c.student_id,width:76,height:76,
+        colorDark:'#0b1f4a',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});
+    }catch(e){}
+  });
+  setTimeout(function(){
+    document.querySelectorAll('.cb-qr-box img').forEach(function(i){i.style.display='none';});
+    document.querySelectorAll('.cb-qr-box canvas').forEach(function(cv){
+      cv.style.cssText='display:block!important;max-width:100%!important;max-height:100%!important;';
+    });
+  },350);
+
+  /* Barcodes */
+  cards.forEach(function(c){
+    var el = document.getElementById('bc_'+c.id);
+    if(!el) return;
+    try{
+      JsBarcode(el,c.student_id,{format:'CODE128',width:1.8,height:28,
+        displayValue:false,background:'transparent',lineColor:'#0b1f4a',margin:2});
+    }catch(e){}
+  });
+
+  /* Auto-trigger print after fonts/QR/barcodes are rendered */
+  window.addEventListener('load',function(){
+    setTimeout(function(){
+      var b=document.getElementById('printBtn');
+      if(b) b.textContent='⏳ Opening print dialog…';
+      window.print();
+    },1500);
+  });
+})();
+</script>
+</body>
+</html>

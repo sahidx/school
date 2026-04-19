@@ -7,7 +7,7 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <meta name="version" content="2.0.1-20251022-1930">
-    <meta name="description" content="মডার্ণ আইডিয়াল বেসরকারি প্রাথমিক বিদ্যালয় | Modern Ideal Non-Government Primary School – প্লে, বেবি, নার্সারি, কেজি থেকে পঞ্চম শ্রেণি">
+    <meta name="description" content="মডার্ণ আইডিয়াল বেসরকারি প্রাথমিক বিদ্যালয় | Modern Ideal Kindergarten – Rabeya Polly, Mohadevpur, Naogaon">
     <meta name="keywords" content="Modern Ideal School, মডার্ণ আইডিয়াল বিদ্যালয়, primary school Bangladesh, modernidealschool.edu.bd">
     <link rel="canonical" href="https://modernidealschool.edu.bd/">
     <title>{% block title %}মডার্ণ আইডিয়াল বেসরকারি প্রাথমিক বিদ্যালয়{% endblock %}</title>
@@ -284,10 +284,19 @@
             <div class="flex justify-between h-16">
                 <div class="flex items-center">
                     <!-- Logo -->
-                    <div class="flex-shrink-0 flex items-center">
-                        <i class="fas fa-graduation-cap text-2xl text-white mr-2"></i>
-                        <span class="brand-text text-lg text-white" style="font-family:'Poppins',sans-serif;font-weight:700">Modern Ideal School</span>
-                        <span class="brand-text-bn text-xs" style="display:block;color:#F2C94C;font-family:'Hind Siliguri',sans-serif;font-size:11px;line-height:1.2">মডার্ণ আইডিয়াল বিদ্যালয়</span>
+                    <div class="flex-shrink-0 flex items-center gap-2">
+                        <!-- logo image (shown when school_logo is set) -->
+                        <img id="nb-logo-img"
+                             src=""
+                             alt="School Logo"
+                             style="display:none;height:44px;width:44px;object-fit:contain;border-radius:50%;background:rgba(255,255,255,.1);padding:2px;"
+                        >
+                        <!-- fallback icon -->
+                        <i class="fas fa-graduation-cap text-2xl text-white" id="nb-logo-icon"></i>
+                        <div style="line-height:1.2;min-width:0;">
+                            <div id="nb-school-name" class="brand-text text-white" style="font-family:'Poppins',sans-serif;font-weight:700;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:280px;">Modern Ideal School</div>
+                            <div id="nb-school-bn" style="color:#F2C94C;font-family:'Hind Siliguri',sans-serif;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:280px;">মডার্ণ আইডিয়াল বিদ্যালয়</div>
+                        </div>
                     </div>
                     
                     <!-- Mobile menu button -->
@@ -527,6 +536,32 @@
                 currency: 'BDT'
             }).format(amount);
         }
+
+        // ── Load school branding into navbar ──────────────────────────
+        (function loadSchoolBrand(){
+            fetch('/api/school/info')
+              .then(function(r){ return r.json(); })
+              .then(function(d){
+                var logo  = d.school_logo   || '';
+                var name  = d.school_name   || 'Modern Ideal School';
+                var nameBn= d.school_name_bn|| 'মডার্ণ আইডিয়াল বিদ্যালয়';
+
+                // Name + Bengali
+                var el = document.getElementById('nb-school-name');
+                if(el) el.textContent = name;
+                var elbn = document.getElementById('nb-school-bn');
+                if(elbn) elbn.textContent = nameBn;
+
+                // Logo image
+                if(logo){
+                    var img  = document.getElementById('nb-logo-img');
+                    var icon = document.getElementById('nb-logo-icon');
+                    if(img){  img.src  = logo; img.style.display  = 'block'; }
+                    if(icon){ icon.style.display = 'none'; }
+                }
+              })
+              .catch(function(){});
+        })();
     </script>
     
     <!-- Common utilities -->

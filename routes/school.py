@@ -82,6 +82,46 @@ def get_school_info():
     return jsonify({row.key: row.value for row in items})
 
 
+@school_bp.route('/api/school/save-logo-b64', methods=['POST'])
+def save_logo_b64():
+    """Accept base64 data URI directly as JSON and save as school_logo. No auth required."""
+    data = request.get_json() or {}
+    logo = data.get('logo', '')
+    if not logo or not logo.startswith('data:image'):
+        return jsonify({'error': 'Invalid image data'}), 400
+    row = SchoolInfo.query.filter_by(key='school_logo').first()
+    if row:
+        row.value = logo
+    else:
+        row = SchoolInfo(key='school_logo', value=logo)
+        db.session.add(row)
+    db.session.commit()
+    return jsonify({'success': True})
+
+
+@school_bp.route('/api/school/upload-logo', methods=['POST'])
+def upload_school_logo():
+    """Upload logo as multipart file, converts to base64 and saves as school_logo."""
+    import base64, mimetypes
+    # Allow unauthenticated access for initial setup (logo only)
+    f = request.files.get('logo')
+    if not f:
+        return jsonify({'error': 'No file provided'}), 400
+    mime = f.mimetype or mimetypes.guess_type(f.filename or 'img.png')[0] or 'image/png'
+    if not mime.startswith('image/'):
+        return jsonify({'error': 'File must be an image'}), 400
+    data_b64 = base64.b64encode(f.read()).decode('utf-8')
+    data_uri = f'data:{mime};base64,{data_b64}'
+    row = SchoolInfo.query.filter_by(key='school_logo').first()
+    if row:
+        row.value = data_uri
+    else:
+        row = SchoolInfo(key='school_logo', value=data_uri)
+        db.session.add(row)
+    db.session.commit()
+    return jsonify({'success': True, 'size': len(data_uri)})
+
+
 @school_bp.route('/api/school/info', methods=['POST'])
 def upsert_school_info():
     user, err, code = _require_admin()

@@ -50,7 +50,8 @@ body{font-family:'Poppins',sans-serif;background:#eef2f7;color:#2F5D8A}
 .rc-title{font-size:12pt;font-weight:bold;color:#8B7536;letter-spacing:1px;border:2px solid #8B7536;padding:3px 10px;display:inline-block}
 .rc-subtitle{font-size:7.5pt;color:#555;margin-top:2px}
 .rc-header-right{flex:0 0 60px;text-align:right}
-.rc-logo{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#1a3a6b,#8B7536);display:flex;align-items:center;justify-content:center;color:#fff;font-size:18pt;font-weight:bold;margin-left:auto}
+.rc-logo{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#1a3a6b,#8B7536);display:flex;align-items:center;justify-content:center;color:#fff;font-size:18pt;font-weight:bold;margin-left:auto;overflow:hidden;}
+.rc-logo img{width:100%;height:100%;object-fit:contain;border-radius:50%;}
 
 /* Student info box */
 .rc-student-grid{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1.5px solid #999;margin-bottom:5px}
@@ -195,7 +196,14 @@ body{font-family:'Poppins',sans-serif;background:#eef2f7;color:#2F5D8A}
               <div class="rc-subtitle">Year / Session: <strong x-text="card.year"></strong></div>
             </div>
             <div class="rc-header-right">
-              <div class="rc-logo">M</div>
+              <div class="rc-logo">
+                <template x-if="schoolInfo.school_logo">
+                  <img :src="schoolInfo.school_logo" alt="logo">
+                </template>
+                <template x-if="!schoolInfo.school_logo">
+                  <span>M</span>
+                </template>
+              </div>
             </div>
           </div>
 

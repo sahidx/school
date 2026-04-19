@@ -1967,7 +1967,7 @@ def _get_school_info():
             s = Settings.query.filter_by(key=k).first()
             info[k] = s.value if s else None
     # Sensible defaults
-    info.setdefault('school_name', 'Modern Ideal Non Government Primary School')
+    info.setdefault('school_name', 'Modern Ideal Kindergarten')
     info.setdefault('school_address', '')
     info.setdefault('school_phone', '')
     return info
