@@ -37,6 +37,7 @@ def _get_school_info():
         'logo': info.get('school_logo', ''),
         'website': info.get('school_website', ''),
         'facebook': info.get('school_facebook', ''),
+        'ht_signature': info.get('head_teacher_signature', ''),
     }
 
 @templates_bp.route('/')

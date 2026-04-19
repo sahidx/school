@@ -763,6 +763,7 @@ function schoolCMS(){
       {key:'head_teacher_bani',label:'Head Teacher Message (English)',type:'textarea',wide:true},
       {key:'head_teacher_bani_bn',label:'Head Teacher Message (Bengali)',type:'textarea',wide:true},
       {key:'head_teacher_photo',label:'Head Teacher Photo (Passport Size)',type:'image',wide:true},
+      {key:'head_teacher_signature',label:'Head Teacher Signature (used on ID cards & admit cards — upload on white/transparent background)',type:'image',wide:true},
       // ─ Hero Section ─
       {key:'_hero_header',label:'—— Homepage Hero Background ——',type:'header'},
       {key:'hero_image',label:'Hero Background Photo (Wide banner — recommended 1400×500px)',type:'image',wide:true},    ],
@@ -1027,24 +1028,33 @@ function schoolCMS(){
       reader.onload = async (e) => {
         const dataUri = e.target.result;
         this.schoolInfo[key] = dataUri;
-        // For school_logo: save immediately via dedicated endpoint (avoids large JSON body issues)
-        if(key === 'school_logo'){
-          try{
-            const r = await fetch('/api/school/save-logo-b64', {
-              method:'POST',
-              headers:{'Content-Type':'application/json'},
-              body: JSON.stringify({logo: dataUri})
-            });
-            const d = await r.json();
-            if(d.success){
-              this.infoMsg = '✓ Logo saved!';
-              setTimeout(()=>this.infoMsg='',3000);
-            } else {
-              this.infoMsg = 'Logo save failed: ' + (d.error||'');
-              setTimeout(()=>this.infoMsg='',4000);
-            }
-          }catch(ex){ this.infoMsg='Logo upload error.'; setTimeout(()=>this.infoMsg='',4000); }
-        }
+        // Save immediately for ALL image fields via /api/school/info
+        const saveKey = key === 'school_logo' ? 'school_logo' : key;
+        const body = key === 'school_logo'
+          ? JSON.stringify({logo: dataUri})                  // dedicated logo endpoint
+          : JSON.stringify({[saveKey]: dataUri});
+        const url = key === 'school_logo' ? '/api/school/save-logo-b64' : '/api/school/info';
+        try{
+          const r = await fetch(url, {
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body
+          });
+          const d = await r.json();
+          if(d.success){
+            const labels = {
+              school_logo: 'Logo',
+              head_teacher_signature: 'Signature',
+              head_teacher_photo: 'Head Teacher Photo',
+              hero_image: 'Hero image',
+            };
+            this.infoMsg = '✓ ' + (labels[key] || 'Image') + ' saved!';
+            setTimeout(()=>this.infoMsg='',3000);
+          } else {
+            this.infoMsg = 'Save failed: ' + (d.error||'');
+            setTimeout(()=>this.infoMsg='',4000);
+          }
+        }catch(ex){ this.infoMsg='Upload error.'; setTimeout(()=>this.infoMsg='',4000); }
       };
       reader.readAsDataURL(file);
     },
