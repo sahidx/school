@@ -253,6 +253,37 @@ def delete_announcement(ann_id):
 # School Classes
 # ---------------------------------------------------------------------------
 
+DEFAULT_SECTIONS = [
+    {'name': 'Sun',  'name_bn': 'সান'},
+    {'name': 'Moon', 'name_bn': 'মুন'},
+]
+
+def _ensure_default_sections(class_id):
+    """Create Sun and Moon sections for a class if they don't already exist."""
+    for s in DEFAULT_SECTIONS:
+        exists = SchoolSection.query.filter(
+            SchoolSection.school_class_id == class_id,
+            SchoolSection.name.ilike(s['name'])
+        ).first()
+        if not exists:
+            db.session.add(SchoolSection(
+                school_class_id=class_id,
+                name=s['name'],
+                name_bn=s['name_bn'],
+            ))
+
+@school_bp.route('/api/school/ensure-default-sections', methods=['POST'])
+def ensure_default_sections_all():
+    """Run once (or any time) to add Sun/Moon sections to all classes that lack them."""
+    user, err, code = _require_admin()
+    if err:
+        return err, code
+    classes = SchoolClass.query.filter_by(is_active=True).all()
+    for cls in classes:
+        _ensure_default_sections(cls.id)
+    db.session.commit()
+    return jsonify({'success': True, 'classes_updated': len(classes)})
+
 @school_bp.route('/api/school/classes', methods=['GET'])
 def get_classes():
     classes = SchoolClass.query.filter_by(is_active=True).order_by(asc(SchoolClass.class_number)).all()
@@ -272,6 +303,9 @@ def create_class():
         description=data.get('description') or None,
     )
     db.session.add(cls)
+    db.session.flush()  # get cls.id before commit
+    # Auto-create default Sun and Moon sections for every new class
+    _ensure_default_sections(cls.id)
     db.session.commit()
     return jsonify({'success': True, 'id': cls.id})
 

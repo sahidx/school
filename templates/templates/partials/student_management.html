@@ -36,7 +36,7 @@
                        class="form-input">
             </div>
             <div class="min-w-[200px]">
-                <select x-model="filterBatch" @change="filterStudents()" class="form-input">
+                <select x-model="filterBatch" @change="onFilterClassChange()" class="form-input">
                     <option value="">All Classes</option>
                     <optgroup label="Pre-Primary">
                         <template x-for="cls in schoolClasses.filter(c => c.class_number <= 0)" :key="'c'+cls.id">
@@ -50,6 +50,15 @@
                     </optgroup>
                     <template x-for="batch in batches" :key="'b'+batch.id">
                         <option :value="'b'+batch.id" x-text="batch.name"></option>
+                    </template>
+                </select>
+            </div>
+            <!-- Section filter -->
+            <div class="min-w-[150px]" x-show="filterSections.length > 0">
+                <select x-model="filterSection" @change="filterStudents()" class="form-input">
+                    <option value="">All Sections</option>
+                    <template x-for="sec in filterSections" :key="sec.id">
+                        <option :value="sec.id" x-text="sec.name"></option>
                     </template>
                 </select>
             </div>
@@ -762,6 +771,8 @@ function studentManagement() {
         formPhotoPreview: null,
         searchTerm: '',
         filterBatch: '',
+        filterSection: '',
+        filterSections: [],
         studentToDelete: null,
         studentToReset: null,
         newStudentCredentials: {},
@@ -1009,9 +1020,25 @@ function studentManagement() {
                         matchesBatch = student.batchId == batchId || (student.batchIds && student.batchIds.includes(batchId));
                     }
                 }
+
+                const matchesSection = !this.filterSection ||
+                    student.sectionId == this.filterSection;
                 
-                return matchesSearch && matchesBatch;
+                return matchesSearch && matchesBatch && matchesSection;
             });
+        },
+
+        async onFilterClassChange() {
+            this.filterSection = '';
+            this.filterSections = [];
+            if (this.filterBatch && String(this.filterBatch).startsWith('c')) {
+                const classId = parseInt(this.filterBatch.slice(1));
+                try {
+                    const r = await fetch('/api/school/classes/' + classId + '/sections');
+                    if (r.ok) this.filterSections = await r.json();
+                } catch(e) {}
+            }
+            this.filterStudents();
         },
 
         async editStudent(student) {
