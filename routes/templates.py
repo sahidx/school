@@ -30,13 +30,14 @@ def _get_school_info():
         'name': info.get('school_name', SCHOOL_DEFAULT_NAME),
         'name_bn': info.get('school_name_bn', SCHOOL_DEFAULT_NAME_BN),
         'address': info.get('school_address', 'Rabeya Polly, Mohadevpur, Naogaon'),
+        'address_bn': info.get('school_address_bn', 'রাবেয়া পল্লী, মহাদেবপুর, নওগাঁ।'),
         'phone': info.get('school_phone', '01712-185138'),
         'email': info.get('school_email', ''),
         'eiin': info.get('school_eiin', ''),
         'estd': info.get('estd_year', ''),
         'logo': info.get('school_logo', ''),
-        'website': info.get('school_website', ''),
-        'facebook': info.get('school_facebook', ''),
+        'website': info.get('school_website', 'https://modernidealschool.edu.bd/'),
+        'facebook': info.get('school_facebook', 'https://www.facebook.com/mikgschool'),
         'ht_signature': info.get('head_teacher_signature', ''),
     }
 

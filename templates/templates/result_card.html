@@ -189,7 +189,7 @@ body{font-family:'Poppins',sans-serif;background:#eef2f7;color:#2F5D8A}
           <div class="rc-header">
             <div class="rc-header-left">
               <div class="rc-school-name" x-text="schoolInfo.school_name||'মডার্ণ আইডিয়াল বেসরকারি প্রাথমিক বিদ্যালয়'"></div>
-              <div class="rc-school-addr" x-text="(schoolInfo.address||'') + (schoolInfo.phone?' | Ph: '+schoolInfo.phone:'')"></div>
+              <div class="rc-school-addr" x-text="(schoolInfo.school_address_bn||schoolInfo.address||'') + (schoolInfo.phone?' | Ph: '+schoolInfo.phone:'')"></div>
             </div>
             <div class="rc-header-center">
               <div class="rc-title">ACADEMIC TRANSCRIPT</div>

@@ -50,7 +50,7 @@ html,body{background:#e8ecf4;font-family:'Poppins',Arial,sans-serif;}
   display:flex;flex-direction:column;
 }
 /* Watermark logo */
-.cf-watermark{position:absolute;top:56%;left:50%;transform:translate(-50%,-50%);width:200px;height:200px;opacity:.1;z-index:0;pointer-events:none;}
+.cf-watermark{position:absolute;top:61%;left:50%;transform:translate(-50%,-50%);width:220px;height:220px;opacity:.1;z-index:0;pointer-events:none;}
 .cf-watermark img{width:100%;height:100%;object-fit:contain;}
 
 /* Green curved header */
@@ -69,6 +69,7 @@ html,body{background:#e8ecf4;font-family:'Poppins',Arial,sans-serif;}
 .cf-top-txt{flex:1;min-width:0;}
 .cf-sn{color:#fff;font-size:13px;font-weight:900;line-height:1.2;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;font-family:'Hind Siliguri',Arial,sans-serif;text-shadow:0 1px 3px rgba(0,0,0,.25);}
 .cf-sb{color:rgba(255,255,255,.95);font-size:10px;line-height:1.25;margin-top:2px;font-family:'Hind Siliguri',Arial,sans-serif;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;text-shadow:0 1px 2px rgba(0,0,0,.2);}
+.cf-addr{color:rgba(255,255,255,.8);font-size:7.5px;font-weight:600;font-family:'Hind Siliguri',Arial,sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%;margin-top:-1px;}
 .cf-badge{
   width:100%;text-align:center;
   color:var(--gold-hi);font-size:10px;font-weight:900;
@@ -107,7 +108,7 @@ html,body{background:#e8ecf4;font-family:'Poppins',Arial,sans-serif;}
 
 /* Signature */
 .cf-sig{display:flex;flex-direction:column;align-items:center;gap:0;padding-top:2px;margin-top:auto;}
-.cf-sig-img{max-width:70px;max-height:22px;object-fit:contain;display:block;}
+.cf-sig-img{max-width:68px;max-height:20px;object-fit:contain;display:block;margin-bottom:1px;}
 .cf-sig-line{width:70px;height:1px;background:linear-gradient(90deg,transparent,#6a7e9a,transparent);margin-top:1px;}
 .cf-sig-txt{font-size:7px;font-weight:700;color:#4a5e80;font-family:'Hind Siliguri',Arial,sans-serif;text-align:center;line-height:1.3;}
 
@@ -148,16 +149,16 @@ html,body{background:#e8ecf4;font-family:'Poppins',Arial,sans-serif;}
 .cb-rules{display:flex;flex-direction:column;gap:1.5px;position:relative;z-index:1;}
 .cb-rule{font-size:8px;font-family:'Hind Siliguri',Arial,sans-serif;color:#2a2a2a;line-height:1.5;display:flex;gap:2px;}
 .cb-rule-n{font-weight:700;flex-shrink:0;color:var(--g1);min-width:10px;}
-/* Contact */
-.cb-contact{display:flex;flex-direction:column;gap:1.5px;position:relative;z-index:1;}
-.cb-contact-item{display:flex;gap:3px;font-size:8px;font-family:'Hind Siliguri',Arial,sans-serif;color:#2a2a2a;line-height:1.5;}
-.cb-contact-lbl{font-weight:700;color:var(--g1);flex-shrink:0;}
+/* Contact + QR row */
+.cb-contact-qr{display:flex;gap:6px;align-items:flex-start;position:relative;z-index:1;min-width:0;overflow:hidden;}
+.cb-contact-item{display:flex;gap:3px;font-size:8px;font-family:'Hind Siliguri',Arial,sans-serif;color:#2a2a2a;line-height:1.5;min-width:0;overflow:hidden;word-break:break-all;overflow-wrap:anywhere;}
+.cb-contact-lbl{font-weight:700;color:var(--g1);flex-shrink:0;white-space:nowrap;}
 /* QR column */
-.cb-qr-col{flex-shrink:0;width:90px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;}
-.cb-qr-box{width:84px;height:84px;border:2px solid var(--gold);border-radius:7px;padding:3px;background:#fff;display:flex;align-items:center;justify-content:center;overflow:hidden;}
+.cb-qr-col{flex-shrink:0;width:50px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;overflow:hidden;}
+.cb-qr-box{width:46px;height:46px;border:1.5px solid var(--gold);border-radius:5px;padding:2px;background:#fff;display:flex;align-items:center;justify-content:center;overflow:hidden;}
 .cb-qr-box canvas{display:block!important;max-width:100%!important;max-height:100%!important;}
 .cb-qr-box img{display:none!important;}
-.cb-qr-lbl{font-size:6.5px;font-weight:800;color:#4a6080;letter-spacing:.8px;text-transform:uppercase;}
+.cb-qr-lbl{font-size:5.5px;font-weight:800;color:#4a6080;letter-spacing:.6px;text-transform:uppercase;}
 /* Barcode */
 .cb-bar{padding:5px 8px 4px;border-top:1px solid #dde4f0;background:transparent;display:flex;flex-direction:column;align-items:center;flex-shrink:0;}
 .cb-bar svg{width:182px;height:30px;}
@@ -190,6 +191,10 @@ html,body{background:#e8ecf4;font-family:'Poppins',Arial,sans-serif;}
   }
 
   /* Fix school name clamp in print (Chrome sometimes ignores -webkit-line-clamp in print) */
+  .ic-cf,.ic-cb{overflow:hidden!important;}
+  .cf-top{height:35mm!important;padding:10px 10px 4px!important;}
+  .cf-photo{width:17mm!important;height:21mm!important;top:26mm!important;}
+  .cf-body{padding-top:13mm!important;}
   .cf-sn{
     font-size:11px!important;
     -webkit-line-clamp:2!important;
@@ -197,10 +202,28 @@ html,body{background:#e8ecf4;font-family:'Poppins',Arial,sans-serif;}
     overflow:hidden!important;
   }
   .cf-sb{font-size:9px!important;}
+  .cf-addr{font-size:5pt!important;}
+  .cf-badge{font-size:6pt!important;padding-top:2px!important;margin-top:1px!important;}
+  .cf-name{font-size:6.5pt!important;}
+  .cf-lbl,.cf-colon,.cf-val{font-size:5pt!important;}
+  .cf-val.cf-id{font-size:5.5pt!important;}
+  .cf-sig-img{max-width:16mm!important;max-height:5mm!important;}
+  .cf-sig-txt{font-size:4.5pt!important;}
+  .cf-sig{padding-top:1px!important;}
+  .cf-footer{height:5mm!important;}
+  .cf-footer span{font-size:5pt!important;}
+  .cf-logo{width:10mm!important;height:10mm!important;}
   .cb-sn{font-size:10.5px!important;-webkit-line-clamp:2!important;max-height:2.55em!important;overflow:hidden!important;}
+  .cb-hdr{height:16mm!important;}
+  .cb-logo{width:10mm!important;height:10mm!important;}
+  .cb-bar svg{width:44mm!important;height:7mm!important;}
+  .cb-bar-id{font-size:4pt!important;}
+  .cb-ftr{height:5mm!important;}
+  .cb-ftr span{font-size:4pt!important;}
 
-  /* Watermark */
-  .cf-watermark,.cb-watermark{opacity:.12!important;}
+  /* Watermark – must use mm in print or 200px > 54mm card width causing clip */
+  .cf-watermark{top:60%!important;width:33mm!important;height:33mm!important;opacity:.13!important;}
+  .cb-watermark{top:50%!important;width:26mm!important;height:26mm!important;opacity:.12!important;}
 
   /* Side filters */
   .print-front-only .ic-cb{display:none!important;page-break-after:avoid!important;break-after:avoid!important;}
@@ -230,7 +253,6 @@ html,body{background:#e8ecf4;font-family:'Poppins',Arial,sans-serif;}
 
     <!-- ══ FRONT ══ -->
     <div class="ic-cf">
-      <!-- Watermark -->
       {% if school.logo %}<div class="cf-watermark"><img src="{{ school.logo }}" alt=""></div>{% endif %}
       <!-- Green curved header -->
       <div class="cf-top">
@@ -242,7 +264,6 @@ html,body{background:#e8ecf4;font-family:'Poppins',Arial,sans-serif;}
           </div>
           <div class="cf-top-txt">
             <div class="cf-sn">{{ school.name_bn or school.name }}</div>
-            {% if school.name_bn %}<div class="cf-sb">{{ school.name }}</div>{% endif %}
           </div>
         </div>
         <div class="cf-badge">&#9733; শিক্ষার্থী পরিচয়পত্র &#9733;</div>
@@ -289,7 +310,7 @@ html,body{background:#e8ecf4;font-family:'Poppins',Arial,sans-serif;}
         <div class="cf-sig">
           {% if school.ht_signature %}<img class="cf-sig-img" src="{{ school.ht_signature }}" alt="signature">{% endif %}
           <div class="cf-sig-line"></div>
-          <span class="cf-sig-txt">প্রধান শিক্ষকের স্বাক্ষর<br>ও সীলমোহর</span>
+          <span class="cf-sig-txt">প্রধান শিক্ষকের স্বাক্ষর</span>
         </div>
       </div>
       <!-- Green footer -->
@@ -306,7 +327,6 @@ html,body{background:#e8ecf4;font-family:'Poppins',Arial,sans-serif;}
         </div>
         <div class="cb-hdr-txt">
           <div class="cb-sn">{{ school.name_bn or school.name }}</div>
-          {% if school.name_bn %}<div class="cb-sa">{{ school.name }}</div>{% endif %}
         </div>
       </div>
 
@@ -316,27 +336,22 @@ html,body{background:#e8ecf4;font-family:'Poppins',Arial,sans-serif;}
         <!-- Rules -->
         <div class="cb-section-title">সাধারণ নির্দেশনাবলী:</div>
         <div class="cb-rules">
-          <div class="cb-rule"><span class="cb-rule-n">১.</span>পরিচয়পত্রটি সর্বদা দৃশ্যমান অবস্থায় পরিধান করতে হবে।</div>
-          <div class="cb-rule"><span class="cb-rule-n">২.</span>কার্ডটি হারিয়ে গেলে অবিলম্বে বিদ্যালয় কর্তৃপক্ষকে অবহিত করতে হবে।</div>
-          <div class="cb-rule"><span class="cb-rule-n">৩.</span>এই কার্ডটি অন্য কাউকে হস্তান্তর করা সম্পূর্ণ নিষেধ।</div>
-          <div class="cb-rule"><span class="cb-rule-n">৪.</span>প্রতিষ্ঠানের শৃঙ্খলা ভঙ্গের কারণে এই কার্ড বাতিল হতে পারে।</div>
-          <div class="cb-rule"><span class="cb-rule-n">৫.</span>কার্ডটি খুঁজে পেলে নিচের ঠিকানায় পৌঁছে দেওয়ার অনুরোধ করা হলো।</div>
+          <div class="cb-rule"><span class="cb-rule-n">*</span>কার্ডটি খুঁজে পেলে নিচের ঠিকানায় পৌঁছে দেওয়ার অনুরোধ করা হলো।</div>
         </div>
 
-        <!-- Contact -->
+        <!-- Contact + QR side by side -->
         <div class="cb-section-title">বিদ্যালয়ের যোগাযোগ:</div>
-        <div class="cb-contact">
-          {% if school.address %}<div class="cb-contact-item"><span class="cb-contact-lbl">ঠিকানা:</span>{{ school.address }}</div>{% endif %}
-          {% if school.phone %}<div class="cb-contact-item"><span class="cb-contact-lbl">ফোন:</span>{{ school.phone }}</div>{% endif %}
-          {% if school.website %}<div class="cb-contact-item"><span class="cb-contact-lbl">ওয়েবসাইট:</span>{{ school.website }}</div>{% endif %}
-          {% if school.facebook %}<div class="cb-contact-item"><span class="cb-contact-lbl">ফেসবুক:</span>{{ school.facebook }}</div>{% endif %}
-        </div>
-
-        <!-- QR code -->
-        <div class="cb-qr-col" style="margin-top:6px;">
-          <div class="cb-qr-box"><div id="qr_{{ c.id }}"></div></div>
-          <div class="cb-qr-lbl">Scan QR</div>
-          {% if school.website %}<div style="font-size:6px;color:#1a56db;max-width:88px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ school.website }}</div>{% endif %}
+        <div class="cb-contact-qr">
+          <div class="cb-contact" style="flex:1;min-width:0;overflow:hidden;display:flex;flex-direction:column;gap:1.5px;">
+            {% if school.address_bn %}<div class="cb-contact-item"><span class="cb-contact-lbl">ঠিকানা:</span>{{ school.address_bn }}</div>{% endif %}
+            {% if school.phone %}<div class="cb-contact-item"><span class="cb-contact-lbl">ফোন:</span>{{ school.phone }}</div>{% endif %}
+            {% if school.website %}<div class="cb-contact-item"><span class="cb-contact-lbl">ওয়েব:</span>{{ school.website }}</div>{% endif %}
+            {% if school.facebook %}<div class="cb-contact-item"><span class="cb-contact-lbl">ফেসবুক:</span>{{ school.facebook }}</div>{% endif %}
+          </div>
+          <div class="cb-qr-col">
+            <div class="cb-qr-box"><div id="qr_{{ c.id }}"></div></div>
+            <div class="cb-qr-lbl">Scan QR</div>
+          </div>
         </div>
       </div>
 
@@ -370,7 +385,7 @@ html,body{background:#e8ecf4;font-family:'Poppins',Arial,sans-serif;}
     var el = document.getElementById('qr_'+c.id);
     if(!el) return;
     try{
-      new QRCode(el,{text:qUrl||c.student_id,width:76,height:76,
+      new QRCode(el,{text:qUrl||c.student_id,width:40,height:40,
         colorDark:'#0b1f4a',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});
     }catch(e){}
   });

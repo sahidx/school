@@ -1969,6 +1969,7 @@ def _get_school_info():
     # Sensible defaults
     info.setdefault('school_name', 'Modern Ideal Kindergarten')
     info.setdefault('school_address', '')
+    info.setdefault('school_address_bn', 'রাবেয়া পল্লী, মহাদেবপুর, নওগাঁ।')
     info.setdefault('school_phone', '')
     return info
 

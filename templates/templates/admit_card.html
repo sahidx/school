@@ -353,8 +353,8 @@
         <!-- Text -->
         <div class="head-text">
           <div class="sch-name">{{ school.name }}</div>
-          {% if school.address %}
-          <div class="sch-addr">{{ school.address }}</div>
+          {% if school.address_bn or school.address %}
+          <div class="sch-addr">{{ school.address_bn or school.address }}</div>
           {% endif %}
           {% if school.phone or school.email %}
           <div class="sch-addr">

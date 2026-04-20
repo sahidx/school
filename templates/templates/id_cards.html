@@ -45,7 +45,7 @@
   box-shadow:0 12px 36px rgba(0,0,0,.28),0 2px 8px rgba(0,0,0,.12);
   display:flex;flex-direction:column;font-family:'Poppins',Arial,sans-serif;
 }
-.ic-cf-watermark{position:absolute;top:56%;left:50%;transform:translate(-50%,-50%);width:200px;height:200px;opacity:.1;z-index:0;pointer-events:none;}
+.ic-cf-watermark{position:absolute;top:61%;left:50%;transform:translate(-50%,-50%);width:220px;height:220px;opacity:.1;z-index:0;pointer-events:none;}
 .ic-cf-watermark img{width:100%;height:100%;object-fit:contain;}
 .ic-cf-top{
   height:138px;flex-shrink:0;position:relative;z-index:2;
@@ -64,6 +64,7 @@
 .ic-cf-top-txt{flex:1;min-width:0;}
 .ic-cf-sn{color:#fff;font-size:13px;font-weight:900;line-height:1.2;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;font-family:'Hind Siliguri','Noto Sans Bengali',Arial,sans-serif;}
 .ic-cf-sb{color:rgba(255,255,255,.95);font-size:10px;line-height:1.25;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;margin-top:1px;font-family:'Hind Siliguri','Noto Sans Bengali',Arial,sans-serif;}
+.ic-cf-addr{color:rgba(255,255,255,.8);font-size:7.5px;font-weight:600;font-family:'Hind Siliguri','Noto Sans Bengali',Arial,sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%;padding-left:0;margin-top:-1px;}
 
 /* photo */
 .ic-cf-photo{
@@ -90,9 +91,10 @@
 .ic-cf-sep{color:#556080;font-size:8.5px;font-weight:700;}
 .ic-cf-val{color:#0a1830;font-size:9.5px;font-weight:600;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:'Hind Siliguri','Noto Sans Bengali',Arial,sans-serif;}
 .ic-cf-val.ic-id{font-weight:800;font-size:10.5px;letter-spacing:.3px;}
-.ic-cf-principal{margin-top:auto;display:flex;flex-direction:column;align-items:center;gap:2px;}
-.ic-cf-sig-line{width:70px;height:1px;background:linear-gradient(90deg,transparent,#4a5e80,transparent);}
-.ic-cf-sig-txt{font-size:8px;font-weight:700;color:#4a5e80;font-family:'Hind Siliguri','Noto Sans Bengali',Arial,sans-serif;}
+.ic-cf-principal{margin-top:auto;display:flex;flex-direction:column;align-items:center;gap:0;padding-top:2px;}
+.ic-cf-sig-img{max-width:68px;max-height:20px;object-fit:contain;display:block;margin-bottom:1px;}
+.ic-cf-sig-line{width:70px;height:1px;background:linear-gradient(90deg,transparent,#4a5e80,transparent);margin-top:1px;}
+.ic-cf-sig-txt{font-size:7px;font-weight:700;color:#4a5e80;font-family:'Hind Siliguri','Noto Sans Bengali',Arial,sans-serif;text-align:center;line-height:1.3;}
 .ic-cf-footer{height:24px;flex-shrink:0;background:linear-gradient(145deg,var(--ic-g1),var(--ic-g2));display:flex;align-items:center;justify-content:center;z-index:1;}
 .ic-cf-footer span{color:#fff;font-size:10px;font-weight:700;font-family:'Poppins',Arial,sans-serif;letter-spacing:.5px;}
 
@@ -120,11 +122,11 @@
 .ic-cb-row{display:flex;gap:8px;align-items:flex-start;}
 .ic-cb-ico{width:16px;height:16px;border-radius:50%;background:var(--ic-navy);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;color:#fff;font-weight:900;line-height:1;}
 .ic-cb-txt{color:#14244a;font-size:8px;font-weight:500;line-height:1.4;word-break:break-word;}
-.ic-cb-qr-col{flex-shrink:0;width:90px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;}
-.ic-cb-qr{width:84px;height:84px;border:2px solid var(--ic-gold);border-radius:7px;padding:3px;background:#fff;display:flex;align-items:center;justify-content:center;overflow:hidden;}
+.ic-cb-qr-col{flex-shrink:0;width:56px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;}
+.ic-cb-qr{width:50px;height:50px;border:1.5px solid var(--ic-gold);border-radius:5px;padding:2px;background:#fff;display:flex;align-items:center;justify-content:center;overflow:hidden;}
 .ic-cb-qr canvas{max-width:100%!important;max-height:100%!important;display:block!important;}
 .ic-cb-qr img{display:none!important;}
-.ic-cb-qr-lbl{font-size:6.5px;font-weight:800;color:#4a6080;letter-spacing:.8px;text-transform:uppercase;}
+.ic-cb-qr-lbl{font-size:5.5px;font-weight:800;color:#4a6080;letter-spacing:.6px;text-transform:uppercase;}
 .ic-cb-bar{padding:5px 8px 4px;border-top:1px solid #dde4f0;background:#f4f7fc;display:flex;flex-direction:column;align-items:center;flex-shrink:0;}
 .ic-cb-bar svg{width:182px;height:30px;}
 .ic-cb-bar-id{font-size:7.5px;font-weight:700;letter-spacing:2.5px;color:var(--ic-navy);margin-top:1px;}
@@ -157,21 +159,28 @@
     page-break-after:always;break-after:page;
     margin:0!important;display:flex!important;
   }
-  .ic-cf-top{height:37mm!important;}
-  .ic-cf-photo{width:18mm!important;height:22mm!important;top:27mm!important;}
-  .ic-cf-body{padding-top:14mm!important;}
+  .ic-cf-top{height:35mm!important;}
+  .ic-cf-photo{width:17mm!important;height:21mm!important;top:26mm!important;}
+  .ic-cf-body{padding-top:13mm!important;}
+  .ic-cf-addr{font-size:5pt!important;}
+  .ic-cf-badge{font-size:6pt!important;padding-top:2px!important;margin-top:1px!important;}
+  .ic-cf-sig-img{max-width:16mm!important;max-height:5mm!important;}
+  .ic-cf-principal{padding-top:1px!important;}
   .ic-cf-year{width:5.5mm!important;font-size:4.5pt!important;}
   .ic-cf-sn{font-size:4.5pt!important;}
   .ic-cf-stname{font-size:6.5pt!important;}
   .ic-cf-lbl,.ic-cf-sep,.ic-cf-val{font-size:5pt!important;}
   .ic-cf-val.ic-id{font-size:5.5pt!important;}
-  .ic-cf-sig-txt{font-size:5pt!important;}
-  .ic-cf-logo{width:8.5mm!important;height:8.5mm!important;}
+  .ic-cf-sig-txt{font-size:4.5pt!important;}
+  .ic-cf-logo{width:10mm!important;height:10mm!important;}
+  .ic-cf-footer{height:5mm!important;}
+  .ic-cf-footer span{font-size:5pt!important;}
+  .ic-card-front,.ic-card-back{overflow:hidden!important;}
   .ic-cb-hdr{height:16mm!important;}
   .ic-cb-sn{font-size:5.5pt!important;}
   .ic-cb-txt{font-size:5pt!important;}
   .ic-cb-bar svg{width:44mm!important;height:8mm!important;}
-  .ic-cb-qr{width:22mm!important;height:22mm!important;}
+  .ic-cb-qr{width:14mm!important;height:14mm!important;}
   .ic-cb-bar-id{font-size:4pt!important;}
   /* front/back only: hide & remove page break from hidden cards */
   .print-front-only .ic-card-back{display:none!important;page-break-after:avoid!important;break-after:avoid!important;}
@@ -251,7 +260,6 @@
               </div>
               <div class="ic-cf-top-txt">
                 <div class="ic-cf-sn">{{ school.name_bn or school.name }}</div>
-                {% if school.name_bn %}<div class="ic-cf-sb">{{ school.name }}</div>{% endif %}
               </div>
             </div>
             <div class="ic-cf-badge">&#9733; শিক্ষার্থী পরিচয়পত্র &#9733;</div>
@@ -275,7 +283,7 @@
             <div class="ic-cf-row"><span class="ic-cf-lbl">মাতার নাম</span><span class="ic-cf-sep">:</span><span class="ic-cf-val">{{ c.mother_name or '—' }}</span></div>
             <div class="ic-cf-row"><span class="ic-cf-lbl">যোগাযোগ</span><span class="ic-cf-sep">:</span><span class="ic-cf-val">{{ c.guardian_phone or c.phone or '—' }}</span></div>
             <div class="ic-cf-principal">
-              {% if school.ht_signature %}<img style="max-width:68px;max-height:28px;object-fit:contain;display:block;margin:0 auto -2px;" src="{{ school.ht_signature }}" alt="signature">{% endif %}
+              {% if school.ht_signature %}<img class="ic-cf-sig-img" src="{{ school.ht_signature }}" alt="signature">{% endif %}
               <div class="ic-cf-sig-line"></div>
               <span class="ic-cf-sig-txt">প্রধান শিক্ষকের স্বাক্ষর</span>
             </div>
@@ -293,15 +301,14 @@
             </div>
             <div class="ic-cb-hdr-txt">
               <div class="ic-cb-sn">{{ school.name_bn or school.name }}</div>
-              {% if school.name_bn %}<div class="ic-cb-sa">{{ school.name }}</div>{% endif %}
             </div>
           </div>
           <div class="ic-cb-mid">
             <div class="ic-cb-info">
-              {% if school.address %}
+              {% if school.address_bn %}
               <div class="ic-cb-row">
                 <div class="ic-cb-ico">&#9679;</div>
-                <span class="ic-cb-txt">{{ school.address }}</span>
+                <span class="ic-cb-txt">{{ school.address_bn }}</span>
               </div>
               {% endif %}
               {% if school.phone %}
@@ -332,7 +339,7 @@
             <svg id="bc_{{ c.id }}"></svg>
             <span class="ic-cb-bar-id">{{ c.student_id }}</span>
           </div>
-          <div class="ic-cb-ftr"><span>If found, please return to school &nbsp;|&nbsp; {{ school.phone }}</span></div>
+          <div class="ic-cb-ftr"><span>কার্ডটি খুঁজে পেলে বিদ্যালয়ে ফেরত দিন &nbsp;|&nbsp; {{ school.phone }}</span></div>
         </div>
 
       </div><!-- /ic-pair-row -->
@@ -356,7 +363,7 @@
 <script>
 (function(){
   var qUrl = {{ (school.website or school.facebook or '')|tojson }};
-  var qo = {colorDark:'#0b1f4a',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M,width:76,height:76};
+  var qo = {colorDark:'#0b1f4a',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M,width:44,height:44};
   var cards = {{ cards|tojson if cards else '[]' }};
 
   cards.forEach(function(c){

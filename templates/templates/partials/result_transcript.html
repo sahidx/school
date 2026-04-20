@@ -72,7 +72,7 @@ table.extra td { border: 1px solid #aaa; padding: 4px 6px; text-align: center; }
   <div class="wm {{ 'pass' if result_status == 'Passed' else 'fail' }}">{{ result_status.upper() }}</div>
   <div class="school-header">
     <div class="school-name">{{ school.school_name }}</div>
-    {% if school.school_address %}<div class="school-sub">{{ school.school_address }}</div>{% endif %}
+    {% if school.school_address_bn or school.school_address %}<div class="school-sub">{{ school.school_address_bn or school.school_address }}</div>{% endif %}
     {% if school.school_phone %}<div class="school-sub">Ph: {{ school.school_phone }}</div>{% endif %}
   </div>
   <div class="title-strip">ACADEMIC TRANSCRIPT</div>

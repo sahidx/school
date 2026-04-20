@@ -21,9 +21,9 @@ body { margin: 0; padding: 0; background: #fff; font-family: Arial, 'Noto Sans B
 }
 
 .cf-top {
-  height: 37mm; flex-shrink: 0; position: relative;
+  height: 35mm; flex-shrink: 0; position: relative;
   padding: 2.5mm 2.8mm 0 2.8mm;
-  display: flex; flex-direction: column; align-items: flex-start; gap: 1mm;
+  display: flex; flex-direction: column; align-items: flex-start; gap: 0.8mm;
   background: linear-gradient(145deg, #155c2a 0%, #1f8840 50%, #28aa52 100%);
   border-radius: 0 0 12mm 12mm / 0 0 8mm 8mm;
 }
@@ -33,21 +33,23 @@ body { margin: 0; padding: 0; background: #fff; font-family: Arial, 'Noto Sans B
 }
 .cf-logo-row { display: flex; align-items: center; gap: 1.5mm; width: 100%; }
 .cf-logo {
-  width: 8.5mm; height: 8.5mm; border-radius: 50%; flex-shrink: 0;
-  background: rgba(255,255,255,.1); border: 0.4mm solid rgba(255,255,255,.4);
+  width: 10mm; height: 10mm; border-radius: 50%; flex-shrink: 0;
+  background: #fff; border: none;
   display: flex; align-items: center; justify-content: center; overflow: hidden;
+  padding: 0.8mm;
 }
 .cf-logo img { width: 100%; height: 100%; object-fit: cover; }
 .cf-logo .li { color: #fff; font-size: 3mm; font-weight: 900; }
 .cf-top-txt { flex: 1; min-width: 0; }
 .cf-sn { color: #fff; font-size: 2.2mm; font-weight: 800; line-height: 1.3; text-transform: uppercase; letter-spacing: .05mm; }
 .cf-sb { color: rgba(255,255,255,.6); font-size: 1.7mm; line-height: 1.3; margin-top: .3mm; }
-.cf-addr { color: rgba(255,255,255,.75); font-size: 1.9mm; }
+.cf-addr { color: rgba(255,255,255,.8); font-size: 1.8mm; font-weight: 600; }
+.cf-badge { width: 100%; text-align: center; color: #eecc40; font-size: 2mm; font-weight: 900; border-top: 0.3mm solid rgba(255,220,50,.35); padding-top: 0.8mm; margin-top: 0.5mm; }
 
 /* photo */
 .cf-photo {
-  position: absolute; top: 27mm; left: 50%; transform: translateX(-50%);
-  z-index: 6; width: 18mm; height: 22mm;
+  position: absolute; top: 26mm; left: 50%; transform: translateX(-50%);
+  z-index: 6; width: 17mm; height: 21mm;
   border: 0.9mm solid #fff; border-radius: 1.8mm; overflow: hidden;
   background: #d8e4f0;
   display: flex; align-items: center; justify-content: center;
@@ -59,7 +61,7 @@ body { margin: 0; padding: 0; background: #fff; font-family: Arial, 'Noto Sans B
 .cf-nophoto span { font-size: 1.6mm; font-weight: 700; letter-spacing: .2mm; text-transform: uppercase; }
 
 /* body */
-.cf-body { flex: 1; padding: 14mm 3mm 2.5mm; display: flex; flex-direction: column; }
+.cf-body { flex: 1; padding: 13mm 3mm 1.5mm; display: flex; flex-direction: column; }
 .cf-stname {
   font-size: 3.2mm; font-weight: 800; color: #0a1830; text-align: center;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
@@ -77,9 +79,10 @@ body { margin: 0; padding: 0; background: #fff; font-family: Arial, 'Noto Sans B
 .cf-sep { color: #556080; font-size: 1.9mm; font-weight: 700; }
 .cf-val { color: #0a1830; font-size: 2mm; font-weight: 600; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .cf-val.ic-id { font-weight: 800; font-size: 2.2mm; }
-.cf-principal { margin-top: auto; display: flex; flex-direction: column; align-items: flex-end; gap: 0.5mm; }
-.cf-sig-line { width: 17mm; height: 0.25mm; background: linear-gradient(90deg, transparent, #4a5e80); }
-.cf-sig-txt { font-size: 1.9mm; font-weight: 700; color: #4a5e80; letter-spacing: .12mm; }
+.cf-principal { margin-top: auto; display: flex; flex-direction: column; align-items: center; gap: 0.3mm; }
+.cf-sig-img { max-width: 16mm; max-height: 5mm; object-fit: contain; display: block; }
+.cf-sig-line { width: 17mm; height: 0.25mm; background: linear-gradient(90deg, transparent, #4a5e80, transparent); margin-top: 0.3mm; }
+.cf-sig-txt { font-size: 1.6mm; font-weight: 700; color: #4a5e80; text-align: center; }
 
 /* ── back card ── */
 .card-back {
@@ -158,11 +161,12 @@ body { margin: 0; padding: 0; background: #fff; font-family: Arial, 'Noto Sans B
           {% endif %}
         </div>
         <div class="cf-top-txt">
-          <div class="cf-sn">{{ school.name }}</div>
-          {% if school.name_bn %}<div class="cf-sb">{{ school.name_bn }}</div>{% endif %}
+          <div class="cf-sn">{{ school.name_bn or school.name }}</div>
+          {% if school.name_bn %}<div class="cf-sb">{{ school.name }}</div>{% endif %}
         </div>
       </div>
-      <div class="cf-addr">{{ school.address }}</div>
+      {% if school.address_bn %}<div class="cf-addr">{{ school.address_bn }}</div>{% endif %}
+      <div class="cf-badge">&#9733; শিক্ষার্থী পরিচয়পত্র &#9733;</div>
     </div>
 
     <div class="cf-photo">
@@ -181,14 +185,15 @@ body { margin: 0; padding: 0; background: #fff; font-family: Arial, 'Noto Sans B
     <div class="cf-body">
       <div class="cf-stname">{{ c.full_name }}</div>
       <div class="cf-row cf-id-row">
-        <span class="cf-lbl">ID No.</span><span class="cf-sep">:</span><span class="cf-val ic-id">{{ c.student_id }}</span>
+        <span class="cf-lbl">আইডি নং</span><span class="cf-sep">:</span><span class="cf-val ic-id">{{ c.student_id }}</span>
       </div>
-      <div class="cf-row"><span class="cf-lbl">Father</span><span class="cf-sep">:</span><span class="cf-val">{{ c.guardian_name or '—' }}</span></div>
-      <div class="cf-row"><span class="cf-lbl">Mother</span><span class="cf-sep">:</span><span class="cf-val">{{ c.mother_name or '—' }}</span></div>
-      <div class="cf-row"><span class="cf-lbl">Contact</span><span class="cf-sep">:</span><span class="cf-val">{{ c.guardian_phone or c.phone or '—' }}</span></div>
+      <div class="cf-row"><span class="cf-lbl">পিতার নাম</span><span class="cf-sep">:</span><span class="cf-val">{{ c.guardian_name or '—' }}</span></div>
+      <div class="cf-row"><span class="cf-lbl">মাতার নাম</span><span class="cf-sep">:</span><span class="cf-val">{{ c.mother_name or '—' }}</span></div>
+      <div class="cf-row"><span class="cf-lbl">যোগাযোগ</span><span class="cf-sep">:</span><span class="cf-val">{{ c.guardian_phone or c.phone or '—' }}</span></div>
       <div class="cf-principal">
+        {% if school.ht_signature %}<img class="cf-sig-img" src="{{ school.ht_signature }}" alt="signature">{% endif %}
         <div class="cf-sig-line"></div>
-        <span class="cf-sig-txt">Principal</span>
+        <span class="cf-sig-txt">প্রধান শিক্ষকের স্বাক্ষর</span>
       </div>
     </div>
   </div>
@@ -203,21 +208,21 @@ body { margin: 0; padding: 0; background: #fff; font-family: Arial, 'Noto Sans B
         {% else %}<span class="li">{{ (school.name or 'S')[:2]|upper }}</span>{% endif %}
       </div>
       <div class="cb-hdr-txt">
-        <div class="cb-sn">{{ school.name }}</div>
-        <div class="cb-sa">{{ school.address }}</div>
+        <div class="cb-sn">{{ school.name_bn or school.name }}</div>
+        <div class="cb-sa">{{ school.address_bn or school.address }}</div>
       </div>
     </div>
 
     <div class="cb-mid">
       <div class="cb-info">
-        {% if school.address %}
+        {% if school.address_bn or school.address %}
         <div class="cb-row">
           <div class="cb-ico">
             <svg viewBox="0 0 12 12" width="7" height="7" fill="white">
               <path d="M6 1C4.07 1 2.5 2.57 2.5 4.5c0 2.83 3.5 6.5 3.5 6.5s3.5-3.67 3.5-6.5C9.5 2.57 7.93 1 6 1zm0 4.75a1.25 1.25 0 1 1 0-2.5 1.25 1.25 0 0 1 0 2.5z"/>
             </svg>
           </div>
-          <span class="cb-txt">{{ school.address }}</span>
+          <span class="cb-txt">{{ school.address_bn or school.address }}</span>
         </div>
         {% endif %}
         {% if school.phone %}
@@ -266,7 +271,7 @@ body { margin: 0; padding: 0; background: #fff; font-family: Arial, 'Noto Sans B
     </div>
 
     <div class="cb-ftr">
-      <span>If found, please return to school &nbsp;|&nbsp; {{ school.phone }}</span>
+      <span>কার্ডটি খুঁজে পেলে বিদ্যালয়ে ফেরত দিন &nbsp;|&nbsp; {{ school.phone }}</span>
     </div>
   </div>
   {% endif %}
