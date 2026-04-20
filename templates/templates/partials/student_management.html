@@ -1014,9 +1014,21 @@ function studentManagement() {
             });
         },
 
-        editStudent(student) {
+        async editStudent(student) {
             this.studentForm = { ...student };
+            // Map classRollNumber -> rollNumber for the form field
+            if (student.classRollNumber != null) {
+                this.studentForm.rollNumber = student.classRollNumber;
+            }
             this.showEditModal = true;
+            // Pre-load sections for the student's current class
+            this.formSections = [];
+            if (this.studentForm.schoolClassId) {
+                try {
+                    const r = await fetch('/api/school/classes/' + this.studentForm.schoolClassId + '/sections');
+                    if (r.ok) this.formSections = await r.json();
+                } catch(e) {}
+            }
         },
 
         async saveStudent() {
@@ -1070,7 +1082,22 @@ function studentManagement() {
                         } catch(e) { console.error('Photo upload failed:', e); }
                     }
                 } else {
-                    this.showToast(this.showAddModal ? 'Student added successfully' : 'Student updated successfully', 'success');
+                    // UPDATE path — also save class/section/roll changes
+                    const updatedId = this.studentForm.id;
+                    if (updatedId && this.studentForm.schoolClassId != null) {
+                        try {
+                            await fetch('/api/school/student-info/' + updatedId, {
+                                method: 'POST',
+                                headers: {'Content-Type': 'application/json'},
+                                body: JSON.stringify({
+                                    school_class_id: this.studentForm.schoolClassId,
+                                    section_id: this.studentForm.sectionId || null,
+                                    roll_number: this.studentForm.rollNumber || null
+                                })
+                            });
+                        } catch(e) { console.error('Class update failed:', e); }
+                    }
+                    this.showToast('Student updated successfully', 'success');
                 }
                 
                 this.closeModal();

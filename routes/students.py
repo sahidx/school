@@ -4,7 +4,7 @@ CRUD operations specifically for student management from teacher dashboard
 """
 from flask import Blueprint, request, session, make_response
 from flask_bcrypt import generate_password_hash
-from models import db, User, UserRole, Batch, user_batches
+from models import db, User, UserRole, Batch, user_batches, StudentClassInfo
 from utils.auth import login_required, require_role, get_current_user
 from utils.response import success_response, error_response, serialize_user
 from utils.rankings import get_batch_latest_rank_map
