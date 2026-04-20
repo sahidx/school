@@ -744,11 +744,11 @@ async function loadSchoolInfo(){
     const nameBn=d.school_name_bn||'মডার্ণ আইডিয়াল বেসরকারি প্রাথমিক বিদ্যালয়';
     const phone=d.school_phone||d.phone||'';
     const email=d.school_email||d.email||'info@modernidealschool.edu.bd';
-    const addr=d.school_address||d.address||'';
+    const addr=d.school_address_bn||d.school_address||d.address||'';
     const estd=d.estd_year||d.established||'1999';
     const eiin=d.school_eiin||d.eiin||'';
-    const logo=d.logo_url||'';
-    const fb=d.facebook_url||''; const yt=d.youtube_url||'';
+    const logo=d.school_logo||d.logo_url||'';
+    const fb=d.school_facebook||d.facebook_url||''; const yt=d.youtube_url||'';
 
     // header banner
     set('hdr-name-en',name); set('hdr-name-bn',nameBn);

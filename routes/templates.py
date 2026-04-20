@@ -327,11 +327,6 @@ def student_id_cards():
     """Professional double-sided student ID cards – bulk PDF printing.
     Filters: ?class_id=  or  ?batch_id=  or  ?student_ids=1,2,3
     """
-    if 'user' not in session:
-        return redirect(url_for('templates.login_page') + '?next=/students/id-cards')
-    if session['user'].get('role') not in ('teacher', 'super_user'):
-        return redirect(url_for('templates.index'))
-
     from models import SchoolClass, StudentClassInfo, Batch
 
     class_id     = request.args.get('class_id',  type=int)
@@ -454,11 +449,6 @@ def student_id_cards_pdf():
     Same filters as /students/id-cards: ?class_id= or ?batch_id= or ?student_ids=
     Each card (front then back) gets its own page sized 54×85.6mm.
     """
-    if 'user' not in session:
-        return redirect(url_for('templates.login_page') + '?next=/students/id-cards')
-    if session['user'].get('role') not in ('teacher', 'super_user'):
-        return redirect(url_for('templates.index'))
-
     from models import SchoolClass, StudentClassInfo, Batch
     from flask import render_template as rt
     try:
@@ -584,11 +574,6 @@ def student_id_cards_print():
     """Standalone clean print page – no navbar, auto-triggers browser print.
     Same filters: ?class_id= or ?batch_id= or ?side=front|back|both
     """
-    if 'user' not in session:
-        return redirect(url_for('templates.login_page') + '?next=/students/id-cards')
-    if session['user'].get('role') not in ('teacher', 'super_user'):
-        return redirect(url_for('templates.index'))
-
     from models import SchoolClass, StudentClassInfo, Batch
 
     class_id     = request.args.get('class_id',  type=int)
