@@ -424,6 +424,28 @@ def student_id_cards():
                 ))
             cards.sort(key=lambda c: (c['class_name'], c['roll'] or '9999', c['full_name']))
 
+    else:
+        # No filter — show all active students ordered by class order then roll number
+        infos = (
+            StudentClassInfo.query
+            .join(User, User.id == StudentClassInfo.student_id)
+            .filter(User.is_active == True)
+            .join(SchoolClass, SchoolClass.id == StudentClassInfo.school_class_id)
+            .order_by(SchoolClass.class_number, StudentClassInfo.roll_number, User.first_name)
+            .all()
+        )
+        for info in infos:
+            s = info.student
+            cards.append(_build_card(
+                s,
+                class_name   = info.school_class.name if info.school_class else '',
+                section_name = info.section.name if info.section else '',
+                roll         = info.roll_number or '',
+                blood_group  = info.blood_group or '',
+                reg_number   = info.reg_number or '',
+                year_str     = str(info.academic_year) if info.academic_year else '',
+            ))
+
     school = _get_school_info()
     return render_template(
         'id_cards.html',
