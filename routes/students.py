@@ -90,11 +90,22 @@ def get_students():
         
         # Sort by roll number (students without roll go to end)
         students.sort(key=lambda s: (s.id not in roll_map, roll_map.get(s.id, 999999), s.first_name))
+
+        # Attach school class info (class/section/roll) for filtering in student management UI
+        student_ids = [s.id for s in students]
+        class_info_map = {}
+        if student_ids:
+            class_infos = StudentClassInfo.query.filter(StudentClassInfo.student_id.in_(student_ids)).all()
+            class_info_map = {info.student_id: info for info in class_infos}
         
         students_data = []
         for student in students:
             student_data = serialize_user(student)
             student_data['roll_number'] = roll_map.get(student.id)  # Add roll number
+            class_info = class_info_map.get(student.id)
+            student_data['schoolClassId'] = class_info.school_class_id if class_info else None
+            student_data['sectionId'] = class_info.section_id if class_info else None
+            student_data['classRollNumber'] = class_info.roll_number if class_info else None
             
             # Add batch information - include ALL batches
             if student.batches:
