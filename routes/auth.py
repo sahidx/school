@@ -118,12 +118,8 @@ def login():
                 return False
 
         if user.role == UserRole.STUDENT:
-            # For students: check hashed password (last 4 digits of parent phone)
-            if user.password_hash:
-                password_valid = verify_hash(user.password_hash, password)
-            else:
-                # Fallback to "student123" for legacy accounts without hash
-                password_valid = (password == "student123")
+            # Student login is disabled — silently reject
+            password_valid = False
         else:
             # For teachers and super users, check hashed password
             if user.password_hash:

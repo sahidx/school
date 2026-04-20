@@ -409,13 +409,14 @@ def update_student(student_id):
             if not phone:
                 return error_response('Invalid phone number format', 400)
             
-            # Check if phone is already taken
+            # Only block if phone belongs to a teacher/admin (students can share phones as siblings)
             existing_phone = User.query.filter(
                 User.phoneNumber == phone,
-                User.id != student_id
+                User.id != student_id,
+                User.role != UserRole.STUDENT
             ).first()
             if existing_phone:
-                return error_response('Phone number is already taken', 409)
+                return error_response('Phone number is already registered as a teacher/admin account', 409)
             
             student.phoneNumber = phone
             student.phone = phone  # Sync phone field for SMS
