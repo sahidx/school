@@ -5,7 +5,6 @@ HTML template rendering for frontend pages
 from flask import Blueprint, render_template, redirect, url_for, session, request
 from models import db, User, UserRole, Batch, Settings, MonthlyExam, MonthlyRanking
 from datetime import date
-from utils.auth import login_required, require_role
 
 templates_bp = Blueprint('templates', __name__)
 
@@ -324,12 +323,12 @@ def setup_logo_page():
 # ──────────────────────────────────────────────────────────────────────────────
 
 @templates_bp.route('/students/id-cards')
-@login_required
-@require_role(UserRole.TEACHER, UserRole.SUPER_USER)
 def student_id_cards():
     """Professional double-sided student ID cards – bulk PDF printing.
     Filters: ?class_id=  or  ?batch_id=  or  ?student_ids=1,2,3
     """
+    if not session.get('user_id'):
+        return redirect(url_for('templates.login_page'))
     from models import SchoolClass, StudentClassInfo, Batch
 
     class_id     = request.args.get('class_id',  type=int)
@@ -469,9 +468,9 @@ def student_id_cards():
 
 
 @templates_bp.route('/students/id-cards/pdf')
-@login_required
-@require_role(UserRole.TEACHER, UserRole.SUPER_USER)
 def student_id_cards_pdf():
+    if not session.get('user_id'):
+        return redirect(url_for('templates.login_page'))
     """Generate and download a PDF of student ID cards at exact CR80 size.
     Same filters as /students/id-cards: ?class_id= or ?batch_id= or ?student_ids=
     Each card (front then back) gets its own page sized 54×85.6mm.
@@ -597,9 +596,9 @@ def student_id_cards_pdf():
 
 
 @templates_bp.route('/students/id-cards/print')
-@login_required
-@require_role(UserRole.TEACHER, UserRole.SUPER_USER)
 def student_id_cards_print():
+    if not session.get('user_id'):
+        return redirect(url_for('templates.login_page'))
     """Standalone clean print page – no navbar, auto-triggers browser print.
     Same filters: ?class_id= or ?batch_id= or ?side=front|back|both
     """
