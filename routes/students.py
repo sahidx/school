@@ -404,7 +404,7 @@ def update_student(student_id):
         if 'studentId' in data:
             student.student_id = data['studentId'].strip() if data['studentId'] else None
         
-        if 'phoneNumber' in data:
+        if 'phoneNumber' in data and 'guardianPhone' not in data:
             phone = validate_phone(data['phoneNumber'])
             if not phone:
                 return error_response('Invalid phone number format', 400)
@@ -436,12 +436,16 @@ def update_student(student_id):
         
         if 'guardianPhone' in data:
             guardian_phone = data['guardianPhone'].strip() if data['guardianPhone'] else None
-            student.guardian_phone = guardian_phone
-            # Sync phone fields to ensure SMS works
             if guardian_phone:
-                student.phone = guardian_phone
-                if not student.phoneNumber:  # Only update if phoneNumber is not set
-                    student.phoneNumber = guardian_phone
+                phone = validate_phone(guardian_phone)
+                if phone:
+                    student.guardian_phone = phone
+                    student.phone = phone
+                    student.phoneNumber = phone  # Always sync phoneNumber from guardianPhone
+                else:
+                    return error_response('Invalid phone number format', 400)
+            else:
+                student.guardian_phone = None
         
         if 'guardianName' in data:
             student.guardian_name = data['guardianName'].strip() if data['guardianName'] else None
