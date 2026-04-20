@@ -1063,13 +1063,17 @@ function studentManagement() {
             try {
                 const url = this.showAddModal ? '/api/students' : `/api/students/${this.studentForm.id}`;
                 const method = this.showAddModal ? 'POST' : 'PUT';
-                
+
+                // Strip profile_image from body — handled separately via /photo endpoint
+                const bodyData = { ...this.studentForm };
+                delete bodyData.profile_image;
+
                 const response = await fetch(url, {
                     method: method,
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify(this.studentForm)
+                    body: JSON.stringify(bodyData)
                 });
                 
                 const result = await response.json();
@@ -1123,6 +1127,21 @@ function studentManagement() {
                                 })
                             });
                         } catch(e) { console.error('Class update failed:', e); }
+                    }
+                    // Upload new photo if one was selected during edit
+                    if (updatedId && this.formPhotoPreview) {
+                        try {
+                            const photoResp = await fetch('/api/students/' + updatedId + '/photo', {
+                                method: 'PUT',
+                                headers: {'Content-Type': 'application/json'},
+                                body: JSON.stringify({ photo: this.formPhotoPreview })
+                            });
+                            if (photoResp.ok) {
+                                // Update in-memory student list immediately
+                                const idx = this.students.findIndex(s => s.id === updatedId);
+                                if (idx !== -1) this.students[idx].profile_image = this.formPhotoPreview;
+                            }
+                        } catch(e) { console.error('Photo upload failed:', e); }
                     }
                     this.showToast('Student updated successfully', 'success');
                 }
