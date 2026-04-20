@@ -5,8 +5,12 @@ Main application setup and configuration
 from flask import Flask, render_template, jsonify
 from flask_cors import CORS
 from flask_bcrypt import Bcrypt
-from flask_session import Session
 import os
+
+try:
+    from flask_session import Session
+except Exception:
+    Session = None
 
 # Import extensions
 from models import db
@@ -14,7 +18,7 @@ from config import config_by_name
 
 # Initialize extensions
 bcrypt = Bcrypt()
-sess = Session()
+sess = Session() if Session else None
 
 def create_app(config_name=None):
     """Application factory pattern"""
@@ -27,7 +31,11 @@ def create_app(config_name=None):
     # Initialize extensions with app
     db.init_app(app)
     bcrypt.init_app(app)
-    sess.init_app(app)
+    if sess:
+        sess.init_app(app)
+    else:
+        # Fallback to Flask's default signed-cookie session handling.
+        print("Warning: Flask-Session unavailable; using default Flask sessions")
     
     # Enable CORS for all domains on all routes
     CORS(app, supports_credentials=True)
